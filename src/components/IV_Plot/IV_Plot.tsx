@@ -22,13 +22,14 @@ interface GlowLineParams {
   shadowBlur?: number;
   strokeStyle?: string;
   shadowColor?: string;
-  startingPosition?: [number, number];
 }
+
+type Pair = [number, number];
 
 function drawGlowLine(
   ctx: CanvasRenderingContext2D,
-  line: d3.Line<[number, number]>,
-  data: [number, number][],
+  line: d3.Line<Pair>,
+  data: Pair[],
   {
     lineWidth = 5,
     shadowBlur = 25,
@@ -80,13 +81,13 @@ export default function IV_Plot() {
     const y = current;
     const scaleX = d3
       .scaleLinear()
-      .domain(d3.extent(x) as [number, number])
+      .domain(d3.extent(x) as Pair)
       .range([0, canvas.width]);
     const scaleY = d3
       .scaleLinear()
-      .domain(d3.extent(y) as [number, number])
+      .domain(d3.extent(y) as Pair)
       .range([0, canvas.height]);
-    const data = d3.zip(x, y) as [number, number][];
+    const data = d3.zip(x, y) as Pair[];
 
     line.x(d => scaleX(d[0]));
     line.y(d => scaleY(d[1]));
