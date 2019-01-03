@@ -24,12 +24,12 @@ interface GlowLineParams {
   shadowColor?: string;
 }
 
-type Pair = [number, number];
+type PairType = [number, number];
 
 function drawGlowLine(
   ctx: CanvasRenderingContext2D,
-  line: d3.Line<Pair>,
-  data: Pair[],
+  line: d3.Line<PairType>,
+  data: PairType[],
   {
     lineWidth = 5,
     shadowBlur = 25,
@@ -81,17 +81,34 @@ export default function IV_Plot() {
     const y = current;
     const scaleX = d3
       .scaleLinear()
-      .domain(d3.extent(x) as Pair)
+      .domain(d3.extent(x) as PairType)
       .range([0, canvas.width]);
     const scaleY = d3
       .scaleLinear()
-      .domain(d3.extent(y) as Pair)
+      .domain(d3.extent(y) as PairType)
       .range([0, canvas.height]);
-    const data = d3.zip(x, y) as Pair[];
+    const data = d3.zip(x, y) as PairType[];
 
     line.x(d => scaleX(d[0]));
     line.y(d => scaleY(d[1]));
     drawGlowLine(ctx, line, data);
+
+    /* 
+    Play state algorithm:
+    
+    1. draw rounded box background in CSS
+    2. scale and translate canvas origin to match box
+    3. set up clip path to match box
+    4. get frame translate offset
+    5. slice glow line data
+    6. make d3 scales
+    7. render tick lines
+    8. render glow lines
+    9. render dashed fringe lines
+    10. render points
+    11. unset clip path
+    12. position and render point labels
+ */
   };
 
   useEffect(init, []);
