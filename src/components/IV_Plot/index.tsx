@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-import { getContext, useCanvasResizeEffect } from '../../utils/canvas';
+import { getContext, useCanvasResizeEffect } from 'utils/canvas';
 
 const current = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
 
@@ -31,8 +31,8 @@ function drawGlowLine(
   line: d3.Line<PairType>,
   data: PairType[],
   {
-    lineWidth = 5,
-    shadowBlur = 25,
+    lineWidth = 1,
+    shadowBlur = 10,
     strokeStyle = 'red',
     shadowColor = 'red',
   }: GlowLineParams = {}
@@ -47,6 +47,20 @@ function drawGlowLine(
   line(data);
   ctx.stroke();
 
+  ctx.restore();
+  // ctx.font = '48px Ubuntu Mono';
+  ctx.font = `16px times new roman`;
+  // ctx.font = `16px Ubuntu Mono`;
+  const story = `Once upon a time, I saw a potato laying outside my door.`;
+  ctx.fillText(story, 10, 50);
+
+  ctx.save();
+  ctx.strokeStyle = 'none';
+  ctx.beginPath();
+  ctx.arc(100, 100, 50, 0, Math.PI / 2);
+  ctx.lineTo(100, 100);
+  ctx.closePath();
+  ctx.fill();
   ctx.restore();
 }
 
@@ -95,7 +109,7 @@ export default function IV_Plot() {
 
     /* 
     Play state algorithm:
-    
+
     1. draw rounded box background in CSS
     2. scale and translate canvas origin to match box
     3. set up clip path to match box
@@ -114,19 +128,21 @@ export default function IV_Plot() {
   useEffect(init, []);
 
   return (
-    <>
-      <h1>hello world</h1>
-      <p style={{ color: 'magenta' }}>
-        Once upon a time, I saw a potato laying outside my door. I wondered what
-        it was doing out there. Instead of asking i brought it inside mY room.
-        It was shivering because of the cold. I felt extremely guilty leaving it
-        outside, so my instinct was to imediately bring it inside. I brought
-        inside and gave it a blanket I felt better imediately. Ahhhh, look at me
-        im the superhero of this situation now everyone in town considers me a
-        hero. When you walk past me remember to thank me for saving the life of
-        a fellow potato. ('-')
-      </p>
-      <canvas ref={canvasRef} style={{ border: '1px solid blue' }} />
-    </>
+    <div
+      style={{
+        borderRadius: '5px',
+        backgroundColor: 'rgba(0,0,0,.2)',
+        border: '1px solid rgba(0,0,0,.5)',
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '600px',
+          height: '200px',
+          border: '1px solid blue',
+        }}
+      />
+    </div>
   );
 }

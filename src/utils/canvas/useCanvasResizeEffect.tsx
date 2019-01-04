@@ -7,7 +7,8 @@ export default function useCanvasResizeEffect(
     const resize = () => {
       const { canvas, ctx } = getContext(canvasRef);
 
-      const { width, height } = canvas.getBoundingClientRect();
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
       const ratio = window.devicePixelRatio;
       canvas.width = ratio * width;
       canvas.height = ratio * height;

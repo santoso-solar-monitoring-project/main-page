@@ -26,3 +26,18 @@ storiesOf('Button', module)
 storiesOf('IV Plot', module).add('default', () => {
   return <IV_Plot />;
 });
+
+storiesOf('Legend of Potato Hero', module).add('🥔', () => {
+  return (
+    <p style={{ color: 'magenta' }}>
+      Once upon a time, I saw a potato laying outside my door. I wondered what
+      it was doing out there. Instead of asking i brought it inside mY room. It
+      was shivering because of the cold. I felt extremely guilty leaving it
+      outside, so my instinct was to imediately bring it inside. I brought
+      inside and gave it a blanket I felt better imediately. Ahhhh, look at me
+      im the superhero of this situation now everyone in town considers me a
+      hero. When you walk past me remember to thank me for saving the life of a
+      fellow potato. ('-')
+    </p>
+  );
+});
