@@ -1,55 +1,74 @@
-import toPx from 'utils/units';
-import getPaddingForInteger from '.';
+import getPaddingForInteger from './getPaddingForInteger';
 
-export default function setCanvasResolution(divEl: HTMLDivElement) {
-  const canvasEl = divEl.querySelector('canvas')!;
-  let width = parseFloat(toPx(divEl, divEl.style.width));
-  let height = parseFloat(toPx(divEl, divEl.style.height));
-
-  // record size of visible region of canvas in pixels (i.e. size of divEl)
-  (canvasEl as any).visibleDimensions = { width, height };
+export default function setCanvasResolution(
+  canvasElem: HTMLCanvasElement,
+  visibleWidth: number,
+  visibleHeight: number,
+  MAX_PADDING = 80,
+  PRECISION = 4
+) {
+  // record size of visible region of canvas in pixels
+  const info = ((canvasElem as any).info = {
+    width: visibleWidth,
+    height: visibleHeight,
+  });
 
   // first convert dimensions to integer
-  width = Math.ceil(width);
-  height = Math.ceil(height);
+  visibleWidth = Math.ceil(visibleWidth);
+  visibleHeight = Math.ceil(visibleHeight);
 
   // find the extra padding needed to prevent canvas resolution truncation
   // https://stackoverflow.com/a/54027313/3624264
-  const dpr = +window.devicePixelRatio.toFixed(3);
-  let padWidth = getPaddingForInteger(width, dpr, [0, 50, 1]);
-  let padHeight = getPaddingForInteger(height, dpr, [0, 50, 1]);
+  const dpr = window.devicePixelRatio;
+  const tolerance = Math.pow(10, -PRECISION);
+
+  let padWidth = getPaddingForInteger(
+    visibleWidth,
+    dpr,
+    MAX_PADDING,
+    tolerance
+  );
+  let padHeight = getPaddingForInteger(
+    visibleHeight,
+    dpr,
+    MAX_PADDING,
+    tolerance
+  );
 
   // if can't find a value without truncation just warn and continue (and use no padding).
   if (isNaN(padWidth)) {
     console.warn(
-      `Truncation occurred when scaling the canvas horizontal resolution: ${padWidth}px -> ${Math.trunc(
-        padWidth
-      )}px`
+      `Truncation occurred when scaling the canvas horizontal resolution: ${(
+        visibleWidth * dpr
+      ).toFixed(PRECISION)}px -> ${Math.trunc(visibleWidth * dpr)}px`
     );
     padWidth = 0;
   }
   if (isNaN(padHeight)) {
     console.warn(
-      `Truncation occurred when scaling the canvas vertical resolution: ${padHeight}px -> ${Math.trunc(
-        padHeight
-      )}px`
+      `Truncation occurred when scaling the canvas vertical resolution: ${(
+        visibleHeight * dpr
+      ).toFixed(PRECISION)}px -> ${Math.trunc(visibleHeight * dpr)}px`
     );
     padHeight = 0;
   }
 
+  // record padding into info object
+  Object.assign(info, { padWidth, padHeight, devicePixelRatio: dpr });
+
   // set canvas resolution
-  canvasEl.width = (width + padWidth) * dpr;
-  canvasEl.height = (height + padHeight) * dpr;
+  canvasElem.width = Math.round((visibleWidth + padWidth) * dpr);
+  canvasElem.height = Math.round((visibleHeight + padHeight) * dpr);
 
   // match layout dimensions
-  canvasEl.style.width = `${width + padWidth}px`;
-  canvasEl.style.height = `${height + padHeight}px`;
+  canvasElem.style.width = `${visibleWidth + padWidth}px`;
+  canvasElem.style.height = `${visibleHeight + padHeight}px`;
 
   // draw using CSS pixel coordinates
-  const ctx = canvasEl.getContext('2d')!;
+  const ctx = canvasElem.getContext('2d')!;
   ctx.scale(dpr, dpr);
 
   // only draw visible region
-  ctx.rect(0, 0, width, height);
-  ctx.clip();
+  // ctx.rect(0, 0, visibleWidth, visibleHeight);
+  // ctx.clip();
 }

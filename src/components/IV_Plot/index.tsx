@@ -1,7 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-import { getContext, useCanvasResizeEffect } from 'utils/canvas';
+import GoodCanvas from 'components/GoodCanvas';
+import { getContext } from 'utils/canvas';
+import { optimizedResize } from 'utils/throttleEvent';
 
 const current = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
 
@@ -66,7 +68,6 @@ function drawGlowLine(
 
 export default function IV_Plot() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  useCanvasResizeEffect(canvasRef);
 
   const line = useLine(canvasRef);
 
@@ -125,19 +126,23 @@ export default function IV_Plot() {
  */
   };
 
-  useEffect(init, []);
+  useEffect(() => {
+    init();
+    window.addEventListener(optimizedResize, init);
+  }, []);
 
   return (
     <div
       style={{
         borderRadius: '5px',
         backgroundColor: 'rgba(0,0,0,.2)',
-        border: '1px solid rgba(0,0,0,.5)',
+        border: '1px solid black',
       }}
     >
-      <canvas
+      <GoodCanvas
         ref={canvasRef}
         style={{
+          borderRadius: '4px',
           width: '600px',
           height: '200px',
           border: '1px solid blue',

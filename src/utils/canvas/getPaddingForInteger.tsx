@@ -1,13 +1,14 @@
 export default function getPaddingForInteger(
   dimension: number,
   scale: number,
-  range = [0, 50, 1] /* [start,stop,step] */
+  max_padding: number,
+  tolerance: number
 ) {
   let padding = NaN;
-  const [start, stop, step] = range;
-  for (let i = start; i < stop; i += step) {
+  for (let i = 0; i <= max_padding; i++) {
     const result = (dimension + i) * scale;
-    if (Math.trunc(result) == result) {
+    const fractionalError = Math.abs(Math.round(result) - result) / result;
+    if (fractionalError < tolerance) {
       padding = i;
       break;
     }
