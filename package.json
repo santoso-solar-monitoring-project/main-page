@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "d3": "^5.7.0",
+    "immutable": "^4.0.0-rc.12",
     "react": "16.7.0-alpha.2",
     "react-dom": "16.7.0-alpha.2",
     "react-scripts": "2.1.2"
@@ -26,10 +27,10 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "typescript": "^3.2.2",
     "@babel/core": "^7.2.2",
     "@storybook/addon-actions": "^4.1.4",
     "@storybook/addon-info": "^4.1.4",
+    "@storybook/addon-knobs": "^4.1.4",
     "@storybook/addon-links": "^4.1.4",
     "@storybook/addons": "^4.1.4",
     "@storybook/react": "^4.1.4",
@@ -41,6 +42,8 @@
     "@types/storybook__react": "^4.0.0",
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.0.4",
-    "react-docgen-typescript-webpack-plugin": "^1.1.0"
+    "react-docgen-typescript-webpack-plugin": "^1.1.0",
+    "tslint": "^5.12.0",
+    "typescript": "^3.2.2"
   }
 }
