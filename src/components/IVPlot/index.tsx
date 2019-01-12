@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
+import Imm from 'immutable';
 import * as d3 from 'd3';
 import GoodCanvas, { GoodCanvasType } from 'components/GoodCanvas';
-import GlowLine, { PairType } from 'components/GlowLine';
-import { PropTypes } from 'utils/PropTypes';
 import { getContext } from 'utils/canvas';
+import Points from 'components/Points';
+import Line from 'components/Line';
+import { PropsType } from 'utils/PropsType';
+import { PairType } from 'utils/PairType';
 
 const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
 /* const CURRENTBufferRef = useRef<number[]>([]);
@@ -41,21 +44,57 @@ const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
       12. position and render point labels
    */
 
-export default function IV_Plot({
-  style = {
+/* interface ModeType {
+  style: React.CSSProperties | {};
+  current: {
+    line: {
+      canvasStyle?: CanvasRenderingContext2D | {};
+    };
+    points: {
+      canvasStyle?: CanvasRenderingContext2D | {};
+    };
+  };
+}
+
+export const lightMode: ModeType = {
+  style: { backgroundColor: 'transparent' },
+  current: {
+    line: {
+      canvasStyle: { strokeStyle: 'hsl(330, 100%, 75%)' },
+      // glow: { blurRadius: 10, color: 'hsl(330, 100%, 50%)' },
+    },
+    points: {
+      canvasStyle: { strokeStyle: 'hsl(330, 100%, 75%)' },
+      // glow: { blurRadius: 10, color: 'hsl(330, 100%, 50%)' },
+    },
+  },
+}; */
+
+export interface IVPlotPropsType extends PropsType {}
+
+const defaultProps: Partial<IVPlotPropsType> = Imm.fromJS({
+  style: {
     width: '500px',
     height: '300px',
     borderRadius: '4px',
     border: '40px solid blue',
+    backgroundColor: 'black',
   },
-}: PropTypes = {}) {
+});
+
+type IVPlotType = React.FunctionComponent<typeof defaultProps>;
+
+const IVPlot: IVPlotType = (props: typeof defaultProps) => {
   // stateful variables
   const [data, setData] = useState([] as PairType[]);
   const canvasRef = useRef<GoodCanvasType>(null);
 
+  // unpack props
+  const { style } = defaultProps.mergeDeep(props).toJS();
+
   // prepare data
   useEffect(() => {
-    const { canvas } = getContext(canvasRef);
+    /* const { canvas } = getContext(canvasRef);
     const x = d3.range(CURRENT.length);
     const y = CURRENT;
     const scaleX = d3
@@ -66,15 +105,30 @@ export default function IV_Plot({
       .scaleLinear()
       .domain(d3.extent(y) as PairType)
       .range([0, canvas.dims.height]);
-    const data = d3
+    const _data = d3
       .zip(x, y)
       .map(([x, y]) => [scaleX(x), scaleY(y)]) as PairType[];
-    setData(data);
+    setData(_data); */
   }, []);
-
+  console.log('hi');
+  /* 
+  // canvasStyle={lightMode.current.line.canvasStyle}
+        // glow={lightMode.current.line.glow}
+  */
   return (
-    <GoodCanvas style={style} ref={canvasRef}>
-      <GlowLine data={data} />
+    <GoodCanvas style={{ ...style /* ...lightMode.style */ }} ref={canvasRef}>
+      {/* <> */}
+      {/* Current */}
+      {/* <Line data={data} /> */}
+      {/* <Points data={data} /> */}
+      {
+        // canvasStyle={lightMode.current.points.canvasStyle}
+        // glow={lightMode.current.points.glow}
+      }
+      {/* </> */}
     </GoodCanvas>
   );
-}
+};
+
+IVPlot.defaultProps = defaultProps.toJS();
+export default IVPlot;

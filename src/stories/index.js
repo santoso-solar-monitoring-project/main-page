@@ -1,14 +1,12 @@
 import React from 'react';
-
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { linkTo } from '@storybook/addon-links';
-
 import { Button, Welcome } from '@storybook/react/demo';
-import IV_Plot from '../components/IV_Plot';
-import CornersTest from 'components/GoodCanvas/CornersTest';
-
 import { withKnobs, select, number } from '@storybook/addon-knobs';
+
+import IVPlot from '../components/IVPlot';
+import CornersTest from 'components/GoodCanvas/CornersTest';
 
 storiesOf('Welcome', module).add('to Storybook', () => (
   <Welcome showApp={linkTo('Button')} />
@@ -51,7 +49,7 @@ storiesOf('GoodCanvas', module)
   });
 
 storiesOf('IV Plot', module).add('default', () => {
-  return <IV_Plot />;
+  return <IVPlot />;
 });
 
 storiesOf('Legend of Potato Hero', module).add('🥔', () => {

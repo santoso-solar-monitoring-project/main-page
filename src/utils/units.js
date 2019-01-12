@@ -60,7 +60,7 @@ docElement.removeChild(testElem);
 testElem = undefined;
 
 // convert a value to pixels
-function toPx(elem, value, prop, force) {
+export function toPx(elem, value, prop, force) {
   // use width as the default property, or specify your own
   prop = prop || 'width';
 
@@ -116,7 +116,7 @@ function toPx(elem, value, prop, force) {
 }
 
 // return the computed value of a CSS property
-function curCSS(elem, prop) {
+export function curCSS(elem, prop) {
   var value,
     pixel,
     unit,
@@ -177,4 +177,6 @@ function curCSS(elem, prop) {
   return value;
 }
 
-export default toPx;
+export default function inPixels(elem, value, prop, force) {
+  return +parseFloat(toPx(elem, value, prop, force));
+}

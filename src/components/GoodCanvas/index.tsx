@@ -1,29 +1,69 @@
-import React, { useLayoutEffect, useRef, useEffect, useState } from 'react';
+import React, {
+  useLayoutEffect,
+  useRef,
+  useEffect,
+  useState,
+  SetStateAction,
+} from 'react';
+import Imm from 'immutable';
+import inPixels from 'utils/units';
+import { EnhancedContext } from 'utils/canvas/enhanceContext';
 import { scaleCanvas, getContext } from 'utils/canvas';
-import toPx from 'utils/units';
+import { PropsType } from 'utils/PropsType';
 import { optimizedResize } from 'utils/throttleEvent';
-import { PropTypes } from 'utils/PropTypes';
+import propagateProps from 'utils/propagateProps';
+import Blur from 'components/Blur';
 
 // The augmented HTML <canvas> element.
 export interface GoodCanvasType extends HTMLCanvasElement {
-  needsUpdate: number;
   dims: {
     width: number;
     height: number;
   };
+  setNeedsUpdate: React.Dispatch<SetStateAction<number>>;
 }
+
+// Props automatically added to children of GoodCanvas.
+export interface GoodCanvasChildPropsType extends PropsType {
+  // Reference to internal canvas.
+  canvasRef: React.Ref<GoodCanvasType>;
+  // Settings to be applied to the CanvasRenderingContext2D.
+  canvasStyle: Partial<EnhancedContext>;
+  // Callback to apply settings to the CanvasRenderingContext2D.
+  canvasEffects: (ctx: EnhancedContext) => void;
+  // Global version number. Increments when all children should repaint.
+  canvasNeedsUpdate: number;
+}
+
+export interface GoodCanvasPropsType extends PropsType {
+  showWarnings: boolean;
+  resizeTimeout: number;
+}
+
+const defaultProps: Partial<GoodCanvasPropsType> = Imm.fromJS({
+  style: {
+    // Critical. (TODO: warn user?)
+    position: 'relative',
+    overflow: 'hidden',
+    // Optional.
+    width: '300px',
+    height: '150px',
+  },
+  showWarnings: true,
+  resizeTimeout: 250,
+});
+
+type _GoodCanvasType = React.RefForwardingComponent<
+  GoodCanvasType,
+  typeof defaultProps
+>;
 
 /* 
   A properly scaled <canvas> element accounting for window.devicePixelRatio.
 
   Set the size and other layout properties of GoodCanvas directly through the CSS style prop.
 
-  By default, GoodCanvas will blur its contents while the screen resizes. Control this blur behavior with `blur` prop:
-    blur: {radius: number, timeout: number}
-  where radius is in pixels and timeout is in milliseconds. Passing `false` will disable blur behavior.
-  // FUTURE: Perhaps extract this blur behavior to reuse elsewhere as well.
-
-  GoodCanvas attaches two new props to its child components:
+  GoodCanvas attaches all props listed in the GoodCanvasChildPropsType to its child components:
     1. `canvasRef` -- ref to internal <canvas> element.
     2. `canvasNeedsUpdate` -- counter incremented when GoodCanvas is rescaled.
 
@@ -31,143 +71,160 @@ export interface GoodCanvasType extends HTMLCanvasElement {
   
   To toggle warnings use the `showWarnings` boolean prop.
 */
-function _GoodCanvas(
-  {
-    style = {},
-    children,
-    blur = { radius: 5, timeout: 250 },
-    showWarnings = true,
-    ...otherProps
-  }: PropTypes = {},
+const _GoodCanvas: _GoodCanvasType = (
+  props: typeof defaultProps,
   forwardedCanvasRef: React.Ref<GoodCanvasType>
-) {
+) => {
+  // stateful variables
   const [needsUpdate, setNeedsUpdate] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  // const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<GoodCanvasType>(null);
-  // Note: `<... | null>` is to use the overload returning a MutableRefObject
-  const savedStyle = useRef<React.CSSProperties | null>(null);
-  const [blurPx, setBlurPx] = useState(0);
+  type SavedStyleType = Imm.Map<keyof React.CSSProperties, string>;
+  // `<... | null>` selects the overload returning a MutableRefObject.
+  const savedStyle = useRef<SavedStyleType | null>(null);
 
-  // populate forwardedCanvasRef if not given
-  if (!forwardedCanvasRef) forwardedCanvasRef = canvasRef;
+  console.warn(
+    '_GoodCanvas?',
+    forwardedCanvasRef ? (forwardedCanvasRef as any).current : 'bleh1',
+    canvasRef ? (canvasRef as any)['current'] : 'bleh2'
+    // (containerRef as any).current
+  );
 
-  // toggle warnings
+  // Populate forwardedCanvasRef if not given (to be used internally).
+  forwardedCanvasRef = forwardedCanvasRef || canvasRef;
+  if (forwardedCanvasRef == null) console.error('wtf');
+
+  // Populate default props.
+  const merged = defaultProps.mergeDeep(props);
+  const {
+    style,
+    showWarnings,
+    resizeTimeout,
+    children,
+    ...rest
+  } = merged.toJS();
+
+  console.warn(rest);
+
+  // Toggle warnings.
   const warn = showWarnings ? console.warn : () => {};
 
-  // warn about styles that will be overridden
-  if ('padding' in style) {
+  // Trigger re-scale when styles change.
+  if (savedStyle.current == null) {
+    // Save style on first render.
+    savedStyle.current = merged.get('style');
+  } else if (savedStyle.current == merged.get('style')) {
     warn(
-      'The padding CSS property will be overriden by GoodCanvas internally. Do not try to apply this property.'
+      'GoodCanvas is rescaling because the `style` prop changed. If this is happening often, there could be a negative performance impact.'
     );
-  }
-
-  // populate default styles. override necessary styles.
-  style = {
-    position: 'relative',
-    overflow: 'hidden',
-    // default layout dimensions of canvas
-    width: '300px',
-    height: '150px',
-    ...style,
-    // settings below will override `style` given in props
-    padding: 0,
-  };
-
-  // blur while resizing (if option enabled)
-  if (blur && blurPx) {
-    style.filter = [style.filter || '', `blur(${blurPx}px)`].join(' ');
-  }
-
-  // trigger re-scale when styles change
-  if (!savedStyle.current) {
-    savedStyle.current = style;
-  } else if (
-    Object.keys(style).some(rule => {
-      if (rule != 'filter') {
-        return (
-          !(rule in savedStyle.current!) ||
-          (style as any)[rule] != (savedStyle.current as any)[rule]
-        );
-      }
-      return false;
-    })
-  ) {
-    warn('GoodCanvas: The `style` prop changed triggering a rescaling.');
     savedStyle.current = style;
     setNeedsUpdate(i => i + 1);
   }
 
-  // scale the canvas resolution
+  // Attach setNeedsUpdate to canvas.
   useLayoutEffect(
     () => {
-      const container = containerRef.current!;
-      const { canvas } = getContext(forwardedCanvasRef);
-      let width = parseFloat(toPx(container, container.style.width));
-      let height = parseFloat(toPx(container, container.style.height));
-
-      // account for box-sizing: border-box
-      if (
-        container.style.boxSizing &&
-        container.style.boxSizing != 'content-box'
-      ) {
-        const borderLeft = parseFloat(
-          toPx(container, container.style.borderLeftWidth)
-        );
-        const borderRight = parseFloat(
-          toPx(container, container.style.borderRightWidth)
-        );
-        width -= borderLeft + borderRight;
-        const borderTop = parseFloat(
-          toPx(container, container.style.borderTopWidth)
-        );
-        const borderBottom = parseFloat(
-          toPx(container, container.style.borderBottomWidth)
-        );
-        height -= borderTop + borderBottom;
-      }
-
-      scaleCanvas(canvas, width, height);
-
-      // trigger re-render of children
-      canvas.needsUpdate = needsUpdate;
-      children;
+      console.warn(
+        '_GoodCanvas LAYOUT EFFECT?',
+        forwardedCanvasRef ? (forwardedCanvasRef as any).current : 'bleh1',
+        canvasRef ? (canvasRef as any)['current'] : 'bleh2'
+        // (containerRef as any).current
+      );
+      // const { canvas } = getContext(forwardedCanvasRef);
+      console.log('how often? im curious');
+      // canvas.setNeedsUpdate = setNeedsUpdate;
     },
-    [needsUpdate]
+    [setNeedsUpdate]
   );
 
-  // warn on unmount to help detect undesired behavior
+  // Scale the canvas resolution.
+  // useLayoutEffect(
+  //   () => {
+  //     const container = containerRef.current!;
+  //     const { canvas } = getContext(forwardedCanvasRef);
+  //     let width = inPixels(container, container.style.width);
+  //     let height = inPixels(container, container.style.height);
+
+  //     // Subtract padding and border.
+  //     if (container.style.boxSizing == 'border-box') {
+  //       // Get padding and border offsets for one direction.
+  //       const getTotalOffset = (container: HTMLElement, direction: string) => {
+  //         return ['border', 'padding'].reduce((subtotal, name) => {
+  //           const value = (container.style as any)[`${name}${direction}Width`];
+  //           return subtotal + inPixels(container, value);
+  //         }, 0);
+  //       };
+
+  //       // Subtract horizontal offset.
+  //       width -= ['Left', 'Right'].reduce(
+  //         (subtotal, direction) =>
+  //           subtotal + getTotalOffset(container, direction),
+  //         0
+  //       );
+
+  //       // Subtract vertical offset.
+  //       height -= ['Top', 'Bottom'].reduce(
+  //         (subtotal, direction) =>
+  //           subtotal + getTotalOffset(container, direction),
+  //         0
+  //       );
+  //     }
+
+  //     // Hard work happens here.
+  //     const t = performance.now();
+  //     scaleCanvas(canvas, width, height);
+  //     warn(
+  //       `GoodCanvas rescale complete. (${(performance.now() - t).toFixed(
+  //         2
+  //       )} ms)`
+  //     );
+  //   },
+  //   [needsUpdate]
+  // );
+
+  // // Attach event listener to re-render on window resize.
+  // useEffect(() => {
+  //   let ongoing = false;
+  //   let id: number;
+
+  //   const handler = () => {
+  //     // first resize event
+  //     if (!ongoing) {
+  //       warn(
+  //         'GoodCanvas is rescaling because the window resized. If this is happening often, there could be a negative performance impact.'
+  //       );
+  //       ongoing = true;
+  //     }
+
+  //     // dismiss pending events
+  //     if (id) clearTimeout(id);
+
+  //     // fulfill last response after timeout
+  //     id = window.setTimeout(() => {
+  //       ongoing = false;
+  //       console.warn('what');
+  //       setNeedsUpdate(i => i + 1);
+  //     }, resizeTimeout);
+  //   };
+
+  //   window.addEventListener(optimizedResize, handler);
+  //   return () => window.removeEventListener(optimizedResize, handler);
+  // }, []);
+
+  // Warn on unmount to help detect undesired behavior.
   useEffect(() => {
     return () =>
       warn(
-        'GoodCanvas is unmounting. If this happens often, there could be an negative performance impact.'
+        'GoodCanvas is unmounting. If this is happening often, there could be a negative performance impact.'
       );
   }, []);
 
-  // re-render on window resize
-  useEffect(() => {
-    let ongoing = false;
-    let id: number;
-    const { canvas } = getContext(forwardedCanvasRef);
-    const triggerUpdate = () => {
-      if (!ongoing) {
-        warn('GoodCanvas: Window resized triggering a rescaling.');
-        ongoing = true;
-        setBlurPx(blur.radius);
-      }
-
-      if (id) clearTimeout(id);
-      id = window.setTimeout(() => {
-        ongoing = false;
-        setBlurPx(0);
-        setNeedsUpdate(i => i + 1);
-      }, blur.timeout);
-    };
-    window.addEventListener(optimizedResize, triggerUpdate);
-    return () => window.removeEventListener(optimizedResize, triggerUpdate);
-  }, []);
-
   return (
-    <div style={style} ref={containerRef} {...otherProps}>
+    <Blur
+      style={style}
+      // ref={containerRef}
+      {...rest}
+    >
       <canvas
         style={{
           position: 'absolute',
@@ -178,22 +235,27 @@ function _GoodCanvas(
           border: 'none',
         }}
         ref={forwardedCanvasRef}
+        // ref={x => console.log('when??', x)}
       >
-        {React.Children.map(children, child => {
-          if (React.isValidElement(child)) {
-            return React.cloneElement<any>(child, {
-              canvasRef: forwardedCanvasRef,
-              canvasNeedsUpdate: needsUpdate,
-            });
-          } else {
-            return child;
-          }
+        {// Attach GoodCanvasChildPropsType props to children subtree.
+        propagateProps<GoodCanvasChildPropsType>(children, child => {
+          const {
+            props: { canvasStyle = {}, canvasEffects = () => {} } = {},
+          } = child;
+          console.log('hello');
+          return {
+            canvasRef: forwardedCanvasRef,
+            canvasNeedsUpdate: needsUpdate,
+            canvasStyle,
+            canvasEffects,
+          };
         })}
       </canvas>
-    </div>
+    </Blur>
   );
-}
+};
 
 const GoodCanvas = React.forwardRef(_GoodCanvas);
 GoodCanvas.displayName = 'GoodCanvas';
+GoodCanvas.defaultProps = defaultProps.toJS();
 export default GoodCanvas;

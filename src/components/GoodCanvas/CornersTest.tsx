@@ -1,57 +1,28 @@
-import React, { useEffect } from 'react';
-import GoodCanvas, { GoodCanvasType } from '.';
-import { PropTypes } from 'utils/PropTypes';
-import { getContext } from 'utils/canvas';
+import React from 'react';
+import Imm from 'immutable';
+import GoodCanvas from '.';
+import Corners from './Corners';
+import { PropsType } from 'utils/PropsType';
 
-export default function CornersTest({ style = {} }: PropTypes = {}) {
+export interface CornersTestPropsType extends PropsType {}
+
+const defaultProps: Partial<CornersTestPropsType> = Imm.fromJS({
+  style: {},
+});
+
+type CornersTestType = React.FunctionComponent<typeof defaultProps>;
+
+const CornersTest: CornersTestType = (props: typeof defaultProps) => {
+  // unpack props
+  const { style } = defaultProps.mergeDeep(props).toJS();
+
   return (
     <GoodCanvas style={style}>
       {/* Corners will get a reference to the canvas automatically. */}
       <Corners />
     </GoodCanvas>
   );
-}
+};
 
-// Interface for a child of GoodCanvas
-function Corners({
-  canvasRef,
-  canvasNeedsUpdate,
-}: {
-  canvasRef?: React.RefObject<GoodCanvasType>;
-  canvasNeedsUpdate?: number;
-}) {
-  // console.log(canvasRef, canvasRef!.current);
-
-  if (!canvasRef) return null;
-
-  useEffect(
-    () => {
-      const { canvas, ctx } = getContext(canvasRef!);
-      const dims = (canvas as GoodCanvasType).dims;
-      // console.log(dims, ctx.filter);
-
-      ctx.fillStyle = 'red';
-      ctx.beginPath();
-      ctx.arc(5, 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-
-      ctx.fillStyle = 'blue';
-      ctx.beginPath();
-      ctx.arc(dims.width - 5, 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-
-      ctx.fillStyle = 'green';
-      ctx.beginPath();
-      ctx.arc(dims.width - 5, dims.height - 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-
-      ctx.fillStyle = 'magenta';
-      ctx.beginPath();
-      ctx.arc(5, dims.height - 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-    },
-    [canvasNeedsUpdate]
-  );
-
-  return null;
-}
+CornersTest.defaultProps = defaultProps.toJS();
+export default CornersTest;
