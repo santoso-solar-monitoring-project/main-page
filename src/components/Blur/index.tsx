@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import Imm from 'immutable';
 import { PropsType } from 'utils/PropsType';
 import { optimizedResize } from 'utils/throttleEvent';
@@ -63,16 +63,20 @@ const _Blur: _BlurType = (
     return () => window.removeEventListener(optimizedResize, handler);
   }, []);
 
+  useLayoutEffect(() => console.log('Blur USELAYOUTEFFECT'));
+  console.log('Blur RENDER');
+  useEffect(() => console.log('Blur USEEFFECT'));
   return (
     <div
       // ref={forwardedCanvasRef}
       style={style}
       {...rest}
     >
-      {React.Children.map(children, child => {
-        console.log(child);
+      {// children
+      React.Children.map(children, child => {
+        console.log((child as any).ref);
         const a = React.cloneElement(child);
-        console.warn(a);
+        console.warn((a as any).ref);
         return a;
       })
       // React.cloneElement(children)

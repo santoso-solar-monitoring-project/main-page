@@ -71,6 +71,7 @@ type _GoodCanvasType = React.RefForwardingComponent<
   
   To toggle warnings use the `showWarnings` boolean prop.
 */
+let theRef: any = React.createRef();
 const _GoodCanvas: _GoodCanvasType = (
   props: typeof defaultProps,
   forwardedCanvasRef: React.Ref<GoodCanvasType>
@@ -83,14 +84,9 @@ const _GoodCanvas: _GoodCanvasType = (
   // `<... | null>` selects the overload returning a MutableRefObject.
   const savedStyle = useRef<SavedStyleType | null>(null);
 
-  console.warn(
-    '_GoodCanvas?',
-    forwardedCanvasRef ? (forwardedCanvasRef as any).current : 'bleh1',
-    canvasRef ? (canvasRef as any)['current'] : 'bleh2'
-    // (containerRef as any).current
-  );
-
   // Populate forwardedCanvasRef if not given (to be used internally).
+  // if (cached == null) cached = canvasRef;
+  // else if (cached != canvasRef) console.error('scream and shout !!@#%@#^@^');
   forwardedCanvasRef = forwardedCanvasRef || canvasRef;
   if (forwardedCanvasRef == null) console.error('wtf');
 
@@ -103,8 +99,6 @@ const _GoodCanvas: _GoodCanvasType = (
     children,
     ...rest
   } = merged.toJS();
-
-  console.warn(rest);
 
   // Toggle warnings.
   const warn = showWarnings ? console.warn : () => {};
@@ -121,20 +115,37 @@ const _GoodCanvas: _GoodCanvasType = (
     setNeedsUpdate(i => i + 1);
   }
 
+  console.log(
+    'GoodCanvas RENDER',
+    forwardedCanvasRef ? (forwardedCanvasRef as any).current : 'bleh1',
+    canvasRef ? (canvasRef as any)['current'] : 'bleh2',
+    theRef ? (theRef as any)['current'] : 'bleh3',
+    theRef
+  );
+  useEffect(() =>
+    console.log(
+      'GoodCanvas USEEFFECT',
+      forwardedCanvasRef ? (forwardedCanvasRef as any).current : 'bleh1',
+      canvasRef ? (canvasRef as any)['current'] : 'bleh2',
+      theRef ? (theRef as any)['current'] : 'bleh3'
+    )
+  );
+
   // Attach setNeedsUpdate to canvas.
   useLayoutEffect(
     () => {
-      console.warn(
-        '_GoodCanvas LAYOUT EFFECT?',
+      console.log(
+        'GoodCanvas USELAYOUTEFFECT',
         forwardedCanvasRef ? (forwardedCanvasRef as any).current : 'bleh1',
-        canvasRef ? (canvasRef as any)['current'] : 'bleh2'
+        canvasRef ? (canvasRef as any)['current'] : 'bleh2',
+        theRef ? (theRef as any)['current'] : 'bleh3'
         // (containerRef as any).current
       );
       // const { canvas } = getContext(forwardedCanvasRef);
-      console.log('how often? im curious');
       // canvas.setNeedsUpdate = setNeedsUpdate;
-    },
-    [setNeedsUpdate]
+    }
+    // [setNeedsUpdate]
+    // [theRef.current]
   );
 
   // Scale the canvas resolution.
@@ -234,7 +245,8 @@ const _GoodCanvas: _GoodCanvasType = (
           padding: 0,
           border: 'none',
         }}
-        ref={forwardedCanvasRef}
+        ref={theRef}
+        // ref={forwardedCanvasRef}
         // ref={x => console.log('when??', x)}
       >
         {// Attach GoodCanvasChildPropsType props to children subtree.
@@ -242,7 +254,6 @@ const _GoodCanvas: _GoodCanvasType = (
           const {
             props: { canvasStyle = {}, canvasEffects = () => {} } = {},
           } = child;
-          console.log('hello');
           return {
             canvasRef: forwardedCanvasRef,
             canvasNeedsUpdate: needsUpdate,
@@ -255,7 +266,7 @@ const _GoodCanvas: _GoodCanvasType = (
   );
 };
 
-const GoodCanvas = React.forwardRef(_GoodCanvas);
-GoodCanvas.displayName = 'GoodCanvas';
-GoodCanvas.defaultProps = defaultProps.toJS();
-export default GoodCanvas;
+// const GoodCanvas = React.forwardRef(_GoodCanvas);
+// GoodCanvas.displayName = 'GoodCanvas';
+// GoodCanvas.defaultProps = defaultProps.toJS();
+export default _GoodCanvas;
