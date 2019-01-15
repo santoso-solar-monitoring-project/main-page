@@ -1,0 +1,41 @@
+{
+  "Functional Component with Default Arguments": {
+    "prefix": "ffunction",
+    "body": [
+      "import React from 'react';",
+      "import Imm, { ImmMapType } from '${1:path/to}/Imm';",
+      "import { BasePropsType } from 'utils/BaseProps';",
+      "",
+      "export interface PropsType extends BasePropsType {",
+      "  ${5:// [STEP 5] prop types...},",
+      "}",
+      "",
+      "export type DefaultPropsType = Partial<PropsType>;",
+      "export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;",
+      "",
+      "export const defaultProps: ImmDefaultPropsType = Imm.fromJS({",
+      "  ${6:// [STEP 6] default props...},",
+      "});",
+      "",
+      "type ${2/(^.)(.*)/${1:/upcase}$2/}Type = React.${3|FunctionComponent,RefForwardingComponent|}<${4:/* [STEP 4] RefTargetType, */}DefaultPropsType>;",
+      "",
+      "const ${2:${TM_DIRECTORY/.*\\\\([^\\\\]*)$/$1/}}: ${2/(^.)(.*)/${1:/upcase}$2/}Type = (props: DefaultPropsType) => {",
+      "${9:  // stateful variables\n  ${10:/* [STEP 9] */}\n}",
+      "  // unpack props",
+      "  const mergedProps = defaultProps.mergeDeep(props)",
+      "  const {",
+      "    ${7:// [STEP 7] unpacked props...}",
+      "  }: DefaultPropsType = mergedProps.toJS();",
+      "  const children = props.children;${8: /* [STEP 8] Need children? */}",
+      "",
+      "  ${0:return null; /* [STEP 11] component body... */}",
+      "};",
+      "",
+      "${11:// [STEP 10] Forward Ref?} const ${2/(^_)(.*)/$2/} = React.forwardRef(${2:${TM_DIRECTORY/.*\\\\([^\\\\]*)$/$1/}});",
+      "${11:// [STEP 10] Forward Ref?} ${2/(^_)(.*)/$2/}.displayName = '${2/(^_)(.*)/$2/}';",
+      "${2/(^_)(.*)/$2/}.defaultProps = defaultProps.toJS();",
+      "export default ${2/(^_)(.*)/$2/};"
+    ],
+    "description": "Boilerplate functional component declaration"
+  }
+}

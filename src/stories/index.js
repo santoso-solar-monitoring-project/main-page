@@ -5,8 +5,8 @@ import { linkTo } from '@storybook/addon-links';
 import { Button, Welcome } from '@storybook/react/demo';
 import { withKnobs, select, number } from '@storybook/addon-knobs';
 
-import IVPlot from '../components/IVPlot';
-import CornersTest from 'components/GoodCanvas/CornersTest';
+import IVPlot from 'components/IVPlot';
+import CornersTest from 'components/CornersTest';
 
 storiesOf('Welcome', module).add('to Storybook', () => (
   <Welcome showApp={linkTo('Button')} />
@@ -27,10 +27,14 @@ storiesOf('Button', module)
 storiesOf('GoodCanvas', module)
   .addDecorator(withKnobs)
   .add('Corners Test', () => {
-    const boxSizing = select('box-sizing', {
-      'border-box': 'border-box',
-      'content-box': 'content-box',
-    });
+    const boxSizing = select(
+      'box-sizing',
+      {
+        'border-box': 'border-box',
+        'content-box': 'content-box',
+      },
+      'content-box'
+    );
     const borderWidth = number('borderWidth', 20, {
       range: true,
       min: 0,
@@ -42,7 +46,7 @@ storiesOf('GoodCanvas', module)
       <CornersTest
         style={{
           border: `${borderWidth}px solid red`,
-          boxSizing: boxSizing,
+          boxSizing,
         }}
       />
     );

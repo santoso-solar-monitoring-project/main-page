@@ -1,22 +1,4 @@
-export interface EnhancedContext extends CanvasRenderingContext2D {
-  currentTransform: DOMMatrix;
-  savedTransforms: DOMMatrix[];
-  _setMatrix(): void;
-  save(): void;
-  restore(): void;
-  scale(x: number, y: number): void;
-  rotate(theta: number): void;
-  translate(x: number, y: number): void;
-  transform(
-    a: number,
-    b: number,
-    c: number,
-    d: number,
-    e: number,
-    f: number
-  ): void;
-  resetTransform(): void;
-}
+import { EnhancedContext } from '.';
 
 // in theory, SVGMatrix will be used by the Canvas API in the future;
 // in practice, we can borrow an SVG matrix today!
@@ -139,13 +121,13 @@ export default function enhanceContext(
   return new Proxy(context, handler);
 }
 
-function testIt() {
+export function testIt() {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
   const enhanced = enhanceContext(ctx);
   const log = (msg: string) => {
     const { a, b, c, d, e, f } = enhanced.currentTransform;
-    console.log(msg, { a, b, c, d, e, f });
+    console.warn(msg, { a, b, c, d, e, f });
   };
   (<any>window).enhanced = enhanced;
   log('initial');

@@ -1,0 +1,33 @@
+{
+  "Function with Default Arguments": {
+    "prefix": "ffunction",
+    "body": [
+      "import Imm, { ImmMapType } from '${1:path/to}/Imm';",
+      "",
+      "export interface ArgsType {",
+      "  ${5:// [STEP 5] args types...},",
+      "}",
+      "",
+      "export type DefaultArgsType = Partial<ArgsType>;",
+      "export type ImmDefaultArgsType = ImmMapType<DefaultArgsType>;",
+      "",
+      "export const defaultArgs: ImmDefaultArgsType = Imm.fromJS({",
+      "  ${6:// [STEP 6] default args...},",
+      "});",
+      "",
+      "type ${2/(^.)(.*)/${1:/upcase}$2/}Type = ${3|DefaultArgsFunction,CustomHookType|}<DefaultArgsType${4: /*, [STEP 4] return type */}>;",
+      "",
+      "const ${2:${TM_FILENAME/(.*?)\\..+$/$1/}}: ${2/(^.)(.*)/${1:/upcase}$2/}Type = (args: DefaultArgsType${7:, inputs?: React.InputIdentityList}) => {",
+      "  // unpack args",
+      "  const {",
+      "    ${8:// [STEP 8] unpacked args...}",
+      "  }: DefaultArgsType = defaultArgs.mergeDeep(args).toJS();",
+      "",
+      "  ${0:// [STEP 9] function body...}",
+      "};",
+      "",
+      "export default ${2:func};"
+    ],
+    "description": "Boilerplate function declaration to support default arguments"
+  }
+}

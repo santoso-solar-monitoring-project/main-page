@@ -1,12 +1,19 @@
-import React, { useEffect, useState, useRef } from 'react';
-import Imm from 'immutable';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from 'react';
+import Imm, { ImmMapType } from 'utils/Imm';
 import * as d3 from 'd3';
-import GoodCanvas, { GoodCanvasType } from 'components/GoodCanvas';
+import GoodCanvas, { GoodCanvasElement } from 'components/GoodCanvas';
 import { getContext } from 'utils/canvas';
 import Points from 'components/Points';
 import Line from 'components/Line';
-import { PropsType } from 'utils/PropsType';
-import { PairType } from 'utils/PairType';
+import { BasePropsType } from 'utils/BaseProps';
+import { PairType } from 'utils/Pair';
+import useCounter from 'utils/useCounter';
 
 const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
 /* const CURRENTBufferRef = useRef<number[]>([]);
@@ -70,9 +77,12 @@ export const lightMode: ModeType = {
   },
 }; */
 
-export interface IVPlotPropsType extends PropsType {}
+export interface PropsType extends BasePropsType {}
 
-const defaultProps: Partial<IVPlotPropsType> = Imm.fromJS({
+export type DefaultPropsType = Partial<PropsType>;
+export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
+
+export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
   style: {
     width: '500px',
     height: '300px',
@@ -82,45 +92,65 @@ const defaultProps: Partial<IVPlotPropsType> = Imm.fromJS({
   },
 });
 
-type IVPlotType = React.FunctionComponent<typeof defaultProps>;
+type IVPlotType = React.FunctionComponent<DefaultPropsType>;
 
-const IVPlot: IVPlotType = (props: typeof defaultProps) => {
+const IVPlot: IVPlotType = (props: DefaultPropsType) => {
   // stateful variables
-  const [data, setData] = useState([] as PairType[]);
-  const canvasRef = useRef<GoodCanvasType>(null);
+  const canvasRef = useRef<GoodCanvasElement>(null);
+  const data = useRef<PairType[]>([]);
+  const [needsUpdate, notify] = useCounter();
 
   // unpack props
-  const { style } = defaultProps.mergeDeep(props).toJS();
+  const { style }: DefaultPropsType = defaultProps.mergeDeep(props).toJS();
 
-  // prepare data
+  // subscribe to data
   useEffect(() => {
-    /* const { canvas } = getContext(canvasRef);
-    const x = d3.range(CURRENT.length);
-    const y = CURRENT;
-    const scaleX = d3
-      .scaleLinear()
-      .domain(d3.extent(x) as PairType)
-      .range([0, canvas.dims.width]);
-    const scaleY = d3
-      .scaleLinear()
-      .domain(d3.extent(y) as PairType)
-      .range([0, canvas.dims.height]);
-    const _data = d3
-      .zip(x, y)
-      .map(([x, y]) => [scaleX(x), scaleY(y)]) as PairType[];
-    setData(_data); */
+    const id = window.setInterval(() => {
+      CURRENT.push(CURRENT.shift()!);
+      notify();
+    }, 500);
+    return () => window.clearInterval(id);
   }, []);
-  console.log('hi');
+
+  // transform data for plotting
+  useLayoutEffect(
+    () => {
+      console.log('IVPlot USELAYOUTEFFECT', data.current.length);
+      const { canvas, ctx } = getContext(canvasRef);
+      const x = d3.range(CURRENT.length);
+      const y = CURRENT;
+      const scaleX = d3
+        .scaleLinear()
+        .domain(d3.extent(x) as PairType)
+        .range([0, canvas.dims.width]);
+      const scaleY = d3
+        .scaleLinear()
+        .domain(d3.extent(y) as PairType)
+        .range([0, canvas.dims.height]);
+      data.current = d3
+        .zip(x, y)
+        .map(([x, y]) => [scaleX(x), scaleY(y)]) as PairType[];
+      ctx.clearRect(0, 0, canvas.dims.width, canvas.dims.height);
+    },
+    [needsUpdate]
+  );
+
   /* 
   // canvasStyle={lightMode.current.line.canvasStyle}
         // glow={lightMode.current.line.glow}
   */
   return (
-    <GoodCanvas style={{ ...style /* ...lightMode.style */ }} ref={canvasRef}>
+    <GoodCanvas
+      style={{ ...style /* ...lightMode.style */ }}
+      ref={canvasRef}
+      showWarnings={true}
+      notify={notify}
+      // blur={{ radius: 10 }}
+    >
       {/* <> */}
       {/* Current */}
-      {/* <Line data={data} /> */}
-      {/* <Points data={data} /> */}
+      <Line data={data.current} />
+      <Points data={data.current} />
       {
         // canvasStyle={lightMode.current.points.canvasStyle}
         // glow={lightMode.current.points.glow}

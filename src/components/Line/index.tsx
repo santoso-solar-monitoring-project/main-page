@@ -1,56 +1,62 @@
-import React, { useEffect } from 'react';
-import Imm from 'immutable';
+import React from 'react';
 import * as d3 from 'd3';
-import { GoodCanvasChildPropsType } from 'components/GoodCanvas';
+import Imm, { ImmMapType } from 'utils/Imm';
+import useImmEffect from 'utils/useImmEffect';
 import { getContext } from 'utils/canvas';
-import { PairType } from 'utils/PairType';
+import { ChildProps } from 'components/GoodCanvas';
+import { PairType } from 'utils/Pair';
+import evaluate from 'utils/evaluate';
 
-export interface LinePropsType extends GoodCanvasChildPropsType {
+export interface PropsType extends ChildProps.PropsType {
   data: PairType[];
-  line: d3.Line<PairType> | (() => d3.Line<PairType>);
+  line: d3.Line<PairType>;
 }
 
-const defaultProps: Partial<LinePropsType> = Imm.fromJS({
+export type DefaultPropsType = Partial<PropsType>;
+export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
+
+export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
   data: [],
   // alpha = 0.5 gives centripetal CatmullRom
-  line: () => d3.line().curve(d3.curveCatmullRom.alpha(0.5)),
+  line: 'd3.line().curve(d3.curveCatmullRom.alpha(0.5))',
   canvasStyle: {
     lineWidth: 1,
     strokeStyle: 'hsl(330, 100%, 67%)',
   },
 });
 
-type LineType = React.FunctionComponent<typeof defaultProps>;
+type LineType = React.FunctionComponent<DefaultPropsType>;
 
-const Line: LineType = (props: typeof defaultProps) => {
-  // unpack props
-  const {
-    data,
-    _line,
-    canvasRef,
-    canvasStyle,
-    canvasEffects,
-    canvasNeedsUpdate,
-  } = defaultProps.mergeDeep(props).toJS();
+const Line: LineType = (props: DefaultPropsType) => {
+  // merge props
+  const mergedProps = defaultProps.mergeDeep(props);
 
-  console.log('here');
-  useEffect(
+  useImmEffect(
     () => {
-      console.log('Line', data);
+      // unpack props
+      const {
+        data,
+        line,
+        canvasRef,
+        canvasStyle,
+        canvasEffects,
+      }: DefaultPropsType = mergedProps.toJS();
+      const theLine = typeof line === 'string' ? evaluate(line, { d3 }) : line;
       const { ctx } = getContext(canvasRef!);
-      const line = typeof _line == 'function' ? _line() : _line;
+      console.log('Line USEEFFECT', data!.length);
       // attach context to line
-      line.context(ctx);
+      theLine.context(ctx);
       ctx.save();
       Object.assign(ctx, canvasStyle);
       if (canvasEffects) canvasEffects(ctx);
+
       // draw the line
       ctx.beginPath();
-      line(data);
+      theLine(data);
       ctx.stroke();
       ctx.restore();
     },
-    [canvasNeedsUpdate, data]
+    [mergedProps]
   );
 
   return null;

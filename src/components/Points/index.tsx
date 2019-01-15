@@ -1,15 +1,19 @@
-import React, { useEffect } from 'react';
-import Imm from 'immutable';
-import { GoodCanvasChildPropsType } from 'components/GoodCanvas';
+import React from 'react';
+import Imm, { ImmMapType } from 'utils/Imm';
+import useImmEffect from 'utils/useImmEffect';
 import { getContext } from 'utils/canvas';
-import { PairType } from 'utils/PairType';
+import { ChildProps } from 'components/GoodCanvas';
+import { PairType } from 'utils/Pair';
 
-interface PointsPropsType extends GoodCanvasChildPropsType {
+interface PropsType extends ChildProps.PropsType {
   data: PairType[];
   radius: number;
 }
 
-const defaultProps: Partial<PointsPropsType> = Imm.fromJS({
+export type DefaultPropsType = Partial<PropsType>;
+export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
+
+export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
   data: [],
   radius: 3,
   canvasStyle: {
@@ -29,36 +33,39 @@ const defaultProps: Partial<PointsPropsType> = Imm.fromJS({
   color: 'hsl(330, 100%, 50%)',
 }
 */
-type PointsType = React.FunctionComponent<typeof defaultProps>;
+type PointsType = React.FunctionComponent<DefaultPropsType>;
 
-const Points: PointsType = (props: typeof defaultProps) => {
-  // unpack props
-  const {
-    data,
-    radius,
-    canvasRef,
-    canvasStyle,
-    canvasEffects,
-    canvasNeedsUpdate,
-  } = defaultProps.mergeDeep(props).toJS();
+const Points: PointsType = (props: DefaultPropsType) => {
+  // merge props
+  const mergedProps = defaultProps.mergeDeep(props);
 
-  useEffect(
+  useImmEffect(
     () => {
-      console.log('Points', data);
+      // unpack props
+      const {
+        data,
+        radius,
+        canvasRef,
+        canvasStyle,
+        canvasEffects,
+      }: DefaultPropsType = mergedProps.toJS();
+      console.log('Points USEEFFECT', data!.length);
       const { ctx } = getContext(canvasRef!);
       ctx.save();
       Object.assign(ctx, canvasStyle);
       if (canvasEffects) canvasEffects(ctx);
+
       // draw points
-      for (const [x, y] of data) {
+      for (const [x, y] of data!) {
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, radius!, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
       }
+
       ctx.restore();
     },
-    [canvasNeedsUpdate, data]
+    [mergedProps]
   );
 
   return null;

@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react';
-import Imm from 'immutable';
-import { EnhancedContext } from 'utils/canvas/enhanceContext';
-import { GoodCanvasChildPropsType } from 'components/GoodCanvas';
+import React, { useCallback, useRef } from 'react';
+import Imm, { ImmMapType } from 'utils/Imm';
+import { ChildProps } from 'components/GoodCanvas';
+import { EnhancedContext } from 'utils/canvas';
 import propagateProps from 'utils/propagateProps';
 
 // Same meaning as for CSS box-shadow
-export interface _BoxShadowPropsType extends GoodCanvasChildPropsType {
+export interface PropsType extends ChildProps.PropsType {
   spreadRadius: number;
   blurRadius: number;
   offsetX: number;
@@ -13,7 +13,10 @@ export interface _BoxShadowPropsType extends GoodCanvasChildPropsType {
   color: string;
 }
 
-const defaultProps: Partial<_BoxShadowPropsType> = Imm.fromJS({
+export type DefaultPropsType = Partial<PropsType>;
+export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
+
+export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
   spreadRadius: 0,
   blurRadius: 0,
   offsetX: 0,
@@ -21,47 +24,47 @@ const defaultProps: Partial<_BoxShadowPropsType> = Imm.fromJS({
   color: 'black',
 });
 
-type _BoxShadowType = React.FunctionComponent<typeof defaultProps>;
+type _BoxShadowType = React.FunctionComponent<DefaultPropsType>;
 
-const _BoxShadow: _BoxShadowType = (props: typeof defaultProps) => {
+const _BoxShadow: _BoxShadowType = (props: DefaultPropsType) => {
   // unpack props
-  const {
-    spreadRadius,
-    blurRadius,
-    offsetX,
-    offsetY,
-    color,
-    children,
-  } = defaultProps.mergeDeep(props).toJS();
+  const savedProps = useRef(defaultProps.mergeDeep(props));
+  const mergedProps = savedProps.current.mergeDeep(props);
+  const children = props.children;
 
   // stateful variables
   const canvasEffects = useCallback(
     (ctx: EnhancedContext) => {
+      // unpack other props (lazily inside here)
+      const {
+        spreadRadius,
+        blurRadius,
+        offsetX,
+        offsetY,
+        color,
+      }: DefaultPropsType = mergedProps.toJS();
+
       const { lineWidth = 0 } = ctx;
       ctx.filter = `blur(${blurRadius}px)`;
-      ctx.translate(offsetX, offsetY);
-      ctx.lineWidth += lineWidth + 2 * spreadRadius;
-      ctx.fillStyle = color;
-      ctx.strokeStyle = color;
+      ctx.translate(offsetX!, offsetY!);
+      ctx.lineWidth += lineWidth + 2 * spreadRadius!;
+      ctx.fillStyle = color!;
+      ctx.strokeStyle = color!;
     },
-    [spreadRadius, blurRadius, offsetX, offsetY, color]
+    [mergedProps]
   );
 
-  return (
-    <>
-      {// Add to canvasEffects
-      propagateProps<GoodCanvasChildPropsType>(children, child => {
-        const { props: { canvasEffects: prevEffects = () => {} } = {} } = child;
+  // append a new effect to canvasEffects prop of children
+  return propagateProps<PropsType>(children, child => {
+    const { props: { canvasEffects: prevEffects = () => {} } = {} } = child;
 
-        const newEffects = (ctx: EnhancedContext) => {
-          prevEffects(ctx);
-          canvasEffects(ctx);
-        };
+    const newEffects = (ctx: EnhancedContext) => {
+      prevEffects(ctx);
+      canvasEffects(ctx);
+    };
 
-        return { canvasEffects: newEffects };
-      })}
-    </>
-  );
+    return { canvasEffects: newEffects };
+  });
 };
 
 _BoxShadow.defaultProps = defaultProps.toJS();
