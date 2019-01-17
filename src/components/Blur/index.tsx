@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
 import { optimizedResize } from 'utils/throttleEvent';
 import { ChildProps } from 'components/GoodCanvas';
-import useThrottled from 'utils/useThrottled';
+import { useThrottled } from 'utils/CustomHooks';
 
 export interface PropsType extends ChildProps.PropsType {
   radius: number;

@@ -5,7 +5,7 @@ function isFactory<T>(arg: T | FactoryType<T>): arg is FactoryType<T> {
   return typeof arg === 'function';
 }
 
-export default function useMemoRef<T>(initialValue: T | FactoryType<T>) {
+export function useMemoRef<T>(initialValue: T | FactoryType<T>) {
   const factory: FactoryType<T> = isFactory<T>(initialValue)
     ? initialValue
     : () => initialValue;

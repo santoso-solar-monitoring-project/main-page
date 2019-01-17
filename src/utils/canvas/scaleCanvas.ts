@@ -13,7 +13,7 @@ type ScaleCanvasType = (args: ArgsType) => void;
 /*
 https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313
 */
-const scaleCanvas: ScaleCanvasType = (args: ArgsType) => {
+export const scaleCanvas: ScaleCanvasType = (args: ArgsType) => {
   // Unpack arguments.
   const { canvas, ctx: enhanced } = args;
   let { width, height } = args;
@@ -50,5 +50,3 @@ const scaleCanvas: ScaleCanvasType = (args: ArgsType) => {
     height: savedHeight,
   };
 };
-
-export default scaleCanvas;

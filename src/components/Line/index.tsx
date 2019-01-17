@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import * as d3 from 'd3';
 import Imm, { ImmMapType } from 'utils/Imm';
-import useImmEffect from 'utils/useImmEffect';
+import { useImmEffect } from 'utils/CustomHooks';
 import { getContext } from 'utils/canvas';
 import { ChildProps } from 'components/GoodCanvas';
 import { PairType } from 'utils/Pair';
@@ -30,29 +30,32 @@ type LineType = React.FunctionComponent<DefaultPropsType>;
 const Line: LineType = (props: DefaultPropsType) => {
   // merge props
   const mergedProps = defaultProps.mergeDeep(props);
+  const theLine = mergedProps.get('line');
+  const line = useMemo(
+    () => (typeof theLine === 'string' ? evaluate(theLine, { d3 }) : theLine),
+    [theLine]
+  );
 
   useImmEffect(
     () => {
       // unpack props
       const {
         data,
-        line,
         canvasRef,
         canvasStyle,
         canvasEffects,
       }: DefaultPropsType = mergedProps.toJS();
-      const theLine = typeof line === 'string' ? evaluate(line, { d3 }) : line;
       const { ctx } = getContext(canvasRef!);
       console.log('Line USEEFFECT', data!.length);
       // attach context to line
-      theLine.context(ctx);
+      line.context(ctx);
       ctx.save();
       Object.assign(ctx, canvasStyle);
       if (canvasEffects) canvasEffects(ctx);
 
       // draw the line
       ctx.beginPath();
-      theLine(data);
+      line(data);
       ctx.stroke();
       ctx.restore();
     },

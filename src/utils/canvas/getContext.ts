@@ -8,7 +8,7 @@ const cache = new Map<K, V>();
 
 export type ArgsType = React.Ref<GoodCanvasElement>;
 
-export default function getContext(canvasRef: ArgsType) {
+export function getContext(canvasRef: ArgsType) {
   // Throw on bad arguments
   if (!canvasRef) {
     throw Error('`canvasRef` should not be `null`');

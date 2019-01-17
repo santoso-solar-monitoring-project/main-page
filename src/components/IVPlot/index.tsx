@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useLayoutEffect,
-  useCallback,
-} from 'react';
+import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
 import * as d3 from 'd3';
 import GoodCanvas, { GoodCanvasElement } from 'components/GoodCanvas';
@@ -13,7 +7,7 @@ import Points from 'components/Points';
 import Line from 'components/Line';
 import { BasePropsType } from 'utils/BaseProps';
 import { PairType } from 'utils/Pair';
-import useCounter from 'utils/useCounter';
+import { useCounter } from 'utils/CustomHooks';
 
 const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
 /* const CURRENTBufferRef = useRef<number[]>([]);

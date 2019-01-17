@@ -1,7 +1,7 @@
-// Re-export GoodCanvasElement.*
-import * as GoodCanvasElementNS from './DOMElement';
-export type GoodCanvasElement = GoodCanvasElementNS.AttributesType;
-export { GoodCanvasElementNS };
+// Re-export DOMElement.*
+import * as DOMElementNS from './DOMElement';
+export type GoodCanvasElement = DOMElementNS.AttributesType;
+export { DOMElementNS as GoodCanvasElementNS };
 
 // Re-export ChildProps.*
 import * as ChildPropsNS from './ChildProps';
@@ -11,9 +11,11 @@ import React, { useLayoutEffect, useRef, useEffect, useState } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
 import { scaleCanvas, getContext } from 'utils/canvas';
 import { optimizedResize } from 'utils/throttleEvent';
-import useThrottled from 'utils/useThrottled';
-import useImmLayoutEffect from 'utils/useImmLayoutEffect';
-import useImmEffect from 'utils/useImmEffect';
+import {
+  useImmEffect,
+  useImmLayoutEffect,
+  useThrottled,
+} from 'utils/CustomHooks';
 import propagateProps from 'utils/propagateProps';
 import ignore from 'utils/ignore';
 import { BasePropsType } from 'utils/BaseProps';

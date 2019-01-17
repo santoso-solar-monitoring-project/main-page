@@ -12,7 +12,7 @@ function createMatrix() {
 // current transformation matrix.
 // Call `enhanceContext` on a freshly-fetched 2d canvas context for best
 // results.
-export default function enhanceContext(
+export function enhanceContext(
   context: CanvasRenderingContext2D
 ): EnhancedContext {
   // The main property we are enhancing the context to track

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import Imm, { ImmMapType } from './Imm';
-import { CustomHookType } from './CustomHookType';
+import Imm, { ImmMapType } from 'utils/Imm';
+import { CustomHookType } from 'utils/CustomHookType';
 
 export interface ArgsType {
   event: string;
@@ -20,7 +20,7 @@ export const defaultArgs: ImmDefaultArgsType = Imm.fromJS({
 
 type UseThrottledType = CustomHookType<DefaultArgsType>;
 
-const useThrottled: UseThrottledType = (
+export const useThrottled: UseThrottledType = (
   args: DefaultArgsType,
   inputs?: React.InputIdentityList
 ) => {
@@ -60,4 +60,3 @@ const useThrottled: UseThrottledType = (
 };
 
 useThrottled.defaultArgs = defaultArgs.toJS();
-export default useThrottled;

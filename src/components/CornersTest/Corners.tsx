@@ -1,6 +1,6 @@
 import React from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
-import useImmEffect from 'utils/useImmEffect';
+import { useImmEffect } from 'utils/CustomHooks';
 import { getContext } from 'utils/canvas';
 import { ChildProps } from 'components/GoodCanvas';
 
