@@ -1,10 +1,8 @@
 import React from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
-import { useMemoRef } from '../CustomHooks';
+import { useMemoRef } from 'utils/CustomHooks';
 
-// type HookType<T, R> = (arg: T, inputs?: React.InputIdentityList) => R;
-
-function makeImmHook<
+export function makeImmHook<
   T extends (...args: any[]) => any,
   U = Parameters<T>[0],
   R = ReturnType<T>
@@ -24,5 +22,3 @@ function makeImmHook<
 
   return useImmHook;
 }
-
-export default makeImmHook;
