@@ -2,7 +2,7 @@ import React, { SetStateAction } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
 
 // The augmented HTML <canvas> element.
-export interface AttributesType extends HTMLCanvasElement {
+export interface GoodCanvasElement extends HTMLCanvasElement {
   dims: {
     width: number;
     height: number;
@@ -11,7 +11,7 @@ export interface AttributesType extends HTMLCanvasElement {
   setNeedsUpdate: React.Dispatch<SetStateAction<number>>;
 }
 
-export type DefaultAttributesType = Partial<AttributesType>;
+export type DefaultAttributesType = Partial<GoodCanvasElement>;
 export type ImmDefaultAttributesType = ImmMapType<DefaultAttributesType>;
 
 export const defaultAttributes: ImmDefaultAttributesType = Imm.fromJS({

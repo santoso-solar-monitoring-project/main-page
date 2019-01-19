@@ -1,9 +1,9 @@
 import React from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
-import { useImmEffect } from 'utils/CustomHooks';
 import { getContext } from 'utils/canvas';
 import { ChildProps } from 'components/GoodCanvas';
 import { PairType } from 'utils/Pair';
+import isValidRefObject from 'utils/isValidRefObject';
 
 interface PropsType extends ChildProps.PropsType {
   data: PairType[];
@@ -39,34 +39,31 @@ const Points: PointsType = (props: DefaultPropsType) => {
   // merge props
   const mergedProps = defaultProps.mergeDeep(props);
 
-  useImmEffect(
-    () => {
-      // unpack props
-      const {
-        data,
-        radius,
-        canvasRef,
-        canvasStyle,
-        canvasEffects,
-      }: DefaultPropsType = mergedProps.toJS();
-      console.log('Points USEEFFECT', data!.length);
-      const { ctx } = getContext(canvasRef!);
-      ctx.save();
-      Object.assign(ctx, canvasStyle);
-      if (canvasEffects) canvasEffects(ctx);
+  // unpack props
+  const {
+    data,
+    radius,
+    canvasRef,
+    canvasStyle,
+    canvasEffects,
+  }: DefaultPropsType = mergedProps.toJS();
+  if (!isValidRefObject(canvasRef)) return null;
 
-      // draw points
-      for (const [x, y] of data!) {
-        ctx.beginPath();
-        ctx.arc(x, y, radius!, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-      }
+  // console.log('Points RENDER', (window as any).frameNumber);
+  const { ctx } = getContext(canvasRef!);
+  ctx.save();
+  Object.assign(ctx, canvasStyle);
+  if (canvasEffects) canvasEffects(ctx);
 
-      ctx.restore();
-    },
-    [mergedProps]
-  );
+  // draw points
+  for (const [x, y] of data!) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius!, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  ctx.restore();
 
   return null;
 };

@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import * as d3 from 'd3';
 import Imm, { ImmMapType } from 'utils/Imm';
-import { useImmEffect } from 'utils/CustomHooks';
 import { getContext } from 'utils/canvas';
 import { ChildProps } from 'components/GoodCanvas';
 import { PairType } from 'utils/Pair';
 import evaluate from 'utils/evaluate';
+import isValidRefObject from 'utils/isValidRefObject';
 
 export interface PropsType extends ChildProps.PropsType {
   data: PairType[];
@@ -36,31 +36,27 @@ const Line: LineType = (props: DefaultPropsType) => {
     [theLine]
   );
 
-  useImmEffect(
-    () => {
-      // unpack props
-      const {
-        data,
-        canvasRef,
-        canvasStyle,
-        canvasEffects,
-      }: DefaultPropsType = mergedProps.toJS();
-      const { ctx } = getContext(canvasRef!);
-      console.log('Line USEEFFECT', data!.length);
-      // attach context to line
-      line.context(ctx);
-      ctx.save();
-      Object.assign(ctx, canvasStyle);
-      if (canvasEffects) canvasEffects(ctx);
+  const {
+    data,
+    canvasRef,
+    canvasStyle,
+    canvasEffects,
+  }: DefaultPropsType = mergedProps.toJS();
+  if (!isValidRefObject(canvasRef)) return null;
 
-      // draw the line
-      ctx.beginPath();
-      line(data);
-      ctx.stroke();
-      ctx.restore();
-    },
-    [mergedProps]
-  );
+  const { ctx } = getContext(canvasRef!);
+  // console.log('Line RENDER', (window as any).frameNumber);
+  // attach context to line
+  line.context(ctx);
+  ctx.save();
+  Object.assign(ctx, canvasStyle);
+  if (canvasEffects) canvasEffects(ctx);
+
+  // draw the line
+  ctx.beginPath();
+  line(data);
+  ctx.stroke();
+  ctx.restore();
 
   return null;
 };

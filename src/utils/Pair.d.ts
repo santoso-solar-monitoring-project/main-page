@@ -1,1 +1,1 @@
-export type PairType = [number, number];
+export type PairType<T = number> = [T, T];

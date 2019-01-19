@@ -4,8 +4,8 @@ import { CustomHookType } from 'utils/CustomHookType';
 
 export interface ArgsType {
   event: string;
-  before: () => void;
-  after: () => void;
+  first: () => void;
+  last: () => void;
   timeout: number;
 }
 
@@ -13,8 +13,8 @@ export type DefaultArgsType = Partial<ArgsType>;
 export type ImmDefaultArgsType = ImmMapType<DefaultArgsType>;
 
 export const defaultArgs: ImmDefaultArgsType = Imm.fromJS({
-  before: () => {},
-  after: () => {},
+  first: () => {},
+  last: () => {},
   timeout: 250,
 });
 
@@ -28,8 +28,8 @@ export const useThrottled: UseThrottledType = (
     // unpack args
     const {
       event,
-      before,
-      after,
+      first,
+      last,
       timeout,
     }: DefaultArgsType = defaultArgs.mergeDeep(args).toJS();
     if (!event) return;
@@ -40,7 +40,7 @@ export const useThrottled: UseThrottledType = (
     const handler = () => {
       // first resize event
       if (!ongoing) {
-        before!();
+        first!();
         ongoing = true;
       }
 
@@ -50,7 +50,7 @@ export const useThrottled: UseThrottledType = (
       // fulfill last response after timeout
       id = window.setTimeout(() => {
         ongoing = false;
-        after!();
+        last!();
       }, timeout);
     };
 

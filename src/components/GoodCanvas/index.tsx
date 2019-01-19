@@ -1,6 +1,6 @@
 // Re-export DOMElement.*
-import * as DOMElementNS from './DOMElement';
-export type GoodCanvasElement = DOMElementNS.AttributesType;
+import * as DOMElementNS from './GoodCanvasElement';
+export type GoodCanvasElement = DOMElementNS.GoodCanvasElement;
 export { DOMElementNS as GoodCanvasElementNS };
 
 // Re-export ChildProps.*
@@ -148,11 +148,11 @@ const _GoodCanvas: _GoodCanvasType = (
   useThrottled(
     {
       event: optimizedResize,
-      before: () =>
+      first: () =>
         warn(
           'GoodCanvas is rescaling because the window resized. If this is happening often, there could be a negative performance impact.'
         ),
-      after: () => setNeedsUpdate(i => i + 1),
+      last: () => setNeedsUpdate(i => i + 1),
       timeout: timeout,
     },
     [timeout]
@@ -183,38 +183,42 @@ const _GoodCanvas: _GoodCanvasType = (
         'GoodCanvas is unmounting. If this is happening often, there could be a negative performance impact.'
       );
   }, []);
-  warn('CANVAS RENDER');
-  return (
-    <Blur style={style} ref={containerRef} {...blur}>
-      <canvas
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          margin: 0,
-          padding: 0,
-          border: 'none',
-        }}
-        ref={forwardedRef}
-      >
-        {// Attach GoodCanvasChildPropsType props to children subtree.
-        propagateProps<ChildPropsNS.PropsType>(children, child => {
-          const {
-            canvasStyle,
-            canvasEffects,
-          }: ChildPropsNS.DefaultPropsType = ChildPropsNS.defaultProps
-            .mergeDeep(child.props)
-            .toJS();
 
-          return {
-            canvasRef: forwardedRef,
-            canvasNeedsUpdate: needsUpdate,
-            canvasStyle,
-            canvasEffects,
-          };
-        })}
-      </canvas>
-    </Blur>
+  warn('GoodCanvas RENDER');
+
+  return (
+    <div style={style} ref={containerRef}>
+      <Blur style={{ width: '100%', height: '100%' }} {...blur}>
+        <canvas
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            margin: 0,
+            padding: 0,
+            border: 'none',
+          }}
+          ref={forwardedRef}
+        >
+          {// Attach GoodCanvasChildPropsType props to children subtree.
+          propagateProps<ChildPropsNS.PropsType>(children, child => {
+            const {
+              canvasStyle,
+              canvasEffects,
+            }: ChildPropsNS.DefaultPropsType = ChildPropsNS.defaultProps
+              .mergeDeep(child.props)
+              .toJS();
+
+            return {
+              canvasRef: forwardedRef,
+              canvasNeedsUpdate: needsUpdate,
+              canvasStyle,
+              canvasEffects,
+            };
+          })}
+        </canvas>
+      </Blur>
+    </div>
   );
 };
 

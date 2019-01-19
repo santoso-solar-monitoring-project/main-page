@@ -1,0 +1,114 @@
+patch-package
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+--- a/node_modules/denque/index.d.ts
++++ b/node_modules/denque/index.d.ts
+@@ -13,6 +13,7 @@ declare class Denque<T = any> {
+   get(index: number): T | undefined;
+   remove(index: number, count: number): T[];
+   removeOne(index: number): T | undefined;
++  slice(start?: number, end?: number): T[];
+   splice(index: number, count: number, ...item: T[]): T[] | undefined;
+   isEmpty(): boolean;
+   clear(): void;
+@@ -21,6 +22,7 @@ declare class Denque<T = any> {
+   toArray(): T[];
+ 
+   length: number;
++  [n: number]: T;
+ }
+ 
+ export = Denque;
+old mode 100644
+new mode 100755
+--- a/node_modules/denque/index.js
++++ b/node_modules/denque/index.js
+@@ -1,5 +1,20 @@
+ 'use strict';
+ 
++const indexer = {
++  get: (obj, key) => {
++    return key in obj
++      ? obj[key]
++      : Number.isInteger(+key)
++      ? obj.peekAt(+key)
++      : undefined;
++  },
++  set: (obj, key, value) => {
++    if (Number.isInteger(+key)) obj.setAt(+key, value);
++    else if (key in obj) obj[key] = value;
++    return true;
++  },
++};
++
+ /**
+  * Custom implementation of a double ended queue.
+  */
+@@ -11,6 +26,7 @@ function Denque(array) {
+   if (Array.isArray(array)) {
+     this._fromArray(array);
+   }
++  return new Proxy (this, indexer);
+ }
+ 
+ /**
+@@ -19,6 +35,55 @@ function Denque(array) {
+  * -------------
+  */
+ 
++Denque.prototype.setAt = function setAt(index, value) {
++  var i = index;
++  // expect a number or return undefined
++  if (i !== (i | 0)) {
++    return void 0;
++  }
++  var len = this.size();
++  if (i >= len || i < -len) return undefined;
++  if (i < 0) i += len;
++  i = (this._head + i) & this._capacityMask;
++  this._list[i] = value;
++};
++
++/* 
++Test with:
++a = new Denque([0,1,2,3,4]);a.shift();a.slice()
++// Expect [1,2,3,4]
++a = new Denque([0,1,2,3,4]);a.shift();a.slice(2,-1)
++// Expect [3]
++*/
++Denque.prototype.slice = function slice(start, end) {
++  var newArray;
++  var list = this._list;
++  var len = this.length;
++  // Defaults
++  if (start == null) start = 0;
++  if (end == null) end = len;
++  // End too big
++  if (end > len) end = len;
++  // Negative start/stop
++  if (start < 0) start = len + Math.max(-len, start);
++  if (end < 0) end = len + Math.max(-len, end);
++  // Empty slice
++  if (start >= end) return [];
++  // How many elements to slice
++  const count = Math.max(0, end - start);
++  // Account for queue index coordinates
++  start += this._head;
++  end = Math.min(list.length, this._head + end);
++  // How many wrap around elements
++  const spill = count - (end - start);
++  // Concatenate all sliced elements
++  newArray = [
++    ...list.slice(start, end),
++    ...list.slice(0, Math.min(this._tail, spill)),
++  ];
++  return newArray;
++};
++
+ /**
+  * Returns the item at the specified index from the list.
+  * 0 is the first element, 1 is the second, and so on...

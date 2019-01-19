@@ -43,8 +43,8 @@ const _Blur: _BlurType = (
   useThrottled(
     {
       event: optimizedResize,
-      before: () => setBlurry(true),
-      after: () => setBlurry(false),
+      first: () => setBlurry(true),
+      last: () => setBlurry(false),
       timeout,
     },
     [timeout]
