@@ -22,6 +22,7 @@ All React components in this project have the following structure.
    const {...rest} = defaultProps.mergeDeep(props);
    const children = props.children;
    Also don't rely on the `children` contained in the `rest` in the "DO THIS" example. That would be committing the very same mistake as the "DON'T DO THIS" example.
+   Using refs and Immutable.Map.mergeDeep is in general dangerous.
 
 7. CORE LOGIC. (Varies but often `useEffect`, `useLayoutEffect`.)
 

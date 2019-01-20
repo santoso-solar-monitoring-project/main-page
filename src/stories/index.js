@@ -8,21 +8,25 @@ import { withKnobs, select, number } from '@storybook/addon-knobs';
 import IVPlot from 'components/IVPlot';
 import CornersTest from 'components/CornersTest';
 
-storiesOf('Welcome', module).add('to Storybook', () => (
-  <Welcome showApp={linkTo('Button')} />
-));
+// storiesOf('Welcome', module).add('to Storybook', () => (
+//   <Welcome showApp={linkTo('Button')} />
+// ));
 
-storiesOf('Button', module)
-  .add('with text', () => (
-    <Button onClick={action('clicked')}>Hello Button</Button>
-  ))
-  .add('with some emoji', () => (
-    <Button onClick={action('clicked')}>
-      <span role='img' aria-label='so cool'>
-        😀 😎 👍 💯
-      </span>
-    </Button>
-  ));
+// storiesOf('Button', module)
+//   .add('with text', () => (
+//     <Button onClick={action('clicked')}>Hello Button</Button>
+//   ))
+//   .add('with some emoji', () => (
+//     <Button onClick={action('clicked')}>
+//       <span role='img' aria-label='so cool'>
+//         😀 😎 👍 💯
+//       </span>
+//     </Button>
+//   ));
+
+storiesOf('IV Plot', module).add('play', () => {
+  return <IVPlot />;
+});
 
 storiesOf('GoodCanvas', module)
   .addDecorator(withKnobs)
@@ -51,10 +55,6 @@ storiesOf('GoodCanvas', module)
       />
     );
   });
-
-storiesOf('IV Plot', module).add('default', () => {
-  return <IVPlot />;
-});
 
 storiesOf('Legend of Potato Hero', module).add('🥔', () => {
   return (

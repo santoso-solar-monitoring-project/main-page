@@ -1,11 +1,15 @@
 // Re-export DOMElement.*
-import * as DOMElementNS from './GoodCanvasElement';
+import * as DOMElementNS from './_GoodCanvasElement';
 export type GoodCanvasElement = DOMElementNS.GoodCanvasElement;
 export { DOMElementNS as GoodCanvasElementNS };
 
 // Re-export ChildProps.*
-import * as ChildPropsNS from './ChildProps';
+import * as ChildPropsNS from './_ChildProps';
 export { ChildPropsNS as ChildProps };
+
+// Re-export AnimateType.*
+import * as AnimatableNS from './Animatable';
+export { AnimatableNS as Animatable };
 
 import React, { useLayoutEffect, useRef, useEffect, useState } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';

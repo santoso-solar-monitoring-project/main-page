@@ -9,7 +9,7 @@ export function makeImmHook<
 >(hook: T) {
   const useImmHook = <V extends U>(
     arg: V,
-    inputs?: React.InputIdentityList
+    inputs: React.InputIdentityList
   ): R => {
     const savedInputs = useMemoRef<ImmMapType>(() =>
       Imm.fromJS(inputs).toMap()

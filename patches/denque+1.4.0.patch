@@ -7,6 +7,12 @@ old mode 100644
 new mode 100755
 --- a/node_modules/denque/index.d.ts
 +++ b/node_modules/denque/index.d.ts
+@@ -1,4 +1,4 @@
+-declare class Denque<T = any> {
++declare class Denque<T = any> extends Array<T> {
+   constructor();
+   constructor(array: T[]);
+ 
 @@ -13,6 +13,7 @@ declare class Denque<T = any> {
    get(index: number): T | undefined;
    remove(index: number, count: number): T[];
@@ -27,16 +33,24 @@ old mode 100644
 new mode 100755
 --- a/node_modules/denque/index.js
 +++ b/node_modules/denque/index.js
-@@ -1,5 +1,20 @@
+@@ -1,9 +1,33 @@
  'use strict';
  
 +const indexer = {
 +  get: (obj, key) => {
-+    return key in obj
-+      ? obj[key]
-+      : Number.isInteger(+key)
-+      ? obj.peekAt(+key)
-+      : undefined;
++    if (key in obj) {
++      return obj[key];
++    } else if (Number.isInteger(+key)) {
++      return obj.peekAt(+key);
++    } else if (
++      key in Array.prototype &&
++      typeof Array.prototype[key] === 'function'
++    ) {
++      return (...args) =>
++        Array.prototype[key].call([...obj], ...args);
++    } else {
++      return undefined;
++    }
 +  },
 +  set: (obj, key, value) => {
 +    if (Number.isInteger(+key)) obj.setAt(+key, value);
@@ -48,15 +62,20 @@ new mode 100755
  /**
   * Custom implementation of a double ended queue.
   */
-@@ -11,6 +26,7 @@ function Denque(array) {
+ function Denque(array) {
++  if (this == null) return new Denque(array);
+   this._head = 0;
+   this._tail = 0;
+   this._capacityMask = 0x3;
+@@ -11,6 +35,7 @@ function Denque(array) {
    if (Array.isArray(array)) {
      this._fromArray(array);
    }
-+  return new Proxy (this, indexer);
++  return new Proxy(this, indexer);
  }
  
  /**
-@@ -19,6 +35,55 @@ function Denque(array) {
+@@ -19,6 +44,67 @@ function Denque(array) {
   * -------------
   */
  
@@ -107,6 +126,18 @@ new mode 100755
 +    ...list.slice(0, Math.min(this._tail, spill)),
 +  ];
 +  return newArray;
++};
++
++Denque.prototype[Symbol.iterator] = function*() {
++  const list = this._list,
++    len = list.length,
++    head = this._head,
++    tail = this._tail,
++    end = head < tail ? tail : len;
++  for (let i = head; i < end; i++) yield list[i];
++  if (end > tail) {
++    for (let i = 0; i < tail; i++) yield list[i];
++  }
 +};
 +
  /**

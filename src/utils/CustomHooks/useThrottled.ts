@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
-import { CustomHookType } from 'utils/CustomHookType';
+import { CustomHookType } from '.';
 
 export interface ArgsType {
   event: string;

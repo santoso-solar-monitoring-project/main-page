@@ -1,14 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import * as d3 from 'd3';
 import Imm, { ImmMapType } from 'utils/Imm';
 import { getContext } from 'utils/canvas';
-import { ChildProps } from 'components/GoodCanvas';
+import { ChildProps, Animatable } from 'components/GoodCanvas';
 import { PairType } from 'utils/Pair';
 import evaluate from 'utils/evaluate';
-import isValidRefObject from 'utils/isValidRefObject';
 
-export interface PropsType extends ChildProps.PropsType {
-  data: PairType[];
+export interface PropsType extends ChildProps.PropsType, Animatable.PropsType {
+  data: React.RefObject<PairType[]>;
   line: d3.Line<PairType>;
 }
 
@@ -16,7 +15,6 @@ export type DefaultPropsType = Partial<PropsType>;
 export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
 
 export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
-  data: [],
   // alpha = 0.5 gives centripetal CatmullRom
   line: 'd3.line().curve(d3.curveCatmullRom.alpha(0.5))',
   canvasStyle: {
@@ -36,27 +34,28 @@ const Line: LineType = (props: DefaultPropsType) => {
     [theLine]
   );
 
-  const {
-    data,
-    canvasRef,
-    canvasStyle,
-    canvasEffects,
-  }: DefaultPropsType = mergedProps.toJS();
-  if (!isValidRefObject(canvasRef)) return null;
+  useEffect(() => {
+    const {
+      subscribe,
+      canvasStyle,
+      canvasEffects,
+    }: DefaultPropsType = mergedProps.toJS();
+    const { data } = props;
 
-  const { ctx } = getContext(canvasRef!);
-  // console.log('Line RENDER', (window as any).frameNumber);
-  // attach context to line
-  line.context(ctx);
-  ctx.save();
-  Object.assign(ctx, canvasStyle);
-  if (canvasEffects) canvasEffects(ctx);
-
-  // draw the line
-  ctx.beginPath();
-  line(data);
-  ctx.stroke();
-  ctx.restore();
+    console.log('Line USEEFFECT');
+    const animate: Animatable.FuncType = ({ ctx }) => {
+      // console.log('Line ANIMATE', data!.current);
+      // attach context to line
+      line.context(ctx);
+      Object.assign(ctx, canvasStyle);
+      if (canvasEffects) canvasEffects(ctx);
+      // draw the line
+      ctx.beginPath();
+      line(data!.current);
+      ctx.stroke();
+    };
+    return subscribe!(animate);
+  });
 
   return null;
 };

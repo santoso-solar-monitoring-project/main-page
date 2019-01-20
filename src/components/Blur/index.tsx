@@ -35,7 +35,6 @@ const _Blur: _BlurType = (
     radius,
     timeout,
     enabled,
-    ...rest
   }: DefaultPropsType = defaultProps.mergeDeep(props).toJS();
   const children = props.children;
 

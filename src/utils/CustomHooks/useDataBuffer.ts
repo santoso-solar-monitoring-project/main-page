@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
 import Denque from 'denque';
 
@@ -20,14 +20,16 @@ export function useDataBuffer<T = number>(
   const { initialValue, maxSize }: DefaultArgsType<T> = defaultArgs
     .mergeDeep(args)
     .toJS();
-  const buffer = useMemo(() => new Denque<T>(initialValue!), []);
+  const [buffer, setBuffer] = useState(() => new Denque<T>(initialValue!));
   const updateBuffer = useCallback(
-    (newData: T[]) => {
-      buffer.splice(buffer.length, 0, ...newData);
-      if (buffer.length > maxSize!) {
-        buffer.splice(0, buffer.length - maxSize!);
-      }
-    },
+    (newData: T[]) =>
+      setBuffer(buf => {
+        buf.splice(buf.length, 0, ...newData);
+        if (buf.length > maxSize!) {
+          buf.splice(0, buf.length - maxSize!);
+        }
+        return buf;
+      }),
     [maxSize]
   );
   return [buffer, updateBuffer];
