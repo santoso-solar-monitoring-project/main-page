@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
 import { ChildProps } from 'components/GoodCanvas';
 import { EnhancedContext } from 'utils/canvas';
-import propagateProps from 'utils/propagateProps';
+import { propagateProps } from 'utils/propagateProps';
 
 // Same meaning as for CSS box-shadow
 export interface PropsType extends ChildProps.PropsType {

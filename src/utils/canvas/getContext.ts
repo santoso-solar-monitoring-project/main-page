@@ -2,6 +2,7 @@ import React from 'react';
 import { GoodCanvasElement } from 'components/GoodCanvas';
 import { enhanceContext, EnhancedContext } from '.';
 import isValidRefObject from 'utils/isValidRefObject';
+import { isValidGoodCanvas } from './isValidGoodCanvas';
 
 type K = GoodCanvasElement;
 type V = { canvas: GoodCanvasElement; ctx: EnhancedContext };
@@ -10,16 +11,9 @@ const cache = new Map<K, V>();
 export type ArgsType = React.Ref<GoodCanvasElement>;
 
 export function getContext(canvasRef: ArgsType) {
-  // Throw on bad arguments
-  if (
-    !isValidRefObject(canvasRef, {
-      REF_NULL: '`canvasRef` should not be `null`',
-      NO_CURRENT:
-        'Use a React.RefObject not a functional ref. (`current` member not found in `canvasRef`.)',
-      CURRENT_NULL: '`canvasRef.current` should not be `null`',
-    })
-  ) {
-    // Never reaches here.
+  // Throw on bad GoodCanvas
+  if (!isValidGoodCanvas(canvasRef)) {
+    // Not reached
     throw Error();
   }
 

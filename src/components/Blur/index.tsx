@@ -1,42 +1,36 @@
 import React, { useState } from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
 import { optimizedResize } from 'utils/throttleEvent';
-import { ChildProps } from 'components/GoodCanvas';
 import { useThrottled } from 'utils/CustomHooks';
+import { BaseProps } from 'utils/BaseProps';
+import { Omit } from 'utils/meta';
+import { withImm } from 'utils/Imm';
 
-export interface PropsType extends ChildProps.PropsType {
-  radius: number;
-  timeout: number;
-  enabled: boolean;
+export interface Props extends BaseProps {
+  radius?: number;
+  timeout?: number;
+  enabled?: boolean;
 }
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
+export type OwnProps = Omit<Props, keyof BaseProps>;
 
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
+export const defaultProps = {
   radius: 5,
   timeout: 250,
   enabled: true,
-  style: { filter: '' },
-});
+  style: { filter: '' } as React.CSSProperties,
+};
 
-type _BlurType = React.RefForwardingComponent<HTMLDivElement, DefaultPropsType>;
-
-const _Blur: _BlurType = (
-  props: DefaultPropsType,
-  forwardedRef: React.Ref<HTMLDivElement>
+const Blur: withImm.RFC<Props, HTMLDivElement, typeof defaultProps> = (
+  props,
+  mergedProps,
+  ref
 ) => {
   // stateful variables
   const [blurry, setBlurry] = useState(false);
 
   // unpack props
-  const {
-    style,
-    radius,
-    timeout,
-    enabled,
-  }: DefaultPropsType = defaultProps.mergeDeep(props).toJS();
-  const children = props.children;
+  const { children } = props;
+  const { style, radius, timeout, enabled } = mergedProps;
 
   // attach handler to blur on window resize
   useThrottled(
@@ -55,13 +49,10 @@ const _Blur: _BlurType = (
   }
 
   return (
-    <div ref={forwardedRef} style={style}>
+    <div ref={ref} style={style}>
       {children}
     </div>
   );
 };
 
-const Blur = React.forwardRef(_Blur);
-Blur.displayName = 'Blur';
-Blur.defaultProps = defaultProps.toJS();
-export default Blur;
+const _Blur = React.forwardRef(withImm.bind(defaultProps)(Blur));

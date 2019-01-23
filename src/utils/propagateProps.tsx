@@ -1,14 +1,7 @@
 import React from 'react';
-import { BasePropsType } from './BaseProps';
+import { BaseProps } from './BaseProps';
 
-export interface ArgsType<P = BasePropsType> {
-  children: React.ReactNode;
-  props: (
-    child: React.ReactElement<P & { children?: React.ReactNode }>
-  ) => P | Partial<P>;
-}
-
-export default function propagateProps<P = BasePropsType>(
+export function propagateProps<P = BaseProps>(
   children: React.ReactNode,
   props: (
     child: React.ReactElement<P & { children?: React.ReactNode }>

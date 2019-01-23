@@ -1,7 +1,7 @@
 import React from 'react';
 
 // https://github.com/sw-yx/react-typescript-cheatsheet#useful-react-prop-type-examples
-export interface BasePropsType {
+export interface BaseProps {
   /* 
   children1: JSX.Element;                            // bad, doesnt account for arrays
   children2: JSX.Element | JSX.Element[];            // meh, doesnt accept functions

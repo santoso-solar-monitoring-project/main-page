@@ -2,7 +2,8 @@ import React, { useMemo, useEffect } from 'react';
 import * as d3 from 'd3';
 import Imm, { ImmMapType } from 'utils/Imm';
 import { getContext } from 'utils/canvas';
-import { ChildProps, Animatable } from 'components/GoodCanvas';
+import { ChildProps } from 'components/GoodCanvas';
+import * as Animatable from 'components/Animatable';
 import { PairType } from 'utils/Pair';
 import evaluate from 'utils/evaluate';
 

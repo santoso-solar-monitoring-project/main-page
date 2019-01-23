@@ -7,52 +7,37 @@ export { DOMElementNS as GoodCanvasElementNS };
 import * as ChildPropsNS from './_ChildProps';
 export { ChildPropsNS as ChildProps };
 
-// Re-export AnimateType.*
-import * as AnimatableNS from './Animatable';
-export { AnimatableNS as Animatable };
-
 import React, { useLayoutEffect, useRef, useEffect, useState } from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
 import { scaleCanvas, getContext } from 'utils/canvas';
 import { optimizedResize } from 'utils/throttleEvent';
-import {
-  useImmEffect,
-  useImmLayoutEffect,
-  useThrottled,
-} from 'utils/CustomHooks';
-import propagateProps from 'utils/propagateProps';
+import { useImm, useThrottled } from 'utils/CustomHooks';
+import { propagateProps } from 'utils/propagateProps';
 import ignore from 'utils/ignore';
-import { BasePropsType } from 'utils/BaseProps';
+import { BaseProps } from 'utils/BaseProps';
 import Blur, * as BlurNS from 'components/Blur';
 import noop from 'utils/noop';
+import { withImm } from 'utils/Imm';
+import { isValidGoodCanvas } from 'utils/canvas/isValidGoodCanvas';
 
-export interface PropsType extends BasePropsType {
-  showWarnings: boolean;
-  timeout: number;
-  blur: Omit<BlurNS.DefaultPropsType, keyof BasePropsType>;
-  notify: () => void;
+export interface Props extends BaseProps {
+  showWarnings?: boolean;
+  timeout?: number;
+  blur?: BlurNS.OwnProps;
+  notify?: () => void;
 }
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
-
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
+export const defaultProps = {
   style: {
     position: 'relative',
     overflow: 'hidden',
     width: '300px',
     height: '150px',
     boxSizing: 'content-box',
-  },
+  } as React.CSSProperties,
   showWarnings: false,
   timeout: 250,
   notify: noop,
-});
-
-type _GoodCanvasType = React.RefForwardingComponent<
-  GoodCanvasElement,
-  DefaultPropsType
->;
+};
 
 /* 
   A properly scaled <canvas> element accounting for window.devicePixelRatio.
@@ -67,9 +52,10 @@ type _GoodCanvasType = React.RefForwardingComponent<
   
   To toggle warnings use the `showWarnings` boolean prop.
 */
-const _GoodCanvas: _GoodCanvasType = (
-  props: DefaultPropsType,
-  forwardedRef: React.Ref<GoodCanvasElement>
+const GoodCanvas: withImm.RFC<Props, GoodCanvasElement> = (
+  props,
+  mergedProps,
+  ref
 ) => {
   // stateful variables
   const [needsUpdate, setNeedsUpdate] = useState(0);
@@ -78,27 +64,26 @@ const _GoodCanvas: _GoodCanvasType = (
   const firstRender = useRef(true);
 
   // Populate forwardedRef if not given (to be used internally).
-  forwardedRef = forwardedRef || canvasRef;
+  ref = ref || canvasRef;
+
+  // Verify the ref passed is not a custom functional ref.
+  if (!isValidGoodCanvas(canvasRef)) {
+    // Not reached
+    throw Error();
+  }
 
   // Populate default props.
-  const mergedProps = defaultProps.mergeDeep(props);
-  const {
-    style,
-    showWarnings,
-    timeout,
-    blur,
-    notify,
-  }: DefaultPropsType = mergedProps.toJS();
-  const children = props.children;
+  const { blur, children } = props;
+  const { style, showWarnings, timeout, notify } = mergedProps;
 
   // Toggle warnings.
   const warn = showWarnings ? console.warn : ignore;
 
   // Scale the canvas resolution.
-  useImmLayoutEffect(
+  useImm(useLayoutEffect)(
     () => {
       const container = containerRef.current!;
-      const { canvas, ctx } = getContext(forwardedRef);
+      const { canvas, ctx } = getContext(ref);
       const computeStyle = (property: string) =>
         parseFloat(
           window.getComputedStyle(container).getPropertyValue(property)
@@ -139,12 +124,12 @@ const _GoodCanvas: _GoodCanvasType = (
       // Notify parents
       if (!firstRender.current && notify) notify();
     },
-    [needsUpdate, mergedProps.get('style')]
+    [needsUpdate, style]
   );
 
   // Attach setNeedsUpdate to canvas DOM element.
   useLayoutEffect(() => {
-    const { canvas } = getContext(forwardedRef);
+    const { canvas } = getContext(ref);
     canvas.setNeedsUpdate = setNeedsUpdate;
   }, []);
 
@@ -163,7 +148,7 @@ const _GoodCanvas: _GoodCanvasType = (
   );
 
   // Warn about re-scale when styles change.
-  useImmEffect(
+  useImm(useEffect)(
     () => {
       if (firstRender.current) {
         return;
@@ -172,7 +157,7 @@ const _GoodCanvas: _GoodCanvasType = (
         'GoodCanvas is rescaling because the `style` prop changed. If this is happening often, there could be a negative performance impact.'
       );
     },
-    [mergedProps.get('style')]
+    [style]
   );
 
   // Mark first render cycle complete.
@@ -202,19 +187,20 @@ const _GoodCanvas: _GoodCanvasType = (
             padding: 0,
             border: 'none',
           }}
-          ref={forwardedRef}
+          ref={ref}
         >
           {// Attach GoodCanvasChildPropsType props to children subtree.
           propagateProps<ChildPropsNS.PropsType>(children, child => {
             const {
               canvasStyle,
               canvasEffects,
-            }: ChildPropsNS.DefaultPropsType = ChildPropsNS.defaultProps
-              .mergeDeep(child.props)
-              .toJS();
+            }: ChildPropsNS.DefaultPropsType = withImm.mergeDeep(
+              ChildPropsNS.defaultProps,
+              child.props
+            );
 
             return {
-              canvasRef: forwardedRef,
+              canvasRef: ref as React.RefObject<GoodCanvasElement>,
               canvasNeedsUpdate: needsUpdate,
               canvasStyle,
               canvasEffects,
@@ -226,7 +212,7 @@ const _GoodCanvas: _GoodCanvasType = (
   );
 };
 
-const GoodCanvas = React.forwardRef(_GoodCanvas);
-GoodCanvas.displayName = 'GoodCanvas';
-GoodCanvas.defaultProps = defaultProps.toJS();
-export default GoodCanvas;
+const _GoodCanvas = React.forwardRef(
+  withImm.bind(defaultProps)<Props, GoodCanvasElement>(GoodCanvas)
+);
+export default _GoodCanvas;

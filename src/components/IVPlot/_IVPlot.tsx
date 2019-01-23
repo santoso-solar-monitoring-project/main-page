@@ -7,22 +7,14 @@ import React, {
 } from 'react';
 import * as d3 from 'd3';
 import Imm, { ImmMapType } from 'utils/Imm';
-import {
-  GoodCanvasElement,
-  ChildProps,
-  Animatable,
-} from 'components/GoodCanvas';
+import { GoodCanvasElement, ChildProps } from 'components/GoodCanvas';
+import * as Animatable from 'components/Animatable';
 import { getContext, EnhancedContext } from 'utils/canvas';
 import Points from 'components/Points';
 import Line from 'components/Line';
 import { PairType } from 'utils/Pair';
 import { useCounter, useDataBufferSilent } from 'utils/CustomHooks';
-
-const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
-const [lo, hi] = [Math.min(...CURRENT), Math.max(...CURRENT)];
-const generate = (): PairType => [Date.now(), Math.random() * (hi - lo) + lo];
-
-const initialValue = CURRENT.map((v, i): PairType => [i * 500, v]);
+import { useBigBuffer } from './useBigBuffer';
 
 export interface PropsType extends ChildProps.PropsType {
   // [STEP 5] prop types...,
@@ -38,121 +30,19 @@ export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
 type _IVPlotType = React.FunctionComponent<DefaultPropsType>;
 
 const _IVPlot: _IVPlotType = props => {
-  // subscribe to data
-  const [buffer, concatToBuffer] = useDataBufferSilent<PairType>({
-    maxSize: 10000,
-    // initialValue,
-  });
   // TODO: interpolate this value:
   const samplePeriod = useRef(500); // milliseconds
-  useEffect(() => {
-    const updateData = () => {
-      concatToBuffer([generate()]);
-      setTimeout(updateData, 250 + Math.random() * 500);
-    };
-    updateData();
-  }, []);
+  const buffer = useBigBuffer({ samplePeriod, maxSize: 10000 });
 
-  const {
-    canvasRef,
-    canvasStyle,
-    canvasEffects,
-    canvasNeedsUpdate,
-  }: DefaultPropsType = props;
+  const { canvasRef } = props;
+  const [loop, subscribe] = Animatable.useAnimationLoop(canvasRef!);
 
-  // initialize axes scales
-  const scaleX = useMemo(() => d3.scaleLinear(), []);
-  const scaleY = useMemo(() => d3.scaleLinear(), []);
-  useEffect(
-    () => {
-      const { canvas } = getContext(canvasRef!);
-      scaleX.range([0, canvas.dims.width]);
-      scaleY.range([0, canvas.dims.height]);
-    },
-    [canvasNeedsUpdate]
-  );
-
-  // transform view selection of buffer for output
   const output = useRef<PairType[]>([]);
-  // TODO: calculate based on canvas width
   const timespan = useRef(7000); // milliseconds
   const seekEnd = useRef((now: number) => now); // milliseconds
   // const seekEnd = useRef((t: number) => 500 * (CURRENT.length - 1)); // milliseconds
-  const bisector = useMemo(() => d3.bisector((d: PairType) => d[0]), []);
-
-  const transform = useCallback<Animatable.FuncType>(
-    () => {
-      // Set end time and x-axis scaling.
-      const end = seekEnd.current(Date.now());
-      const start = end - timespan.current;
-      const pad = 1500;
-      scaleX.domain([start + pad, end - pad]);
-
-      // Get current view of buffer
-      const searchFrom = Math.max(
-        0,
-        Math.ceil(
-          buffer.length - (1.5 * timespan.current) / samplePeriod.current
-        )
-      );
-      const left = bisector.left(buffer, start, searchFrom);
-      const view: PairType[] = buffer.slice(left);
-
-      // Set y-axis scaling for view
-      // scaleY.domain(d3.extent(view, d => d[1]) as PairType);
-      scaleY.domain([lo, hi] as PairType);
-
-      // output view in scaled (canvas) coordinates
-      output.current = view.map(([x, y]): PairType => [scaleX(x), scaleY(y)]);
-      // console.log('DATA TRANSFORM ANIMATE', output.current);
-    },
-    [seekEnd.current, timespan]
-  );
 
   // TODO: figure out how to abstract this animation stuff to be a reusable hook
-  const [animationLoop, concatToAnimationLoop] = useDataBufferSilent<{
-    animate?: Animatable.FuncType;
-  }>();
-
-  const subscribe: Animatable.PropsType['subscribe'] = useCallback(animate => {
-    console.log('subscribed');
-    const animation = { animate };
-    concatToAnimationLoop([animation]);
-    return () => {
-      console.log('deleting');
-      delete animation.animate;
-    };
-  }, []);
-
-  useEffect(() => {
-    const { canvas, ctx } = getContext(canvasRef!);
-    let id: number;
-    let last = performance.now();
-    const globalLoop = (now: number) => {
-      const args = { canvas, ctx, delta: now - last };
-      const dead: number[] = [];
-      // console.log('globalLoop running...', animationLoop.length);
-      animationLoop.forEach(({ animate }, i) => {
-        if (animate) {
-          ctx.save();
-          animate(args);
-          ctx.restore();
-        } else {
-          console.log('finalizing delete...');
-          dead.push(i);
-        }
-      });
-      // subtract j because j elements before have already been removed...
-      dead.forEach((x, j) => animationLoop.removeOne(x - j));
-      last = now;
-      id = requestAnimationFrame(globalLoop);
-      // id = window.setTimeout(globalLoop, 1000);
-    };
-    id = requestAnimationFrame(globalLoop);
-    // id = window.setTimeout(globalLoop, 1000);
-    return () => cancelAnimationFrame(id);
-    // return () => window.clearTimeout(id);
-  }, []);
 
   /* 
     TODO: Refactor all of these below into separate components.

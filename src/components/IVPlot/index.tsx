@@ -1,7 +1,7 @@
 import React from 'react';
 import Imm, { ImmMapType } from 'utils/Imm';
 import GoodCanvas from 'components/GoodCanvas';
-import { BasePropsType } from 'utils/BaseProps';
+import { BaseProps } from 'utils/BaseProps';
 import _IVPlot from './_IVPlot';
 
 /* interface ModeType {
@@ -30,7 +30,7 @@ export const lightMode: ModeType = {
   },
 }; */
 
-export interface PropsType extends BasePropsType {}
+export interface PropsType extends BaseProps {}
 
 export type DefaultPropsType = Partial<PropsType>;
 export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;

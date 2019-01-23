@@ -5,7 +5,7 @@ import { linkTo } from '@storybook/addon-links';
 import { Button, Welcome } from '@storybook/react/demo';
 import { withKnobs, select, number } from '@storybook/addon-knobs';
 
-import IVPlot from 'components/IVPlot';
+// import IVPlot from 'components/IVPlot';
 import CornersTest from 'components/CornersTest';
 
 // storiesOf('Welcome', module).add('to Storybook', () => (
@@ -24,9 +24,9 @@ import CornersTest from 'components/CornersTest';
 //     </Button>
 //   ));
 
-storiesOf('IV Plot', module).add('play', () => {
-  return <IVPlot />;
-});
+// storiesOf('IV Plot', module).add('play', () => {
+// return <IVPlot />;
+// });
 
 storiesOf('GoodCanvas', module)
   .addDecorator(withKnobs)
@@ -39,9 +39,16 @@ storiesOf('GoodCanvas', module)
       },
       'content-box'
     );
-    const borderWidth = number('borderWidth', 20, {
+    const borderWidth = number('Border width', 20, {
       range: true,
       min: 0,
+      max: 100,
+      step: 1,
+    });
+
+    const radius = number('Circle radius', 5, {
+      range: true,
+      min: 5,
       max: 100,
       step: 1,
     });
@@ -52,6 +59,7 @@ storiesOf('GoodCanvas', module)
           border: `${borderWidth}px solid red`,
           boxSizing,
         }}
+        radius={radius}
       />
     );
   });

@@ -20,7 +20,10 @@ export function useDataBufferSilent<T = number, U extends Array<T> = T[]>(
   const { initialValue, maxSize }: DefaultArgsType<T> = defaultArgs
     .mergeDeep(args)
     .toJS();
-  const buffer = useMemo(() => new Denque<T>(initialValue!), []);
+  const buffer = useMemo(
+    () => (initialValue ? new Denque<T>(initialValue) : new Denque<T>()),
+    []
+  );
   const updateBuffer = useCallback((newData: U) => {
     buffer.splice(buffer.length, 0, ...newData);
     if (buffer.length > maxSize!) {

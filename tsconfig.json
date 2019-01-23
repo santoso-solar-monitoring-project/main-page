@@ -1,16 +1,14 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -19,8 +17,6 @@
     "noEmit": true,
     "jsx": "preserve"
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "extends": "./tsconfig.absolute_paths_workaround.json"
 }

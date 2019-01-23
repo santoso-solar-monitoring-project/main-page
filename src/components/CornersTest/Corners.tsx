@@ -1,58 +1,52 @@
-import React from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
-import { useImmEffect } from 'utils/CustomHooks';
+import { useEffect } from 'react';
 import { getContext } from 'utils/canvas';
 import { ChildProps } from 'components/GoodCanvas';
+import { withImm } from 'utils/Imm';
 
-export interface PropsType extends ChildProps.PropsType {}
+export interface Props extends ChildProps.PropsType {
+  radius?: number;
+}
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
+export const defaultProps = {
+  radius: 100,
+};
 
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({});
+const Corners: withImm.FC<Props, typeof defaultProps> = (
+  props,
+  mergedProps
+) => {
+  useEffect(() => {
+    const { canvasRef, canvasStyle, canvasEffects } = props;
+    const { radius } = mergedProps;
+    const { canvas, ctx } = getContext(canvasRef!);
+    const { width, height } = canvas.dims;
 
-type CornersType = React.FunctionComponent<DefaultPropsType>;
+    ctx.clearRect(0, 0, width, height);
+    ctx.save();
+    Object.assign(ctx, canvasStyle);
+    if (canvasEffects) canvasEffects(ctx);
 
-const Corners: CornersType = (props: DefaultPropsType) => {
-  // merge props
-  const mergedProps = defaultProps.mergeDeep(props);
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(radius, radius, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.arc(width - radius, radius, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'green';
+    ctx.beginPath();
+    ctx.arc(width - radius, height - radius, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'magenta';
+    ctx.beginPath();
+    ctx.arc(radius, height - radius, radius, 0, 2 * Math.PI);
+    ctx.fill();
 
-  useImmEffect(
-    () => {
-      // unpack props
-      const {
-        canvasRef,
-        canvasStyle,
-        canvasEffects,
-      }: DefaultPropsType = mergedProps.toJS();
-      const { canvas, ctx } = getContext(canvasRef!);
-      ctx.save();
-      Object.assign(ctx, canvasStyle);
-      if (canvasEffects) canvasEffects(ctx);
-      const dims = canvas.dims;
-      ctx.fillStyle = 'red';
-      ctx.beginPath();
-      ctx.arc(5, 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.fillStyle = 'blue';
-      ctx.beginPath();
-      ctx.arc(dims.width - 5, 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.fillStyle = 'green';
-      ctx.beginPath();
-      ctx.arc(dims.width - 5, dims.height - 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.fillStyle = 'magenta';
-      ctx.beginPath();
-      ctx.arc(5, dims.height - 5, 5, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.restore();
-    },
-    [mergedProps]
-  );
+    ctx.restore();
+  });
 
   return null;
 };
 
-Corners.defaultProps = defaultProps.toJS();
-export default Corners;
+export default withImm.bind(defaultProps)(Corners);

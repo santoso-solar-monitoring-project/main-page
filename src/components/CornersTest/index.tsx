@@ -1,17 +1,12 @@
 import React from 'react';
 import GoodCanvas from 'components/GoodCanvas';
-import Corners from './Corners';
-import { BasePropsType } from 'utils/BaseProps';
+import Corners, * as CornersNS from './Corners';
 
-export interface PropsType extends BasePropsType {}
-
-type CornersTestType = React.FunctionComponent<PropsType>;
-
-const CornersTest: CornersTestType = (props: PropsType) => {
+const CornersTest = (props: CornersNS.Props) => {
+  const { style, radius } = props;
   return (
-    <GoodCanvas {...props} showWarnings={true}>
-      {/* Corners will get a reference to the canvas automatically. */}
-      <Corners />
+    <GoodCanvas style={style} showWarnings={true}>
+      <Corners radius={radius} />
     </GoodCanvas>
   );
 };
