@@ -1,23 +1,29 @@
 // Re-export DOMElement.*
-import * as DOMElementNS from './_GoodCanvasElement';
-export type GoodCanvasElement = DOMElementNS.GoodCanvasElement;
-export { DOMElementNS as GoodCanvasElementNS };
+import * as GoodCanvasElementNS from './GoodCanvasElement';
+export type GoodCanvasElement = GoodCanvasElementNS.GoodCanvasElement;
+export { GoodCanvasElementNS };
 
 // Re-export ChildProps.*
-import * as ChildPropsNS from './_ChildProps';
-export { ChildPropsNS as ChildProps };
+import * as GoodCanvasChildNS from './GoodCanvasChild';
+export { GoodCanvasChildNS as GoodCanvasChild };
 
-import React, { useLayoutEffect, useRef, useEffect, useState } from 'react';
+import React, {
+  useLayoutEffect,
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+} from 'react';
 import { scaleCanvas, getContext } from 'utils/canvas';
 import { optimizedResize } from 'utils/throttleEvent';
-import { useImm, useThrottled } from 'utils/CustomHooks';
+import { useThrottled } from 'utils/CustomHooks';
 import { propagateProps } from 'utils/propagateProps';
 import ignore from 'utils/ignore';
 import { BaseProps } from 'utils/BaseProps';
 import Blur, * as BlurNS from 'components/Blur';
 import noop from 'utils/noop';
-import { withImm } from 'utils/Imm';
-import { isValidGoodCanvas } from 'utils/canvas/isValidGoodCanvas';
+import { useImm, withImm } from 'utils/Imm';
+import isValidRefObject from 'utils/isValidRefObject';
 
 export interface Props extends BaseProps {
   showWarnings?: boolean;
@@ -33,7 +39,7 @@ export const defaultProps = {
     width: '300px',
     height: '150px',
     boxSizing: 'content-box',
-  } as React.CSSProperties,
+  } as Props['style'],
   showWarnings: false,
   timeout: 250,
   notify: noop,
@@ -52,9 +58,8 @@ export const defaultProps = {
   
   To toggle warnings use the `showWarnings` boolean prop.
 */
-const GoodCanvas: withImm.RFC<Props, GoodCanvasElement> = (
+const GoodCanvas: React.RefForwardingComponent<GoodCanvasElement, Props> = (
   props,
-  mergedProps,
   ref
 ) => {
   // stateful variables
@@ -67,14 +72,17 @@ const GoodCanvas: withImm.RFC<Props, GoodCanvasElement> = (
   ref = ref || canvasRef;
 
   // Verify the ref passed is not a custom functional ref.
-  if (!isValidGoodCanvas(canvasRef)) {
+  if (!isValidRefObject(canvasRef)) {
     // Not reached
     throw Error();
   }
 
   // Populate default props.
   const { blur, children } = props;
-  const { style, showWarnings, timeout, notify } = mergedProps;
+  const { style, showWarnings, timeout, notify } = withImm.merge(
+    defaultProps,
+    props
+  );
 
   // Toggle warnings.
   const warn = showWarnings ? console.warn : ignore;
@@ -94,7 +102,7 @@ const GoodCanvas: withImm.RFC<Props, GoodCanvasElement> = (
       // Subtract padding and border.
       if (container.style.boxSizing == 'border-box') {
         // Get padding and border offsets for one direction.
-        const getTotalOffset = (container: HTMLElement, direction: string) => {
+        const getTotalOffset = (direction: string) => {
           return (
             computeStyle(`border-${direction}-width`) +
             computeStyle(`padding-${direction}`)
@@ -102,14 +110,10 @@ const GoodCanvas: withImm.RFC<Props, GoodCanvasElement> = (
         };
 
         // Subtract horizontal offset.
-        width -=
-          getTotalOffset(container, 'left') +
-          getTotalOffset(container, 'right');
+        width -= getTotalOffset('left') + getTotalOffset('right');
 
         // Subtract vertical offset.
-        height -=
-          getTotalOffset(container, 'top') +
-          getTotalOffset(container, 'bottom');
+        height -= getTotalOffset('top') + getTotalOffset('bottom');
       }
 
       // Hard work happens here.
@@ -175,6 +179,26 @@ const GoodCanvas: withImm.RFC<Props, GoodCanvasElement> = (
 
   warn('GoodCanvas RENDER');
 
+  // Attach GoodCanvasChildPropsType props to children subtree.
+  const decoratedChildren = useImm(useMemo)(
+    () => {
+      return propagateProps<GoodCanvasChildNS.Props>(children, child => {
+        const { canvasStyle, canvasEffects } = withImm.mergeDeep(
+          GoodCanvasChildNS.defaultProps,
+          child.props
+        );
+
+        return {
+          canvasRef: ref as React.RefObject<GoodCanvasElement>,
+          canvasNeedsUpdate: needsUpdate,
+          canvasStyle,
+          canvasEffects,
+        };
+      });
+    },
+    [needsUpdate, children, ref]
+  );
+
   return (
     <div style={style} ref={containerRef}>
       <Blur style={{ width: '100%', height: '100%' }} {...blur}>
@@ -189,30 +213,11 @@ const GoodCanvas: withImm.RFC<Props, GoodCanvasElement> = (
           }}
           ref={ref}
         >
-          {// Attach GoodCanvasChildPropsType props to children subtree.
-          propagateProps<ChildPropsNS.PropsType>(children, child => {
-            const {
-              canvasStyle,
-              canvasEffects,
-            }: ChildPropsNS.DefaultPropsType = withImm.mergeDeep(
-              ChildPropsNS.defaultProps,
-              child.props
-            );
-
-            return {
-              canvasRef: ref as React.RefObject<GoodCanvasElement>,
-              canvasNeedsUpdate: needsUpdate,
-              canvasStyle,
-              canvasEffects,
-            };
-          })}
+          {decoratedChildren}
         </canvas>
       </Blur>
     </div>
   );
 };
 
-const _GoodCanvas = React.forwardRef(
-  withImm.bind(defaultProps)<Props, GoodCanvasElement>(GoodCanvas)
-);
-export default _GoodCanvas;
+export default React.forwardRef(GoodCanvas);

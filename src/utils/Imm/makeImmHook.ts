@@ -1,21 +1,37 @@
 import React from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
+import { ImmMapType, fromJS } from 'utils/Imm';
 import { useMemoRef } from 'utils/CustomHooks';
 
+type Callable = (...args: any[]) => any;
+
+type UseCallBackCase<
+  T,
+  X extends Callable,
+  Else = never
+> = T extends typeof React.useCallback ? X : Else;
+
+type UseEffectCase<
+  T,
+  X extends Callable,
+  Else = never
+> = T extends typeof React.useEffect ? void : Else;
+
+type UseMemoCase<T, X extends Callable, Else = never> = X extends () => any
+  ? ReturnType<X>
+  : Else;
+
 export function makeImmHook<
-  T extends (arg: any, inputs: React.InputIdentityList) => any,
-  U = Parameters<T>[0]
+  T extends (arg: any, inputs: React.InputIdentityList) => any
 >(hook: T) {
-  function ImmHook<V extends U>(
-    arg: V,
+  function ImmHook<X extends Callable>(
+    arg: X,
     inputs: React.InputIdentityList
-  ): V extends (...args: any[]) => infer R ? R : ReturnType<T> {
-    const savedInputs = useMemoRef<ImmMapType>(() =>
-      Imm.fromJS(inputs).toMap()
+  ): UseCallBackCase<T, X, UseEffectCase<T, X, UseMemoCase<T, X>>> {
+    const savedInputs = useMemoRef<ImmMapType>(
+      () => fromJS(inputs).toMap(),
+      []
     );
-    savedInputs.current = savedInputs.current.mergeDeep(
-      Imm.fromJS(inputs).toMap()
-    );
+    savedInputs.current = savedInputs.current.mergeDeep(fromJS(inputs).toMap());
     return hook(arg, [savedInputs.current]);
   }
 
@@ -23,6 +39,10 @@ export function makeImmHook<
 }
 
 // Test case (hover/uncomment to see types):
-const aaaa = makeImmHook(React.useMemo);
-const bbbb = aaaa(() => 3, []); // number
-// const cccc = aaaa(3, []); // [ts] Argument of type '3' is not assignable to parameter of type '() => {}'. [2345]
+// const aaaa = makeImmHook(React.useCallback);
+// const bbbb = aaaa(() => 3, []);
+// const cccc = makeImmHook(React.useEffect);
+// const dddd = cccc(() => 3, []); // number
+// const eeee = makeImmHook(React.useMemo);
+// const ffff = eeee(() => 3, []); // number
+// const gggg = aaaa(3, []); // [ts] Argument of type '3' is not assignable to parameter of type '() => {}'. [2345]

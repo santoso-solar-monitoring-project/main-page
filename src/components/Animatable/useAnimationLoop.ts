@@ -7,12 +7,12 @@ import { useDataBufferSilent } from 'utils/CustomHooks';
 
 export function useAnimationLoop(
   canvasRef: React.RefObject<GoodCanvasElement>
-): [Denque<A.LoopItemType>, A.SubscribeType] {
+): [Denque<A.AnimationLoopItem>, A.Subscribe] {
   // Animation loop array
-  const [loop, concat] = useDataBufferSilent<A.LoopItemType>();
+  const [loop, concat] = useDataBufferSilent<A.AnimationLoopItem>();
 
   // Function to append elements to loop
-  const subscribe = useCallback<A.SubscribeType>(animate => {
+  const subscribe = useCallback<A.Subscribe>(animate => {
     const node = { animate };
     concat([node]);
     return () => {

@@ -1,37 +1,21 @@
 import React, { useEffect } from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
-import { CustomHookType } from '.';
+import { withImm } from 'utils/Imm';
 
-export interface ArgsType {
+export interface Args {
   event: string;
   first: () => void;
   last: () => void;
-  timeout: number;
+  timeout?: number;
 }
 
-export type DefaultArgsType = Partial<ArgsType>;
-export type ImmDefaultArgsType = ImmMapType<DefaultArgsType>;
-
-export const defaultArgs: ImmDefaultArgsType = Imm.fromJS({
-  first: () => {},
-  last: () => {},
+export const defaultArgs = {
   timeout: 250,
-});
+};
 
-type UseThrottledType = CustomHookType<DefaultArgsType>;
-
-export const useThrottled: UseThrottledType = (
-  args: DefaultArgsType,
-  inputs?: React.InputIdentityList
-) => {
+export function useThrottled(args: Args, inputs?: React.InputIdentityList) {
   useEffect(() => {
-    // unpack args
-    const {
-      event,
-      first,
-      last,
-      timeout,
-    }: DefaultArgsType = defaultArgs.mergeDeep(args).toJS();
+    const { event, first, last } = args;
+    const { timeout } = withImm.merge(defaultArgs, args);
     if (!event) return;
 
     let ongoing = false;
@@ -40,7 +24,7 @@ export const useThrottled: UseThrottledType = (
     const handler = () => {
       // first resize event
       if (!ongoing) {
-        first!();
+        if (first) first();
         ongoing = true;
       }
 
@@ -50,13 +34,11 @@ export const useThrottled: UseThrottledType = (
       // fulfill last response after timeout
       id = window.setTimeout(() => {
         ongoing = false;
-        last!();
+        if (last) last();
       }, timeout);
     };
 
     window.addEventListener(event, handler);
     return () => window.removeEventListener(event, handler);
   }, inputs);
-};
-
-useThrottled.defaultArgs = defaultArgs.toJS();
+}

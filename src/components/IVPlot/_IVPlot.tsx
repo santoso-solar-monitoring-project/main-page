@@ -1,43 +1,22 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from 'react';
-import * as d3 from 'd3';
-import Imm, { ImmMapType } from 'utils/Imm';
-import { GoodCanvasElement, ChildProps } from 'components/GoodCanvas';
-import * as Animatable from 'components/Animatable';
-import { getContext, EnhancedContext } from 'utils/canvas';
+import React, { useLayoutEffect, useRef } from 'react';
+import { GoodCanvasChild } from 'components/GoodCanvas';
+import * as Anim from 'components/Animatable';
 import Points from 'components/Points';
 import Line from 'components/Line';
-import { PairType } from 'utils/Pair';
-import { useCounter, useDataBufferSilent } from 'utils/CustomHooks';
+import { Pair } from 'utils/Pair';
 import { useBigBuffer } from './useBigBuffer';
 
-export interface PropsType extends ChildProps.PropsType {
-  // [STEP 5] prop types...,
-}
+export interface Props extends GoodCanvasChild.Props {}
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
-
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
-  // [STEP 6] default props...,
-});
-
-type _IVPlotType = React.FunctionComponent<DefaultPropsType>;
-
-const _IVPlot: _IVPlotType = props => {
+const _IVPlot: React.FunctionComponent<Props> = props => {
   // TODO: interpolate this value:
   const samplePeriod = useRef(500); // milliseconds
   const buffer = useBigBuffer({ samplePeriod, maxSize: 10000 });
 
   const { canvasRef } = props;
-  const [loop, subscribe] = Animatable.useAnimationLoop(canvasRef!);
+  const [loop, subscribe] = Anim.useAnimationLoop(canvasRef!);
 
-  const output = useRef<PairType[]>([]);
+  const output = useRef<Pair[]>([]);
   const timespan = useRef(7000); // milliseconds
   const seekEnd = useRef((now: number) => now); // milliseconds
   // const seekEnd = useRef((t: number) => 500 * (CURRENT.length - 1)); // milliseconds
@@ -48,7 +27,7 @@ const _IVPlot: _IVPlotType = props => {
     TODO: Refactor all of these below into separate components.
   */
   useLayoutEffect(() => {
-    const clear: Animatable.FuncType = ({ canvas, ctx }) => {
+    const clear: Anim.Animate = ({ canvas, ctx }) => {
       ctx.fillRect(0, 0, canvas!.dims.width, canvas!.dims.height);
     };
     console.log('_IVPLOT USELAYOUTEFFECT 1');
@@ -76,7 +55,7 @@ const _IVPlot: _IVPlotType = props => {
     let fps = 1;
     const FPS_THRESHOLD = 200; // (ms) ~ 5fps
     const FPS_LOW_THRESHOLD = 10; // (ms) ~ 100fps
-    const setFPS: Animatable.FuncType = ({ canvas, ctx, delta }) => {
+    const setFPS: Anim.Animate = ({ canvas, ctx, delta }) => {
       const DECAY = getIIRDecay(1 / 4, delta / 1000);
       console.assert(isFinite(delta), '1');
       console.assert(isFinite(DECAY), '2');
@@ -108,5 +87,4 @@ const _IVPlot: _IVPlotType = props => {
   );
 };
 
-_IVPlot.defaultProps = defaultProps.toJS();
 export default _IVPlot;

@@ -1,26 +1,22 @@
 import React, { useEffect } from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
-import { getContext } from 'utils/canvas';
-import { ChildProps } from 'components/GoodCanvas';
-import * as Animatable from 'components/Animatable';
-import { PairType } from 'utils/Pair';
+import { withImm } from 'utils/Imm';
+import { GoodCanvasChild } from 'components/GoodCanvas';
+import * as Anim from 'components/Animatable';
+import { Pair } from 'utils/Pair';
 
-interface PropsType extends ChildProps.PropsType, Animatable.PropsType {
-  data: React.RefObject<PairType[]>;
+export interface Props extends GoodCanvasChild.Props, Anim.Props {
+  data: React.RefObject<Pair[]>;
   radius: number;
 }
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
-
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
+export const defaultProps = {
   radius: 3,
   canvasStyle: {
     fillStyle: 'hsl(330, 100%, 75%)',
     strokeStyle: 'hsl(330, 100%, 50%)',
     lineWidth: 0.5,
   },
-});
+};
 
 /* 
 {
@@ -32,25 +28,14 @@ export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
   color: 'hsl(330, 100%, 50%)',
 }
 */
-type PointsType = React.FunctionComponent<DefaultPropsType>;
-
-const Points: PointsType = props => {
-  // merge props
-  const mergedProps = defaultProps.mergeDeep(props);
-
+const Points: React.FunctionComponent<Props> = props => {
   useEffect(() => {
     // unpack props
-    const {
-      // data,
-      radius,
-      subscribe,
-      canvasStyle,
-      canvasEffects,
-    }: DefaultPropsType = mergedProps.toJS();
-    const { data } = props;
+    const { radius, canvasStyle } = withImm.merge(defaultProps, props);
+    const { data, subscribe, canvasEffects } = props;
 
     console.log('Points USEEFFECT');
-    const animate: Animatable.FuncType = ({ ctx }) => {
+    const animate: Anim.Animate = ({ ctx }) => {
       // console.log('Points ANIMATE', data!.current);
       Object.assign(ctx, canvasStyle);
       if (canvasEffects) canvasEffects(ctx);
@@ -68,5 +53,4 @@ const Points: PointsType = props => {
   return null;
 };
 
-Points.defaultProps = defaultProps.toJS();
 export default Points;

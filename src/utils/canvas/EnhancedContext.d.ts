@@ -1,4 +1,4 @@
-export interface _EnhancedContext extends CanvasRenderingContext2D {
+export interface EnhancedContext extends CanvasRenderingContext2D {
   currentTransform: DOMMatrix;
   savedTransforms: DOMMatrix[];
   _setMatrix(): void;

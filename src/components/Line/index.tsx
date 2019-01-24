@@ -1,50 +1,37 @@
 import React, { useMemo, useEffect } from 'react';
 import * as d3 from 'd3';
-import Imm, { ImmMapType } from 'utils/Imm';
-import { getContext } from 'utils/canvas';
-import { ChildProps } from 'components/GoodCanvas';
-import * as Animatable from 'components/Animatable';
-import { PairType } from 'utils/Pair';
+import { withImm } from 'utils/Imm';
+import { GoodCanvasChild } from 'components/GoodCanvas';
+import * as Anim from 'components/Animatable';
+import { Pair } from 'utils/Pair';
 import evaluate from 'utils/evaluate';
 
-export interface PropsType extends ChildProps.PropsType, Animatable.PropsType {
-  data: React.RefObject<PairType[]>;
-  line: d3.Line<PairType>;
+export interface Props extends GoodCanvasChild.Props, Anim.Props {
+  data: React.RefObject<Pair[]>;
+  line?: d3.Line<Pair>;
 }
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
-
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
+export const defaultProps = {
   // alpha = 0.5 gives centripetal CatmullRom
   line: 'd3.line().curve(d3.curveCatmullRom.alpha(0.5))',
   canvasStyle: {
     lineWidth: 1,
     strokeStyle: 'hsl(330, 100%, 67%)',
   },
-});
+};
 
-type LineType = React.FunctionComponent<DefaultPropsType>;
-
-const Line: LineType = (props: DefaultPropsType) => {
-  // merge props
-  const mergedProps = defaultProps.mergeDeep(props);
-  const theLine = mergedProps.get('line');
+const Line: React.FunctionComponent<Props> = props => {
+  const { line: theLine, canvasStyle } = withImm.merge(defaultProps, props);
   const line = useMemo(
     () => (typeof theLine === 'string' ? evaluate(theLine, { d3 }) : theLine),
     [theLine]
   );
 
   useEffect(() => {
-    const {
-      subscribe,
-      canvasStyle,
-      canvasEffects,
-    }: DefaultPropsType = mergedProps.toJS();
-    const { data } = props;
+    const { data, subscribe, canvasEffects } = props;
 
     console.log('Line USEEFFECT');
-    const animate: Animatable.FuncType = ({ ctx }) => {
+    const animate: Anim.Animate = ({ ctx }) => {
       // console.log('Line ANIMATE', data!.current);
       // attach context to line
       line.context(ctx);
@@ -61,5 +48,4 @@ const Line: LineType = (props: DefaultPropsType) => {
   return null;
 };
 
-Line.defaultProps = defaultProps.toJS();
 export default Line;

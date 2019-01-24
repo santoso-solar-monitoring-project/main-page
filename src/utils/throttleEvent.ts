@@ -1,28 +1,19 @@
-import Imm, { ImmMapType } from 'utils/Imm';
-import { DefaultArgsFunction } from './DefaultArgsFunction';
+import { withImm } from 'utils/Imm';
 
-export interface ArgsType {
+export interface Args {
   event: string;
   customEvent: string;
-  _window: typeof window;
+  _window?: typeof window;
 }
 
-export type DefaultArgsType = Partial<ArgsType>;
-export type ImmDefaultArgsType = ImmMapType<DefaultArgsType>;
-
-export const defaultArgs: ImmDefaultArgsType = Imm.fromJS({
+export const defaultArgs = {
   _window: window,
-});
+};
 
-type ThrottleType = DefaultArgsFunction<DefaultArgsType, () => void>;
-
-const throttle: ThrottleType = (args: DefaultArgsType) => {
+const throttle = (args: Args) => {
   // unpack args
-  const {
-    event,
-    customEvent,
-    _window,
-  }: DefaultArgsType = defaultArgs.mergeDeep(args).toJS();
+  const { _window } = withImm.merge(defaultArgs, args);
+  const { event, customEvent } = args;
 
   if (!event) throw Error('`event` should not be blank');
   if (!customEvent) throw Error('`customEvent` should not be blank');
@@ -50,8 +41,6 @@ const throttle: ThrottleType = (args: DefaultArgsType) => {
 
   return cleanup;
 };
-
-throttle.defaultArgs = defaultArgs.toJS();
 
 export const optimizedResize = 'optimized-resize';
 throttle({ event: 'resize', customEvent: optimizedResize });

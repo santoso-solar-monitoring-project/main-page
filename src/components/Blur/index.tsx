@@ -17,12 +17,11 @@ export const defaultProps = {
   radius: 5,
   timeout: 250,
   enabled: true,
-  style: { filter: '' } as React.CSSProperties,
+  style: { filter: '' } as Props['style'],
 };
 
-const Blur: withImm.RFC<Props, HTMLDivElement, typeof defaultProps> = (
+const Blur: React.RefForwardingComponent<HTMLDivElement, Props> = (
   props,
-  mergedProps,
   ref
 ) => {
   // stateful variables
@@ -30,7 +29,10 @@ const Blur: withImm.RFC<Props, HTMLDivElement, typeof defaultProps> = (
 
   // unpack props
   const { children } = props;
-  const { style, radius, timeout, enabled } = mergedProps;
+  const { style, radius, timeout, enabled } = withImm.merge(
+    defaultProps,
+    props
+  );
 
   // attach handler to blur on window resize
   useThrottled(
@@ -55,4 +57,4 @@ const Blur: withImm.RFC<Props, HTMLDivElement, typeof defaultProps> = (
   );
 };
 
-const _Blur = React.forwardRef(withImm.bind(defaultProps)(Blur));
+export default React.forwardRef(Blur);

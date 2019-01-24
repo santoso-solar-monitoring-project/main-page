@@ -1,5 +1,5 @@
 import React from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
+import { withImm } from 'utils/Imm';
 import GoodCanvas from 'components/GoodCanvas';
 import { BaseProps } from 'utils/BaseProps';
 import _IVPlot from './_IVPlot';
@@ -30,12 +30,9 @@ export const lightMode: ModeType = {
   },
 }; */
 
-export interface PropsType extends BaseProps {}
+export interface Props extends BaseProps {}
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
-
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
+export const defaultProps = {
   style: {
     width: '100%',
     height: '300px',
@@ -43,13 +40,11 @@ export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
     // border: '10px solid blue',
     backgroundColor: 'black',
   },
-});
+};
 
-type IVPlotType = React.FunctionComponent<DefaultPropsType>;
-
-const IVPlot: IVPlotType = props => {
+const IVPlot: React.FunctionComponent<Props> = props => {
   // unpack props
-  const { style }: DefaultPropsType = defaultProps.mergeDeep(props).toJS();
+  const { style } = withImm.merge(defaultProps, props);
 
   return (
     <GoodCanvas style={style} showWarnings={true}>
@@ -58,7 +53,6 @@ const IVPlot: IVPlotType = props => {
   );
 };
 
-IVPlot.defaultProps = defaultProps.toJS();
 export default IVPlot;
 
 /* 

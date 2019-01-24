@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { getContext } from 'utils/canvas';
-import { ChildProps } from 'components/GoodCanvas';
+import { GoodCanvasChild } from 'components/GoodCanvas';
 import { withImm } from 'utils/Imm';
 
-export interface Props extends ChildProps.PropsType {
+export interface Props extends GoodCanvasChild.Props {
   radius?: number;
 }
 
@@ -11,13 +11,10 @@ export const defaultProps = {
   radius: 100,
 };
 
-const Corners: withImm.FC<Props, typeof defaultProps> = (
-  props,
-  mergedProps
-) => {
+const Corners: React.FunctionComponent<Props> = props => {
   useEffect(() => {
     const { canvasRef, canvasStyle, canvasEffects } = props;
-    const { radius } = mergedProps;
+    const { radius } = withImm.merge(defaultProps, props);
     const { canvas, ctx } = getContext(canvasRef!);
     const { width, height } = canvas.dims;
 
@@ -49,4 +46,4 @@ const Corners: withImm.FC<Props, typeof defaultProps> = (
   return null;
 };
 
-export default withImm.bind(defaultProps)(Corners);
+export default Corners;

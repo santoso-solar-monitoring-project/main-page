@@ -1,25 +1,21 @@
 import { useMemo, useCallback } from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
+import { withImm } from 'utils/Imm';
 import Denque from 'denque';
 
-interface ArgsType<T> {
-  initialValue: T[];
-  maxSize: number;
+interface Args<T> {
+  initialValue?: T[];
+  maxSize?: number;
 }
 
-type DefaultArgsType<T> = Partial<ArgsType<T>>;
-type ImmDefaultArgsType<T> = ImmMapType<DefaultArgsType<T>>;
-
-const defaultArgs: ImmDefaultArgsType<any> = Imm.fromJS({
+const defaultArgs = {
   maxSize: Infinity,
-});
+};
 
 export function useDataBufferSilent<T = number, U extends Array<T> = T[]>(
-  args: DefaultArgsType<T> = {}
+  args: Args<T>
 ): [Denque<T>, (newData: U) => void] {
-  const { initialValue, maxSize }: DefaultArgsType<T> = defaultArgs
-    .mergeDeep(args)
-    .toJS();
+  const { initialValue } = args;
+  const { maxSize } = withImm.merge(defaultArgs, args);
   const buffer = useMemo(
     () => (initialValue ? new Denque<T>(initialValue) : new Denque<T>()),
     []

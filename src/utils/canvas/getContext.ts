@@ -1,16 +1,13 @@
 import React from 'react';
 import { GoodCanvasElement } from 'components/GoodCanvas';
 import { enhanceContext, EnhancedContext } from '.';
-import isValidRefObject from 'utils/isValidRefObject';
 import { isValidGoodCanvas } from './isValidGoodCanvas';
 
 type K = GoodCanvasElement;
 type V = { canvas: GoodCanvasElement; ctx: EnhancedContext };
 const cache = new Map<K, V>();
 
-export type ArgsType = React.Ref<GoodCanvasElement>;
-
-export function getContext(canvasRef: ArgsType) {
+export function getContext(canvasRef: React.Ref<GoodCanvasElement>) {
   // Throw on bad GoodCanvas
   if (!isValidGoodCanvas(canvasRef)) {
     // Not reached

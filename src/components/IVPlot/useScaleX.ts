@@ -1,25 +1,18 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
-import Imm, { ImmMapType } from 'utils/Imm';
-import { GoodCanvasElement, ChildProps } from 'components/GoodCanvas';
+import { GoodCanvasChild } from 'components/GoodCanvas';
 import * as Animatable from 'components/Animatable';
-import { getContext, EnhancedContext } from 'utils/canvas';
-import { PairType } from 'utils/Pair';
+import { getContext } from 'utils/canvas';
+import { Pair } from 'utils/Pair';
 
-export interface ArgsType extends ChildProps.OwnPropsType {
-  input: React.RefObject<PairType[]>;
+export interface Args extends GoodCanvasChild.OwnProps {
+  input: React.RefObject<Pair[]>;
   seekEnd: React.RefObject<(now: number) => number>;
   timespan: React.RefObject<number>;
-  output: React.MutableRefObject<PairType[]>;
+  output: React.MutableRefObject<Pair[]>;
 }
 
-export function useScaleX(args: ArgsType) {
+export function useScaleX(args: Args) {
   const { canvasRef, canvasNeedsUpdate } = args;
   const { input, seekEnd, timespan, output } = args;
 
@@ -36,9 +29,9 @@ export function useScaleX(args: ArgsType) {
   // transform view selection of input for output
   // TODO: calculate based on canvas width (maintain a given speed)
 
-  const bisector = useMemo(() => d3.bisector((d: PairType) => d[0]), []);
+  const bisector = useMemo(() => d3.bisector((d: Pair) => d[0]), []);
 
-  const animate = useCallback<Animatable.FuncType>(
+  const animate = useCallback<Animatable.Animate>(
     () => {
       // Set end time and x-axis scaling.
       const end = seekEnd.current!(Date.now());
@@ -55,7 +48,7 @@ export function useScaleX(args: ArgsType) {
         )
       );
       const left = bisector.left(input.current, start, searchFrom);
-      const view: PairType[] = input.current.slice(left);
+      const view: Pair[] = input.current.slice(left);
     },
     [seekEnd.current, timespan]
   );

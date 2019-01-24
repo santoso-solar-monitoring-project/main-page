@@ -1,5 +1,4 @@
 import React from 'react';
-import Imm, { ImmMapType } from 'utils/Imm';
 import { EnhancedContext } from 'utils/canvas';
 import { GoodCanvasElement } from '.';
 import { BaseProps } from 'utils/BaseProps';
@@ -7,7 +6,7 @@ import noop from 'utils/noop';
 import { Omit } from 'utils/meta';
 
 // Props automatically added to children of GoodCanvas.
-export interface PropsType extends BaseProps {
+export interface Props extends BaseProps {
   // Reference to internal canvas.
   canvasRef?: React.RefObject<GoodCanvasElement>;
   // Settings to be applied to the CanvasRenderingContext2D.
@@ -18,14 +17,10 @@ export interface PropsType extends BaseProps {
   canvasNeedsUpdate?: number;
 }
 
-export type OwnPropsType = Omit<PropsType, keyof BaseProps>;
+export type OwnProps = Omit<Props, keyof BaseProps>;
 
-export type DefaultPropsType = Partial<PropsType>;
-export type ImmDefaultPropsType = ImmMapType<DefaultPropsType>;
-
-export const defaultProps: ImmDefaultPropsType = Imm.fromJS({
-  canvasRef: null,
+export const defaultProps = {
   canvasStyle: {},
   canvasEffects: noop,
   canvasNeedsUpdate: 0,
-});
+};

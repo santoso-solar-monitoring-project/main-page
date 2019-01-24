@@ -1,19 +1,11 @@
-import React, {
-  FunctionComponent as FuncComp,
-  RefForwardingComponent as RefComp,
-} from 'react';
-import { ImmMapType, fromJS } from '.';
-import {
-  OptionalKeys,
-  Omit,
-  ArrayToIntersection,
-  OptionalOnly,
-} from 'utils/meta';
+import React from 'react';
+import { fromJS } from '.';
+import { ArrayToIntersection } from 'utils/meta';
 
 // Exclude RefObject-type and `children` props from `mergedProps`.
 export type DangerousProps<P> = NonNullable<
   {
-    [K in keyof P]: NonNullable<P[K]> extends React.RefObject<any>
+    [K in keyof P]-?: P[K] extends React.RefObject<any>
       ? K
       : K extends 'children'
       ? K
@@ -21,136 +13,76 @@ export type DangerousProps<P> = NonNullable<
   }[keyof P]
 >;
 
-export type MergedProps<P, D = P> =
-  // Pick<
-  // Required<D>,
-  // NonNullable<OptionalKeys<Omit<D, DangerousProps<D>>>>
-  // >;
-  // Omit<
-  //   OptionalOnly<P>,
-  //   NonNullable<DangerousProps<P> | Exclude<keyof P, keyof D>>
-  // >;
-  Omit<Required<P>, DangerousProps<P> | Exclude<keyof P, keyof D>>;
-
-// Functional component
-export interface FC<P, D = P> {
-  (props: P, mergedProps: MergedProps<P, D>): ReturnType<
-    React.FunctionComponent<P>
-  >;
+// Useful merger to ignore undefined
+// Another difference: The merged result excludes properties not originally present in `target`
+export function merger<V>(old: V, next: V) {
+  return next === undefined ? old : next;
 }
 
-// RefForwarding component
-export interface RFC<P, T, D = P> {
-  (
-    props: P,
-    mergedProps: MergedProps<P, D>,
-    ref: React.Ref<T> | null
-  ): ReturnType<React.RefForwardingComponent<T, P>>;
+export function defaultMerger<V>(_old: V, next: V) {
+  return next;
 }
 
-type SetOptionals<P, D> = Omit<P, keyof D> & Partial<D>;
-
-// Choose decorator overload
-class WithImm<D> {
-  constructor(private defaultProps: D) {}
-
-  // Typeguard to distinguish between component types
-  isFunc<P, T>(f: FC<P> | RFC<P, T>): f is FC<P> {
-    return typeof f === 'function' && f.length == 2;
-  }
-  isRefFunc<P, T>(f: FC<P> | RFC<P, T>): f is RFC<P, T> {
-    return typeof f === 'function' && f.length == 3;
-  }
-
-  // Don't merge `undefined` values (when explicitly set)
-  merger = <V>(oldValue: V, newValue: V) =>
-    newValue === undefined ? oldValue : newValue;
-
-  bind<P extends D>(f: FC<SetOptionals<P, D>>): FuncComp<SetOptionals<P, D>>;
-  bind<P extends Partial<D>, T>(f: RFC<P, T>): RefComp<T, P>;
-  bind<P extends Partial<D>, T>(
-    f: FC<P> | RFC<P, T>
-  ): FuncComp<P> | RefComp<T, P> {
-    // Save Immutable-converted version of defaultProps
-    const defaultPropsImm: ImmMapType<P> = mergeDeep(this.defaultProps, {});
-
-    if (this.isFunc<P, T>(f)) {
-      // Functional component
-      type SafeProps<P> = Omit<P, DangerousProps<P>>;
-      const decorated: React.FunctionComponent<P> = props => {
-        const mergedProps = mergeDeepWith(
-          this.merger,
-          // Save a tiny bit of work by reusing an Immutable object
-          (defaultPropsImm as any) as P,
-          props as SafeProps<P>
-        ) as MergedProps<P>;
-
-        return f(props, mergedProps);
-      };
-      decorated.displayName = f.name;
-
-      return decorated;
-    } else {
-      // RefForwarding component
-      type SafeProps<P> = Omit<P, DangerousProps<P>>;
-      const decorated: React.RefForwardingComponent<T, P> = (props, ref) => {
-        const mergedProps = mergeDeepWith(
-          this.merger,
-          // Save a tiny bit of work by reusing an Immutable object
-          (defaultPropsImm as any) as P,
-          props as SafeProps<P>
-        ) as MergedProps<P>;
-
-        return f(props, mergedProps, ref);
-      };
-      decorated.displayName = f.name;
-
-      return decorated;
-    }
-  }
+// Convenience alias with desireable return type, passing the useful merger
+// Another difference: The merged result excludes properties not originally present in `target`
+export function merge<T, S>(
+  target: T,
+  ...sources: S[]
+): DangerousProps<T> extends any ? T : never {
+  return mergePropsWith(merger, target, ...sources);
 }
 
-// Decorator factory
-export function bind<D>(defaultProps: D): WithImm<D>['bind'] {
-  const resolver = new WithImm(defaultProps);
-  return <P extends Partial<D>, T>(f: FC<P> | RFC<P, T>) =>
-    resolver.bind<P, T>(f);
+// Convenience alias with desireable return type
+// Another difference: The merged result excludes properties not originally present in `target`
+export function mergeProps<T, S>(
+  target: T,
+  ...sources: S[]
+): DangerousProps<T> extends any ? T : never {
+  return mergeDeep(target, ...sources);
+}
+
+// Convenience alias with desireable return type
+// Another difference: The merged result excludes properties not originally present in `target`
+export function mergePropsWith<T, S>(
+  merger: <K, V>(old: V, next: V, key: K) => V,
+  target: T,
+  ...sources: S[]
+): DangerousProps<T> extends any ? T : never {
+  return mergeDeepWith(merger, target, ...sources);
 }
 
 // Like Object.assign but deep and does not modify original
-export function mergeDeep<T, S extends any[]>(
+// Another difference: The merged result excludes properties not originally present in `target`
+export function mergeDeep<T, S>(
   target: T,
-  ...sources: S
-): T & ArrayToIntersection<S> {
-  return fromJS(target)
-    .mergeDeep(...sources)
-    .toJS();
+  ...sources: S[]
+): T & ArrayToIntersection<S[]> {
+  return mergeDeepWith(defaultMerger, target, ...sources);
 }
 
-// Like Object.assign but deep with custom merge conflict resolver and does not modify original
-export function mergeDeepWith<T, U extends any[]>(
-  merger: <K, V>(oldValue: V, newValue: V, key: K) => V,
+// Like Object.assign but deep with custom merge conflict resolver and does not modify original.
+// Another difference: The merged result excludes properties not originally present in `target`
+export function mergeDeepWith<T, S>(
+  merger: <K, V>(old: V, next: V, key: K) => V,
   target: T,
-  ...sources: U
-): T & ArrayToIntersection<U> {
+  ...sources: S[]
+): T & ArrayToIntersection<S[]> {
+  // Only merge in props already present in the target.
+  const selection = Object.keys(target);
+  sources = sources.map(source =>
+    Object.keys(source)
+      .filter(key => selection.includes(key))
+      .reduce(
+        (obj, key) => {
+          return {
+            ...obj,
+            [key]: (source as any)[key],
+          };
+        },
+        {} as S
+      )
+  );
   return fromJS(target)
     .mergeDeepWith(merger, ...sources)
     .toJS();
 }
-
-// Example usage...
-const defaultProps = { hi: 5 };
-// IMPORTANT: Only optional properties are added to `mergedProps`
-type PropsType = { hi?: number; yes: string };
-
-// RefForwardingComponent, type parameters required
-const aaaa = bind(defaultProps)<PropsType, any>(
-  (props, mergedProps, ref) => null
-);
-
-// FunctionComponent, `typeof props` defaults to same as defaultProps
-const bbbb = bind(defaultProps)((props, mergedProps) => {
-  type a = OptionalKeys<typeof props>; // "hi"
-  props.hi; // (property) hi?: number | undefined
-  return null;
-});
