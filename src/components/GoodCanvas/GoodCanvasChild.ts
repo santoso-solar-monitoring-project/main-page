@@ -7,10 +7,12 @@ import { EnhancedContext } from 'utils/canvas';
 
 export const Props = declare(
   class {
-    static required: { canvasRef?: React.RefObject<GoodCanvasElement> };
+    static required: {
+      canvasRef?: React.RefObject<typeof GoodCanvasElement.propsOut>;
+    };
     static defaults = {
       canvasStyle: {} as Partial<EnhancedContext>,
-      canvasEffects: noop,
+      canvasEffects: noop as (ctx: EnhancedContext) => void,
       canvasNeedsUpdate: 0,
     };
   },

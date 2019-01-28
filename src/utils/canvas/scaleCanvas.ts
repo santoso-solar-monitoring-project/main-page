@@ -43,8 +43,10 @@ export function scaleCanvas(args: Args) {
   ctx.clip();
 
   // Save bounding dimensions in Canvas coordinates.
-  (canvas as GoodCanvasElement).dims = {
-    width: savedWidth,
-    height: savedHeight,
-  };
+  (canvas as typeof GoodCanvasElement.propsOut).dims = GoodCanvasElement({
+    dims: {
+      width: savedWidth,
+      height: savedHeight,
+    },
+  }).dims;
 }

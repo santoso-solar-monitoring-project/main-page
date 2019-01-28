@@ -2,8 +2,8 @@ import { GoodCanvasElement } from 'components/GoodCanvas';
 import isValidRefObject from 'utils/isValidRefObject';
 
 export function isValidGoodCanvas(
-  canvasRef: React.Ref<GoodCanvasElement>
-): canvasRef is React.RefObject<GoodCanvasElement> {
+  canvasRef: React.Ref<typeof GoodCanvasElement.propsOut>
+): canvasRef is React.RefObject<typeof GoodCanvasElement.propsOut> {
   if (
     !isValidRefObject(canvasRef, {
       REF_NULL: '`canvasRef` should not be `null`',

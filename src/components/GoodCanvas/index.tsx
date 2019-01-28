@@ -1,11 +1,9 @@
-// Re-export DOMElement.*
-import * as GoodCanvasElementNS from './GoodCanvasElement';
-export type GoodCanvasElement = GoodCanvasElementNS.GoodCanvasElement;
-export { GoodCanvasElementNS };
+import { GoodCanvasElement } from './GoodCanvasElement';
+export { GoodCanvasElement } from './GoodCanvasElement';
 
 // Re-export ChildProps.*
-import * as GoodCanvasChildNS from './GoodCanvasChild';
-export { GoodCanvasChildNS as GoodCanvasChild };
+import * as GoodCanvasChild from './GoodCanvasChild';
+export { GoodCanvasChild };
 
 import React, {
   useLayoutEffect,
@@ -22,14 +20,14 @@ import ignore from 'utils/ignore';
 import { BaseProps } from 'utils/BaseProps';
 import Blur, * as BlurNS from 'components/Blur';
 import noop from 'utils/noop';
-import { useImm, withImm } from 'utils/Imm';
+import { useImm } from 'utils/Imm';
 import isValidRefObject from 'utils/isValidRefObject';
 import { declare } from 'utils/DefaultProps';
 
 const Props = declare(
   class {
     static required: {
-      blur?: BlurNS.OwnProps.propsIn;
+      blur?: typeof BlurNS.OwnProps.propsIn;
     };
     static defaults = {
       style: {
@@ -61,13 +59,13 @@ const Props = declare(
   To toggle warnings use the `showWarnings` boolean prop.
 */
 const GoodCanvas: React.RefForwardingComponent<
-  GoodCanvasElement,
+  typeof GoodCanvasElement.propsOut,
   typeof Props.propsOut
 > = (props, ref) => {
   // stateful variables
   const [needsUpdate, setNeedsUpdate] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<GoodCanvasElement>(null);
+  const canvasRef = useRef<typeof GoodCanvasElement.propsOut>(null);
   const firstRender = useRef(true);
 
   // Populate forwardedRef if not given (to be used internally).
@@ -180,15 +178,17 @@ const GoodCanvas: React.RefForwardingComponent<
   // Attach GoodCanvasChildPropsType props to children subtree.
   const decoratedChildren = useImm(useMemo)(
     () => {
-      return propagateProps<typeof GoodCanvasChildNS.Props.propsIn>(
+      return propagateProps<typeof GoodCanvasChild.Props.propsIn>(
         children,
         child => {
-          const { canvasStyle, canvasEffects } = GoodCanvasChildNS.Props(
+          const { canvasStyle, canvasEffects } = GoodCanvasChild.Props(
             child.props
           );
 
           return {
-            canvasRef: ref as React.RefObject<GoodCanvasElement>,
+            canvasRef: ref as React.RefObject<
+              typeof GoodCanvasElement.propsOut
+            >,
             canvasNeedsUpdate: needsUpdate,
             canvasStyle,
             canvasEffects,
@@ -220,4 +220,4 @@ const GoodCanvas: React.RefForwardingComponent<
   );
 };
 
-export default React.forwardRef(Props.bind(GoodCanvas));
+export default React.forwardRef(Props.attach(GoodCanvas));

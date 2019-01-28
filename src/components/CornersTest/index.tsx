@@ -1,8 +1,8 @@
 import React from 'react';
 import GoodCanvas from 'components/GoodCanvas';
-import Corners, * as CornersNS from './Corners';
+import Corners, { Props } from './Corners';
 
-const CornersTest = (props: CornersNS.Props) => {
+const CornersTest = (props: typeof Props.propsOut) => {
   const { style, radius } = props;
   return (
     <GoodCanvas style={style} showWarnings={true}>
@@ -11,4 +11,4 @@ const CornersTest = (props: CornersNS.Props) => {
   );
 };
 
-export default CornersTest;
+export default Props.attach(CornersTest);

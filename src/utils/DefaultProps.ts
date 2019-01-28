@@ -37,7 +37,10 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
   Object.keys(defaults).forEach(key => {
     if (key === 'children') {
       warn(`Don't use a default children prop! Refs will be lost.`);
-    } else if ('current' in defaults[key as keyof Defaults]) {
+    } else if (
+      typeof defaults[key as keyof Defaults] === 'object' &&
+      'current' in defaults[key as keyof Defaults]
+    ) {
       warn(
         `Found an default property with a 'current' property. If this is a 'React.RefObject' beware that the ref may be lost! ${key}:`,
         defaults[key as keyof Defaults]
@@ -55,11 +58,12 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     >;
   };
 
-  const bind = <T extends (props: PropsOut, ...rest: any[]) => any>(f: T) => {
-    const decorated = <U extends any[]>(
+  const attach = <T extends (props: PropsOut, ...rest: any[]) => any>(f: T) => {
+    const decorated = <U extends any[], V>(
       props: Pretty<Required> & Partial<Pretty<Defaults>>,
+      placeholder: V,
       ...rest: U
-    ): T extends (...args: any[]) => infer V ? V : any => {
+    ): T extends (...args: any[]) => infer W ? W : any => {
       return f(factory(props), ...rest);
     };
     decorated.displayName = (f as any).displayName || f.name;
@@ -79,10 +83,10 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     // List of base classes
     bases: baseClasses,
     // Decorator accepting a function whose props are to be transformed
-    bind,
+    attach,
   };
 
-  return Object.assign(types, factory);
+  return Object.assign(factory, types);
 }
 
 // Test usage:
