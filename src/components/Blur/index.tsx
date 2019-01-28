@@ -2,37 +2,31 @@ import React, { useState } from 'react';
 import { optimizedResize } from 'utils/throttleEvent';
 import { useThrottled } from 'utils/CustomHooks';
 import { BaseProps } from 'utils/BaseProps';
-import { Omit } from 'utils/meta';
-import { withImm } from 'utils/Imm';
+import { declare } from 'utils/DefaultProps';
 
-export interface Props extends BaseProps {
-  radius?: number;
-  timeout?: number;
-  enabled?: boolean;
-}
+export const Props = declare(
+  class {
+    static defaults = {
+      radius: 5,
+      timeout: 250,
+      enabled: true,
+      style: { filter: '' } as typeof BaseProps.propsOut.style,
+    };
+  },
+  BaseProps
+);
 
-export type OwnProps = Omit<Props, keyof BaseProps>;
+export const OwnProps = declare(Props.own);
 
-export const defaultProps = {
-  radius: 5,
-  timeout: 250,
-  enabled: true,
-  style: { filter: '' } as Props['style'],
-};
-
-const Blur: React.RefForwardingComponent<HTMLDivElement, Props> = (
-  props,
-  ref
-) => {
+const Blur: React.RefForwardingComponent<
+  HTMLDivElement,
+  typeof Props.propsOut
+> = (props, ref) => {
   // stateful variables
   const [blurry, setBlurry] = useState(false);
 
   // unpack props
-  const { children } = props;
-  const { style, radius, timeout, enabled } = withImm.merge(
-    defaultProps,
-    props
-  );
+  const { children, style, radius, timeout, enabled } = props;
 
   // attach handler to blur on window resize
   useThrottled(
@@ -57,4 +51,4 @@ const Blur: React.RefForwardingComponent<HTMLDivElement, Props> = (
   );
 };
 
-export default React.forwardRef(Blur);
+export default React.forwardRef(Props.bind(Blur));

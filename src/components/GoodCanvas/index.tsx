@@ -24,26 +24,28 @@ import Blur, * as BlurNS from 'components/Blur';
 import noop from 'utils/noop';
 import { useImm, withImm } from 'utils/Imm';
 import isValidRefObject from 'utils/isValidRefObject';
+import { declare } from 'utils/DefaultProps';
 
-export interface Props extends BaseProps {
-  showWarnings?: boolean;
-  timeout?: number;
-  blur?: BlurNS.OwnProps;
-  notify?: () => void;
-}
-
-export const defaultProps = {
-  style: {
-    position: 'relative',
-    overflow: 'hidden',
-    width: '300px',
-    height: '150px',
-    boxSizing: 'content-box',
-  } as Props['style'],
-  showWarnings: false,
-  timeout: 250,
-  notify: noop,
-};
+const Props = declare(
+  class {
+    static required: {
+      blur?: BlurNS.OwnProps.propsIn;
+    };
+    static defaults = {
+      style: {
+        position: 'relative',
+        overflow: 'hidden',
+        width: '300px',
+        height: '150px',
+        boxSizing: 'content-box',
+      } as typeof BaseProps.propsOut.style,
+      showWarnings: false,
+      timeout: 250,
+      notify: noop,
+    };
+  },
+  BaseProps
+);
 
 /* 
   A properly scaled <canvas> element accounting for window.devicePixelRatio.
@@ -58,10 +60,10 @@ export const defaultProps = {
   
   To toggle warnings use the `showWarnings` boolean prop.
 */
-const GoodCanvas: React.RefForwardingComponent<GoodCanvasElement, Props> = (
-  props,
-  ref
-) => {
+const GoodCanvas: React.RefForwardingComponent<
+  GoodCanvasElement,
+  typeof Props.propsOut
+> = (props, ref) => {
   // stateful variables
   const [needsUpdate, setNeedsUpdate] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -78,11 +80,7 @@ const GoodCanvas: React.RefForwardingComponent<GoodCanvasElement, Props> = (
   }
 
   // Populate default props.
-  const { blur, children } = props;
-  const { style, showWarnings, timeout, notify } = withImm.merge(
-    defaultProps,
-    props
-  );
+  const { blur, children, style, showWarnings, timeout, notify } = props;
 
   // Toggle warnings.
   const warn = showWarnings ? console.warn : ignore;
@@ -182,19 +180,21 @@ const GoodCanvas: React.RefForwardingComponent<GoodCanvasElement, Props> = (
   // Attach GoodCanvasChildPropsType props to children subtree.
   const decoratedChildren = useImm(useMemo)(
     () => {
-      return propagateProps<GoodCanvasChildNS.Props>(children, child => {
-        const { canvasStyle, canvasEffects } = withImm.mergeDeep(
-          GoodCanvasChildNS.defaultProps,
-          child.props
-        );
+      return propagateProps<typeof GoodCanvasChildNS.Props.propsIn>(
+        children,
+        child => {
+          const { canvasStyle, canvasEffects } = GoodCanvasChildNS.Props(
+            child.props
+          );
 
-        return {
-          canvasRef: ref as React.RefObject<GoodCanvasElement>,
-          canvasNeedsUpdate: needsUpdate,
-          canvasStyle,
-          canvasEffects,
-        };
-      });
+          return {
+            canvasRef: ref as React.RefObject<GoodCanvasElement>,
+            canvasNeedsUpdate: needsUpdate,
+            canvasStyle,
+            canvasEffects,
+          };
+        }
+      );
     },
     [needsUpdate, children, ref]
   );
@@ -220,4 +220,4 @@ const GoodCanvas: React.RefForwardingComponent<GoodCanvasElement, Props> = (
   );
 };
 
-export default React.forwardRef(GoodCanvas);
+export default React.forwardRef(Props.bind(GoodCanvas));

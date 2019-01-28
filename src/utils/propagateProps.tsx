@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseProps } from './BaseProps';
 
-export function propagateProps<P = BaseProps>(
+export function propagateProps<P = typeof BaseProps.propsIn>(
   children: React.ReactNode,
   props: (
     child: React.ReactElement<P & { children?: React.ReactNode }>

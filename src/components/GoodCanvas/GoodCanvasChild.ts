@@ -1,26 +1,33 @@
 import React from 'react';
-import { EnhancedContext } from 'utils/canvas';
 import { GoodCanvasElement } from '.';
 import { BaseProps } from 'utils/BaseProps';
 import noop from 'utils/noop';
-import { Omit } from 'utils/meta';
+import { declare } from 'utils/DefaultProps';
+import { EnhancedContext } from 'utils/canvas';
 
-// Props automatically added to children of GoodCanvas.
-export interface Props extends BaseProps {
-  // Reference to internal canvas.
-  canvasRef?: React.RefObject<GoodCanvasElement>;
-  // Settings to be applied to the CanvasRenderingContext2D.
-  canvasStyle?: Partial<EnhancedContext>;
-  // Callback to apply settings to the CanvasRenderingContext2D.
-  canvasEffects?: (ctx: EnhancedContext) => void;
-  // Global version number. Increments when all children should repaint.
-  canvasNeedsUpdate?: number;
-}
+export const Props = declare(
+  class {
+    static required: { canvasRef?: React.RefObject<GoodCanvasElement> };
+    static defaults = {
+      canvasStyle: {} as Partial<EnhancedContext>,
+      canvasEffects: noop,
+      canvasNeedsUpdate: 0,
+    };
+  },
+  BaseProps
+);
 
-export type OwnProps = Omit<Props, keyof BaseProps>;
+export const OwnProps = declare(Props.own);
 
-export const defaultProps = {
-  canvasStyle: {},
-  canvasEffects: noop,
-  canvasNeedsUpdate: 0,
-};
+// Test usage:
+// const a = bind(Props, BaseProps);
+// const c = a.required;
+// const d = a.defaults;
+// const e = a.own.required;
+// const f = a.own.defaults;
+// const g = a.bases;
+// const h = a.propsIn;
+// const i = a.propsOut;
+// const j = a.decorate;
+// const b = a({ canvasNeedsUpdate: 3 });
+// type DefaultProps = Pick<typeof b, keyof typeof b>;

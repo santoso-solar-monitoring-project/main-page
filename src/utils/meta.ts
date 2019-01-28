@@ -14,10 +14,6 @@ export type PrettyPrint<T, U, Message> = [T] extends [U] ? Message : T;
 export type ArrayToBoxedUnion<T extends any[]> = {
   [P in keyof T]: [T[P]]
 }[Exclude<keyof T, keyof any[]>];
-export type ArrayToUnion<T extends any[]> = { [P in keyof T]: T[P] }[Exclude<
-  keyof T,
-  keyof any[]
->];
 export type UnionToIntersect<U> = (U extends any
   ? (k: U) => void
   : never) extends ((k: infer I) => void)
@@ -28,25 +24,21 @@ export type ArrayToIntersection<T extends any[]> = UnboxIntersect<
   UnionToIntersect<ArrayToBoxedUnion<T>>
 >;
 
-export type EntriesArrayToUnion<
-  E extends ([K, V])[],
-  K = string | number | symbol,
-  V = any
-> = { [x in keyof E]: E[x] }[Exclude<keyof E, keyof any[]>];
-export type EntriesToSingletons<E> = E extends { 0: infer K; 1: infer V }
-  ? K extends string | number | symbol
-    ? { [x in K]: V }
-    : never
-  : never;
-export type EntriesToObject<
-  E extends ([K, V])[],
-  K extends string | number | symbol = string | number | symbol,
-  V = any
-> = UnionToIntersect<EntriesToSingletons<EntriesArrayToUnion<E, K, V>>>;
-
-// type aaaaa = EntriesArrayToUnion<
-//   [[2, 1], ['hello', 'world'], ['wow', () => {}]]
-// >;
-// type bbbbb = EntriesToSingletons<aaaaa>;
-// type ccccc = UnionToIntersect<bbbbb>;
-// type ddddd = EntriesToObject<[[2, 1], ['hello', 'world'], ['wow', () => {}]]>;
+// https://stackoverflow.com/a/54010248/3624264
+type Narrowable =
+  | string
+  | number
+  | boolean
+  | symbol
+  | object
+  | null
+  | undefined
+  | void
+  | ((...args: any[]) => any)
+  | {};
+export const literally = <
+  T extends { [k: string]: V | T } | Array<{ [k: string]: V | T }>,
+  V extends Narrowable
+>(
+  t: T
+) => t;
