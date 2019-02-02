@@ -93,6 +93,12 @@ export function enhanceContext(
       enhanced.currentTransform = createMatrix();
       context.resetTransform();
     },
+
+    isolate(f: () => void) {
+      enhanced.save();
+      f();
+      enhanced.restore();
+    },
   };
 
   const handler = {

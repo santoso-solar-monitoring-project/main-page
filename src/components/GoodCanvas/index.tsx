@@ -16,13 +16,13 @@ import { scaleCanvas, getContext } from 'utils/canvas';
 import { optimizedResize } from 'utils/throttleEvent';
 import { useThrottled } from 'utils/CustomHooks';
 import { propagateProps } from 'utils/propagateProps';
-import ignore from 'utils/ignore';
 import { BaseProps } from 'utils/BaseProps';
 import Blur, * as BlurNS from 'components/Blur';
 import noop from 'utils/noop';
 import { useImm } from 'utils/Imm';
 import isValidRefObject from 'utils/isValidRefObject';
 import { declare } from 'utils/DefaultProps';
+import warn from 'utils/warn';
 
 const Props = declare(
   class {
@@ -37,7 +37,6 @@ const Props = declare(
         height: '150px',
         boxSizing: 'content-box',
       } as typeof BaseProps.propsOut.style,
-      showWarnings: false,
       timeout: 250,
       notify: noop,
     };
@@ -78,10 +77,10 @@ const GoodCanvas: React.RefForwardingComponent<
   }
 
   // Populate default props.
-  const { blur, children, style, showWarnings, timeout, notify } = props;
+  const { blur, children, style, timeout, notify } = props;
 
   // Toggle warnings.
-  const warn = showWarnings ? console.warn : ignore;
+  warn();
 
   // Scale the canvas resolution.
   useImm(useLayoutEffect)(
@@ -178,7 +177,7 @@ const GoodCanvas: React.RefForwardingComponent<
   // Attach GoodCanvasChildPropsType props to children subtree.
   const decoratedChildren = useImm(useMemo)(
     () => {
-      return propagateProps<typeof GoodCanvasChild.Props.propsIn>(
+      return propagateProps<typeof GoodCanvasChild.OwnProps.propsIn>(
         children,
         child => {
           const { canvasStyle, canvasEffects } = GoodCanvasChild.Props(
@@ -220,4 +219,4 @@ const GoodCanvas: React.RefForwardingComponent<
   );
 };
 
-export default React.forwardRef(Props.attach(GoodCanvas));
+export default React.forwardRef(Props.wrap(GoodCanvas));

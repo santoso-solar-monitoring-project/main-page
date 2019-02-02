@@ -1,9 +1,12 @@
 import { Omit, ArrayToIntersection } from './meta';
 import { withImm } from './Imm';
+import warn from './warn';
 
-export let warn = console.warn;
-
-export type PropsClass = { required?: object; defaults?: object };
+export type PropsClass = {
+  required?: object;
+  defaults?: object;
+  injected?: object;
+};
 
 type Pretty<T> = Pick<T, keyof T>;
 
@@ -12,8 +15,9 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
   propsClass: P,
   ...baseClasses: S
 ) {
-  type D = P['defaults'];
-  type R = P['required'];
+  type I = P['injected'];
+  type D = P['defaults'] & I;
+  type R = P['required'] & Partial<I>;
 
   type BasesD<T> = T extends PropsClass ? T['defaults'] : {};
   type BasesR<T> = T extends PropsClass ? T['required'] : {};
@@ -58,10 +62,10 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     >;
   };
 
-  const attach = <T extends (props: PropsOut, ...rest: any[]) => any>(f: T) => {
+  const wrap = <T extends (props: PropsOut, ...rest: any[]) => any>(f: T) => {
     const decorated = <U extends any[], V>(
       props: Pretty<Required> & Partial<Pretty<Defaults>>,
-      placeholder: V,
+      placeholder?: V,
       ...rest: U
     ): T extends (...args: any[]) => infer W ? W : any => {
       return f(factory(props), ...rest);
@@ -83,7 +87,7 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     // List of base classes
     bases: baseClasses,
     // Decorator accepting a function whose props are to be transformed
-    attach,
+    wrap,
   };
 
   return Object.assign(factory, types);

@@ -5,7 +5,7 @@ import { linkTo } from '@storybook/addon-links';
 import { Button, Welcome } from '@storybook/react/demo';
 import { withKnobs, select, number } from '@storybook/addon-knobs';
 
-// import IVPlot from 'components/IVPlot';
+import IVPlot from 'components/IVPlot';
 import CornersTest from 'components/CornersTest';
 
 // storiesOf('Welcome', module).add('to Storybook', () => (
@@ -24,9 +24,9 @@ import CornersTest from 'components/CornersTest';
 //     </Button>
 //   ));
 
-// storiesOf('IV Plot', module).add('play', () => {
-// return <IVPlot />;
-// });
+storiesOf('IV Plot', module).add('play', () => {
+  return <IVPlot />;
+});
 
 storiesOf('GoodCanvas', module)
   .addDecorator(withKnobs)

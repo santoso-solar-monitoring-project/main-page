@@ -8,57 +8,65 @@ Mockup:
 
 ![Mockup](previews/mockup.png)
 
-Lines of code:
+File Overview:
 
 ```bash
 $ wc -l src/components/**/* src/utils/***
-     33 src/components/Animatable/index.ts
-     50 src/components/Animatable/useAnimationLoop.ts
-     60 src/components/Blur/index.tsx
-     70 src/components/BoxShadow/index.tsx
+     54 src/components/Blur/index.tsx
+     69 src/components/BoxShadow/index.tsx
      49 src/components/CornersTest/Corners.tsx
      14 src/components/CornersTest/index.tsx
-     26 src/components/GoodCanvas/GoodCanvasChild.ts
-     21 src/components/GoodCanvas/GoodCanvasElement.ts
-    223 src/components/GoodCanvas/index.tsx
-     90 src/components/IVPlot/_IVPlot.tsx
-     64 src/components/IVPlot/index.tsx
-     47 src/components/IVPlot/useBigBuffer.ts
-     57 src/components/IVPlot/useScaleX.ts
-     31 src/components/IVPlot/useScaleY.ts
-     51 src/components/Line/index.tsx
-     56 src/components/Points/index.tsx
-     17 src/utils/BaseProps.ts
+     35 src/components/GoodCanvas/GoodCanvasChild.ts
+     16 src/components/GoodCanvas/GoodCanvasElement.ts
+    222 src/components/GoodCanvas/index.tsx
+     80 src/components/IVPlot/_IVPlot.tsx
+     67 src/components/IVPlot/index.tsx
+     57 src/components/IVPlot/useDataFeed.ts
+     57 src/components/IVPlot/useFPS.ts
+     28 src/components/IVPlot/useScales.ts
+     39 src/components/IVPlot/useTimeSpan.ts
+     65 src/components/IVPlot/useView.ts
+     48 src/components/useLine/index.tsx
+     50 src/components/usePoints/index.tsx
+     14 src/utils/BaseProps.ts
 wc: src/utils/canvas: Is a directory
       0 src/utils/canvas
-    155 src/utils/canvas/enhanceContext.ts
-     19 src/utils/canvas/EnhancedContext.d.ts
-     33 src/utils/canvas/getContext.ts
-      6 src/utils/canvas/index.ts
+     10 src/utils/canvas/clear.ts
+    161 src/utils/canvas/enhanceContext.ts
+     20 src/utils/canvas/EnhancedContext.d.ts
+     35 src/utils/canvas/getContext.ts
+      7 src/utils/canvas/index.ts
      21 src/utils/canvas/isValidGoodCanvas.ts
-     50 src/utils/canvas/scaleCanvas.ts
+     52 src/utils/canvas/scaleCanvas.ts
+      3 src/utils/clamp.ts
 wc: src/utils/CustomHooks: Is a directory
       0 src/utils/CustomHooks
-      5 src/utils/CustomHooks/index.ts
+      8 src/utils/CustomHooks/index.ts
       7 src/utils/CustomHooks/useCounter.ts
-     32 src/utils/CustomHooks/useDataBuffer.ts
-     30 src/utils/CustomHooks/useDataBufferSilent.ts
+     30 src/utils/CustomHooks/useDataBuffer.ts
+     28 src/utils/CustomHooks/useDataBufferSilent.ts
+     31 src/utils/CustomHooks/useDecay.ts
+     31 src/utils/CustomHooks/useFIR.ts
      11 src/utils/CustomHooks/useMemoRef.ts
+     32 src/utils/CustomHooks/useMemoSpring.ts
      44 src/utils/CustomHooks/useThrottled.ts
+    141 src/utils/DefaultProps.ts
+      7 src/utils/easy.d.ts
       5 src/utils/evaluate.ts
-     15 src/utils/fromEntries.ts
+      2 src/utils/identity.ts
       2 src/utils/ignore.ts
 wc: src/utils/Imm: Is a directory
       0 src/utils/Imm
      18 src/utils/Imm/index.ts
      48 src/utils/Imm/makeImmHook.ts
      18 src/utils/Imm/useImm.ts
-     88 src/utils/Imm/withImm.ts
+     80 src/utils/Imm/withImm.ts
      19 src/utils/isValidRefObject.ts
-     52 src/utils/meta.ts
+     44 src/utils/meta.ts
       2 src/utils/noop.ts
       1 src/utils/Pair.d.ts
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
-   1717 total
+      3 src/utils/warn.ts
+   1962 total
 ```

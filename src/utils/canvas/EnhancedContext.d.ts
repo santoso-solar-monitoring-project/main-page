@@ -16,4 +16,5 @@ export interface EnhancedContext extends CanvasRenderingContext2D {
     f: number
   ): void;
   resetTransform(): void;
+  isolate(f: () => void): void;
 }

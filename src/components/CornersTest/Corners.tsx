@@ -12,10 +12,10 @@ export const Props = declare(
   GoodCanvasChild.Props
 );
 
-const Corners: React.FunctionComponent<typeof Props.propsOut> = props => {
+const Corners: React.FC<typeof Props.propsOut> = props => {
   useEffect(() => {
     const { canvasRef, canvasStyle, canvasEffects, radius } = props;
-    const { canvas, ctx } = getContext(canvasRef!);
+    const { canvas, ctx } = getContext(canvasRef);
     const { width, height } = canvas.dims;
 
     ctx.clearRect(0, 0, width, height);
@@ -46,4 +46,4 @@ const Corners: React.FunctionComponent<typeof Props.propsOut> = props => {
   return null;
 };
 
-export default Props.attach(Corners);
+export default Props.wrap(Corners);

@@ -51,4 +51,4 @@ const Blur: React.RefForwardingComponent<
   );
 };
 
-export default React.forwardRef(Props.attach(Blur));
+export default React.forwardRef(Props.wrap(Blur));

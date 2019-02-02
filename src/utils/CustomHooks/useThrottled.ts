@@ -1,21 +1,21 @@
 import React, { useEffect } from 'react';
+import noop from 'utils/noop';
 import { withImm } from 'utils/Imm';
 
-export interface Args {
-  event: string;
-  first: () => void;
-  last: () => void;
-  timeout?: number;
-}
-
-export const defaultArgs = {
+const defaults = {
   timeout: 250,
+  first: noop,
+  last: noop,
 };
+
+interface Args extends Partial<typeof defaults> {
+  event: string;
+}
 
 export function useThrottled(args: Args, inputs?: React.InputIdentityList) {
   useEffect(() => {
-    const { event, first, last } = args;
-    const { timeout } = withImm.merge(defaultArgs, args);
+    const { event, first, last, timeout } = withImm.mergeFull(defaults, args);
+
     if (!event) return;
 
     let ongoing = false;

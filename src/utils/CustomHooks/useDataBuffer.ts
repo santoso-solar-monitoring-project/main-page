@@ -2,20 +2,18 @@ import { useState, useCallback } from 'react';
 import { withImm } from 'utils/Imm';
 import Denque from 'denque';
 
-interface Args<T> {
-  initialValue: T[];
-  maxSize?: number;
-}
-
-const defaultArgs = {
+const defaults = {
   maxSize: Infinity,
 };
+
+interface Args<T> extends Partial<typeof defaults> {
+  initialValue: T[];
+}
 
 export function useDataBuffer<T = number>(
   args: Args<T>
 ): [Denque<T>, (newData: T[]) => void] {
-  const { initialValue } = args;
-  const { maxSize } = withImm.merge(defaultArgs, args);
+  const { initialValue, maxSize } = withImm.mergeFull(defaults, args);
   const [buffer, setBuffer] = useState(() => new Denque<T>(initialValue!));
   const updateBuffer = useCallback(
     (newData: T[]) =>

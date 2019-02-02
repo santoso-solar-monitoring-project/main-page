@@ -2,17 +2,6 @@ import React from 'react';
 import { fromJS } from '.';
 import { ArrayToIntersection } from 'utils/meta';
 
-// Exclude RefObject-type and `children` props from `mergedProps`.
-export type DangerousProps<P> = NonNullable<
-  {
-    [K in keyof P]-?: P[K] extends React.RefObject<any>
-      ? K
-      : K extends 'children'
-      ? K
-      : never
-  }[keyof P]
->;
-
 // Useful merger to ignore undefined
 // Another difference: The merged result excludes properties not originally present in `target`
 export function ignoreUndefined<V>(old: V, next: V) {
@@ -27,10 +16,7 @@ export function defaultMerger<V>(_old: V, next: V) {
 // Does not add new properties not originally in `target`.
 // Undefined values in `sources` are ignored (do not overwrite `target` values).
 // Excludes dangerous React props.
-export function merge<T, S extends any[]>(
-  target: T,
-  ...sources: S
-): DangerousProps<T> extends any ? T : never {
+export function merge<T, S extends any[]>(target: T, ...sources: S): T {
   return mergeWith(ignoreUndefined, target, ...sources);
 }
 
@@ -39,7 +25,7 @@ export function mergeWith<T, S extends any[]>(
   merger: <K, V>(old: V, next: V, key: K) => V,
   target: T,
   ...sources: S
-): DangerousProps<T> extends any ? T : never {
+): T {
   // Filter out props not already present in `target`.
   const selection = Object.keys(target);
   sources = sources.map(source =>
