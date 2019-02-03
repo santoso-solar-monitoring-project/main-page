@@ -10,8 +10,10 @@ Mockup:
 
 File Overview:
 
+[//]: # (Don't edit manually past this point. It will be overwritten in the pre-commit git hook.)
+
 ```bash
-$ wc -l src/components/**/* src/utils/***
+$ wc -l src/components/*/** src/utils/***
      54 src/components/Blur/index.tsx
      69 src/components/BoxShadow/index.tsx
      49 src/components/CornersTest/Corners.tsx
@@ -21,22 +23,24 @@ $ wc -l src/components/**/* src/utils/***
     222 src/components/GoodCanvas/index.tsx
      80 src/components/IVPlot/_IVPlot.tsx
      67 src/components/IVPlot/index.tsx
+     18 src/components/IVPlot/useAnimationFrame.ts
      57 src/components/IVPlot/useDataFeed.ts
-     57 src/components/IVPlot/useFPS.ts
+     59 src/components/IVPlot/useFPS.ts
      28 src/components/IVPlot/useScales.ts
      39 src/components/IVPlot/useTimeSpan.ts
-     65 src/components/IVPlot/useView.ts
-     48 src/components/useLine/index.tsx
-     50 src/components/usePoints/index.tsx
+     67 src/components/IVPlot/useView.ts
+     41 src/components/useLine/index.tsx
+     43 src/components/usePoints/index.tsx
      14 src/utils/BaseProps.ts
 wc: src/utils/canvas: Is a directory
       0 src/utils/canvas
-     10 src/utils/canvas/clear.ts
+      6 src/utils/canvas/clear.ts
     161 src/utils/canvas/enhanceContext.ts
-     20 src/utils/canvas/EnhancedContext.d.ts
+     23 src/utils/canvas/EnhancedContext.ts
      35 src/utils/canvas/getContext.ts
-      7 src/utils/canvas/index.ts
+     10 src/utils/canvas/index.ts
      21 src/utils/canvas/isValidGoodCanvas.ts
+     57 src/utils/canvas/newEffect.ts
      52 src/utils/canvas/scaleCanvas.ts
       3 src/utils/clamp.ts
 wc: src/utils/CustomHooks: Is a directory
@@ -50,9 +54,9 @@ wc: src/utils/CustomHooks: Is a directory
      11 src/utils/CustomHooks/useMemoRef.ts
      32 src/utils/CustomHooks/useMemoSpring.ts
      44 src/utils/CustomHooks/useThrottled.ts
-    141 src/utils/DefaultProps.ts
+    186 src/utils/DefaultProps.ts
       7 src/utils/easy.d.ts
-      5 src/utils/evaluate.ts
+      4 src/utils/evaluate.ts
       2 src/utils/identity.ts
       2 src/utils/ignore.ts
 wc: src/utils/Imm: Is a directory
@@ -62,11 +66,11 @@ wc: src/utils/Imm: Is a directory
      18 src/utils/Imm/useImm.ts
      80 src/utils/Imm/withImm.ts
      19 src/utils/isValidRefObject.ts
-     44 src/utils/meta.ts
+     60 src/utils/meta.ts
       2 src/utils/noop.ts
       1 src/utils/Pair.d.ts
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   1962 total
+   2089 total
 ```
