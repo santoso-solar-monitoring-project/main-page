@@ -13,7 +13,7 @@ then
 fi
 
 # Stash unstaged changes
-git stash -q --keep-index
+# git stash -q --keep-index
 
 # Editing README.md
 buffer=$(mktemp)
@@ -30,10 +30,10 @@ wc -l src/components/*/** src/utils/**/* src/utils/* >>${buffer} 2>&1
 echo '```' >>${buffer}
 
 # Stage updated README.md
-git add -u
+# git add -u
 
 # Re-apply original unstaged changes
-git stash pop -q
+# git stash pop -q
 
 # Replace README
 mv $buffer README.md

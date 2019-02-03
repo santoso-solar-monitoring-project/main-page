@@ -8,18 +8,23 @@ const Args = declare(
       width: 0,
       // plus fraction of
       height: 0.05,
+      invert: false,
     };
   }
 );
 
 export const useCrop = Args.wrap(
-  clip => {
+  ({ invert, ...bounds }) => {
     return newEffect(ctx => {
       const { width, height } = ctx;
-      const clipBy = ctx.deriveCoordinate(clip);
+      const clipBy = ctx.deriveCoordinate(bounds);
+      const region = new Path2D();
       ctx.beginPath();
-      ctx.rect(clipBy, 0, width - 2 * clipBy, height);
-      ctx.clip();
+      region.rect(clipBy, 0, width - 2 * clipBy, height);
+      if (invert) {
+        region.rect(0, 0, width, height);
+      }
+      ctx.clip(region, 'evenodd');
     });
   },
   { hint: 'all props optional' }

@@ -76,23 +76,26 @@ const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
   };
 
   const dashed = useDashes([4, 6], 1);
-  const cropped = useCrop();
+  const cropped = useCrop({ height: 0.1 });
+  const outerCropped = useCrop({ height: 0.1, invert: true });
   const renderLoop = [
     clear,
-    dashed(
-      useLine({
-        data: view,
-        // canvasStyle: { strokeStyle: 'green' /* , lineWidth: 10 */ },
-      })
+    outerCropped(
+      dashed(
+        useLine({
+          data: view,
+          // canvasStyle: { strokeStyle: 'green', lineWidth: 10 },
+        })
+      )
     ),
     cropped(
       useLine({
         data: view,
-        //   // canvasStyle: { strokeStyle: 'green' },
+        // canvasStyle: { strokeStyle: 'blue' },
       }),
       usePoints({ data: view })
     ),
-    useFPS(),
+    useFPS({ offset: { x: { height: -0.1 } } }),
   ];
 
   if (canvasRef.current) {

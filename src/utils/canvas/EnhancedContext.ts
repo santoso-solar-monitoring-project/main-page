@@ -1,5 +1,11 @@
 import { GoodCanvasElement } from 'components/GoodCanvas';
 
+export type RelativeCoordinate = Partial<{ width: number; height: number }>;
+export type RelativeCoordinates = Partial<{
+  x: RelativeCoordinate;
+  y: RelativeCoordinate;
+}>;
+
 export interface EnhancedContext extends CanvasRenderingContext2D {
   currentTransform: DOMMatrix;
   savedTransforms: DOMMatrix[];
@@ -24,12 +30,7 @@ export interface EnhancedContext extends CanvasRenderingContext2D {
     ...args: T
   ): T extends (...args: any[]) => infer W ? W : any;
   deriveCoordinate(coord: Partial<{ width: number; height: number }>): number;
-  deriveXY(
-    coords: Partial<{
-      x: Partial<{ width: number; height: number }>;
-      y: Partial<{ width: number; height: number }>;
-    }>
-  ): { x: number; y: number };
+  deriveXY(coords: RelativeCoordinates): { x: number; y: number };
   readonly canvas: typeof GoodCanvasElement.propsOut;
   readonly width: number;
   readonly height: number;

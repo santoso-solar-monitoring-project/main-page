@@ -21,10 +21,10 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
      35 src/components/GoodCanvas/GoodCanvasChild.ts
      16 src/components/GoodCanvas/GoodCanvasElement.ts
     222 src/components/GoodCanvas/index.tsx
-    108 src/components/IVPlot/_IVPlot.tsx
+    111 src/components/IVPlot/_IVPlot.tsx
      67 src/components/IVPlot/index.tsx
      32 src/components/IVPlot/useAnimationFrame.ts
-     26 src/components/IVPlot/useCrop.ts
+     31 src/components/IVPlot/useCrop.ts
      57 src/components/IVPlot/useDataFeed.ts
      98 src/components/IVPlot/useFPS.ts
      28 src/components/IVPlot/useScales.ts
@@ -47,11 +47,11 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
       8 src/utils/Imm/mapFromJS.ts
      18 src/utils/Imm/useImm.ts
      80 src/utils/Imm/withImm.ts
-     36 src/utils/canvas/EnhancedContext.ts
+     37 src/utils/canvas/EnhancedContext.ts
       6 src/utils/canvas/clear.ts
     204 src/utils/canvas/enhanceContext.ts
      35 src/utils/canvas/getContext.ts
-     10 src/utils/canvas/index.ts
+     16 src/utils/canvas/index.ts
      21 src/utils/canvas/isValidGoodCanvas.ts
      57 src/utils/canvas/newEffect.ts
      53 src/utils/canvas/scaleCanvas.ts
@@ -75,5 +75,5 @@ wc: src/utils/canvas: Is a directory
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   2275 total
+   2290 total
 ```

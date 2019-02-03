@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { EnhancedContext, newEffect, EffectOptions } from 'utils/canvas';
+import { newEffect, EffectOptions, RelativeCoordinates } from 'utils/canvas';
 import { useFIR, useDecay, useMemoSpring } from 'utils/CustomHooks';
 import { config } from 'react-spring';
 import { declare } from 'utils/DefaultProps';
@@ -20,7 +20,7 @@ const Args = declare(
           // plus fraction of
           height: 1,
         },
-      },
+      } as RelativeCoordinates,
       offset: {
         x: {
           // fraction of
@@ -34,7 +34,7 @@ const Args = declare(
           // plus fraction of
           height: -0.025,
         },
-      },
+      } as RelativeCoordinates,
     };
   },
   EffectOptions
