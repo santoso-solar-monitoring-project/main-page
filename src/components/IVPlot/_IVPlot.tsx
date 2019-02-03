@@ -1,20 +1,20 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { GoodCanvasChild } from 'components/GoodCanvas';
-import usePoints from 'components/usePoints';
-import useLine from 'components/useLine';
+import { usePoints } from 'components/usePoints';
+import { useLine } from 'components/useLine';
 import useDataFeed from './useDataFeed';
 import { useView } from './useView';
-import { clear } from 'utils/canvas';
+import { clear, getContext, newEffect } from 'utils/canvas';
 import { useFPS } from './useFPS';
 import { useScalesXY } from './useScales';
 import { FC } from 'utils/easy';
 import { useTimeSpan } from './useTimeSpan';
-import { useCounter } from 'utils/CustomHooks';
+import { useAnimationFrame } from './useAnimationFrame';
 
 const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
-  const { canvasRef, canvasStyle, canvasEffects, canvasNeedsUpdate } = props;
+  const { canvasRef, canvasNeedsUpdate } = props;
 
-  const [buffer, samplePeriod] = useDataFeed({
+  const [amps, samplePeriod] = useDataFeed({
     samplePeriod: 500,
     maxSize: 10000,
   });
@@ -44,35 +44,35 @@ const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
   });
 
   const seekOffset = useRef(0); // milliseconds to shift window into the past by
-  const view = useView(
+  const { view, padLeft, padRight } = useView(
     scaleX,
     scaleY,
-    buffer,
+    amps,
     seekOffset.current,
     timespan.current,
     samplePeriod,
     stride.current
   );
 
-  clear(canvasRef);
+  const dashed = (segments: number[]) =>
+    newEffect(ctx => {
+      ctx.setLineDash(segments);
+    });
 
-  useLine({ data: view, canvasRef, canvasStyle, canvasEffects });
-  usePoints({ data: view, canvasRef, canvasStyle, canvasEffects });
-  useFPS(canvasRef);
+  const dashed46 = dashed([4, 6]);
+  const line = useLine({
+    data: view,
+    // canvasStyle: { strokeStyle: 'green' },
+  });
+  const points = usePoints({ data: view });
+  const fps = useFPS();
 
-  const [, nextFrame] = useCounter();
-  useEffect(() => {
-    const loop = () => {
-      nextFrame();
-      id = requestAnimationFrame(loop);
-    };
-    let id = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(id);
+  if (canvasRef.current) {
+    const { ctx } = getContext(canvasRef);
+    [clear, line, points, fps].forEach(e => e(ctx));
+  }
 
-    // let n = 0;
-    // let id = window.setInterval(loop, 16);
-    // return () => window.clearInterval(id);
-  }, []);
+  useAnimationFrame();
 
   return null;
 };

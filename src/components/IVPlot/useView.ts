@@ -61,5 +61,7 @@ export function useView(
   const [hi] = useMemoSpring(extent[1], { tension: 60, friction: 10 });
   scaleY.domain([lo, hi] as Pair);
 
-  return view.map(([x, y]): Pair => [scaleX(x), scaleY(y)]);
+  const transformed = view.map(([x, y]): Pair => [scaleX(x), scaleY(y)]);
+
+  return { view: transformed, padLeft, padRight };
 }

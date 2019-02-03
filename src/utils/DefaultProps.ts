@@ -1,4 +1,4 @@
-import { Omit, ArrayToIntersection } from './meta';
+import { Omit, ArrayToIntersection, Equals } from './meta';
 import { withImm } from './Imm';
 import warn from './warn';
 
@@ -52,9 +52,9 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     }
   });
 
-  type Factory = ((
+  type Factory = (
     props: Pretty<Required> & Partial<Pretty<Defaults>>
-  ) => PropsOut);
+  ) => PropsOut;
 
   const factory: Factory = props => {
     return { ...props, ...withImm.merge(defaults, props) } as ReturnType<
@@ -62,17 +62,62 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     >;
   };
 
-  const wrap = <T extends (props: PropsOut, ...rest: any[]) => any>(f: T) => {
-    const decorated = <U extends any[], V>(
-      props: Pretty<Required> & Partial<Pretty<Defaults>>,
-      placeholder?: V,
-      ...rest: U
-    ): T extends (...args: any[]) => infer W ? W : any => {
-      return f(factory(props), ...rest);
-    };
-    decorated.displayName = (f as any).displayName || f.name;
-    return decorated;
-  };
+  type Decorated<T> = <U extends any[], V>(
+    props: Pretty<Required> & Partial<Pretty<Defaults>>,
+    placeholder?: V,
+    ...rest: U
+  ) => T extends (...args: any[]) => infer W ? W : any;
+
+  type DecoratedOptional<T> = <U extends any[], V>(
+    props?: Partial<Pretty<Defaults>>,
+    placeholder?: V,
+    ...rest: U
+  ) => T extends (...args: any[]) => infer W ? W : any;
+
+  class Resolver {
+    static wrapSignture<T extends (props: PropsOut, ...rest: any[]) => any>(
+      f: T
+    ): Decorated<T>;
+    static wrapSignture<T extends (props: PropsOut, ...rest: any[]) => any>(
+      f: T,
+      flag: { hint: 'all props optional' }
+    ): DecoratedOptional<T>;
+    static wrapSignture<T extends (props: PropsOut, ...rest: any[]) => any>(
+      f: T,
+      { hint = '' } = {}
+    ): Decorated<T> | DecoratedOptional<T> {
+      return {} as Decorated<T> | DecoratedOptional<T>;
+    }
+  }
+
+  function wrap<T extends (props: PropsOut, ...rest: any[]) => any>(
+    f: T,
+    { hint = '' } = {}
+  ) {
+    if (hint !== 'all props optional') {
+      const decorated: Decorated<T> = (props, placeholder, ...rest) => {
+        return f(
+          factory(props as Parameters<Factory>[0]),
+          placeholder,
+          ...rest
+        );
+      };
+      (decorated as any).displayName = (f as any).displayName || f.name;
+
+      return decorated;
+    } else {
+      const decorated: DecoratedOptional<T> = (props, placeholder, ...rest) => {
+        return f(
+          factory(props as Parameters<Factory>[0]),
+          placeholder,
+          ...rest
+        );
+      };
+      (decorated as any).displayName = (f as any).displayName || f.name;
+
+      return decorated;
+    }
+  }
 
   const types = {
     defaults,
@@ -87,7 +132,7 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     // List of base classes
     bases: baseClasses,
     // Decorator accepting a function whose props are to be transformed
-    wrap,
+    wrap: wrap as typeof Resolver['wrapSignture'],
   };
 
   return Object.assign(factory, types);

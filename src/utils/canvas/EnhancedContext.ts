@@ -1,3 +1,5 @@
+import { GoodCanvasElement } from 'components/GoodCanvas';
+
 export interface EnhancedContext extends CanvasRenderingContext2D {
   currentTransform: DOMMatrix;
   savedTransforms: DOMMatrix[];
@@ -17,4 +19,5 @@ export interface EnhancedContext extends CanvasRenderingContext2D {
   ): void;
   resetTransform(): void;
   isolate(f: () => void): void;
+  canvas: typeof GoodCanvasElement.propsOut;
 }

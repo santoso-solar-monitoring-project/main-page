@@ -1,10 +1,6 @@
-import { GoodCanvasElement } from 'components/GoodCanvas';
-import { getContext } from 'utils/canvas';
-import { CREF } from 'utils/easy';
+import { newEffect } from './newEffect';
 
-export function clear(canvasRef: CREF<typeof GoodCanvasElement.propsOut>) {
-  if (canvasRef.current) {
-    const { canvas, ctx } = getContext(canvasRef);
-    ctx.clearRect(0, 0, canvas.dims.width, canvas.dims.height);
-  }
-}
+export const clear = newEffect(ctx => {
+  const { width, height } = ctx.canvas.dims;
+  ctx.clearRect(0, 0, width, height);
+});

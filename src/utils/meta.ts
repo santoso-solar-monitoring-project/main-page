@@ -42,3 +42,19 @@ export const literally = <
 >(
   t: T
 ) => t;
+
+export type Extends<A, B, C = true, D = false> = [A] extends [B] ? C : D;
+export type Equals<A, B, C = true, D = false> = Extends<
+  C,
+  Extends<A, B, C, D> & Extends<B, A, C, D>,
+  C,
+  D
+>;
+
+// Test cases:
+// type aaaaa = Equals<2|number, number>
+// type AAAAA = Equals<string|number, number>
+// type bbbbb = Extends<never, any>
+// type BBBBB = Extends<any, never>
+// type ccccc = Extends<string, number|string>
+// type CCCCC = Extends<number|string, string>

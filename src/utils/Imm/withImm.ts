@@ -28,7 +28,7 @@ export function mergeWith<T, S extends any[]>(
 ): T {
   // Filter out props not already present in `target`.
   const selection = Object.keys(target);
-  sources = sources.map(source =>
+  sources = sources.filter(Boolean).map(source =>
     Object.keys(source)
       .filter(key => selection.includes(key))
       .reduce((obj, key) => {

@@ -1,7 +1,6 @@
-import { GoodCanvasChild } from 'components/GoodCanvas';
 import { Pair } from 'utils/Pair';
 import { declare } from 'utils/DefaultProps';
-import { getContext } from 'utils/canvas';
+import { EnhancedContext, newEffect, EffectOptions } from 'utils/canvas';
 
 export const Args = declare(
   class {
@@ -12,10 +11,10 @@ export const Args = declare(
         fillStyle: 'hsl(330, 100%, 75%)',
         strokeStyle: 'hsl(330, 100%, 50%)',
         lineWidth: 0.5,
-      } as typeof GoodCanvasChild.Props.propsOut.canvasStyle,
+      } as Partial<EnhancedContext>,
     };
   },
-  GoodCanvasChild.Props
+  EffectOptions
 );
 
 /* 
@@ -28,23 +27,17 @@ export const Args = declare(
   color: 'hsl(330, 100%, 50%)',
 }
 */
-function usePoints(args: typeof Args.propsOut) {
-  const { data, radius, canvasRef, canvasStyle, canvasEffects } = args;
-
-  if (canvasRef.current) {
-    const { ctx } = getContext(canvasRef);
-    ctx.isolate(() => {
-      Object.assign(ctx, canvasStyle);
-      if (canvasEffects) canvasEffects(ctx);
-      // draw points
-      for (const [x, y] of data || []) {
-        ctx.beginPath();
-        ctx.arc(x, y, radius!, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-      }
-    });
-  }
-}
-
-export default Args.wrap(usePoints);
+export const usePoints = Args.wrap(
+  ({ data, radius, canvasStyle, canvasRestyle }) =>
+    newEffect(
+      ctx => {
+        for (const [x, y] of data || []) {
+          ctx.beginPath();
+          ctx.arc(x, y, radius!, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.stroke();
+        }
+      },
+      { canvasStyle, canvasRestyle }
+    )
+);
