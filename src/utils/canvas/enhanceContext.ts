@@ -1,4 +1,7 @@
 import { EnhancedContext } from '.';
+import { getContext } from './getContext';
+import { GoodCanvasElement } from 'components/GoodCanvas';
+import { REF } from 'utils/easy';
 
 // in theory, SVGMatrix will be used by the Canvas API in the future;
 // in practice, we can borrow an SVG matrix today!
@@ -16,7 +19,7 @@ export function enhanceContext(
   context: CanvasRenderingContext2D
 ): EnhancedContext {
   // The main property we are enhancing the context to track
-  let currentTransform = createMatrix();
+  let currentTransform = createMatrix()!;
 
   // the stack of saved matrices
   const savedTransforms = [currentTransform];
@@ -90,7 +93,7 @@ export function enhanceContext(
     // Warning: `resetTransform` is not implemented in at least some browsers
     // and this is _not_ a shim.
     resetTransform() {
-      enhanced.currentTransform = createMatrix();
+      enhanced.currentTransform = createMatrix()!;
       context.resetTransform();
     },
 
@@ -98,6 +101,46 @@ export function enhanceContext(
       enhanced.save();
       f();
       enhanced.restore();
+    },
+
+    get width() {
+      const { canvas } = getContext({
+        current: context.canvas,
+      } as REF<typeof GoodCanvasElement.propsOut>);
+      return canvas.dims.width;
+    },
+    get height() {
+      const { canvas } = getContext({
+        current: context.canvas,
+      } as REF<typeof GoodCanvasElement.propsOut>);
+      return canvas.dims.height;
+    },
+
+    call<T extends any[]>(
+      f: (...args: T) => any,
+      ...args: T
+    ): T extends (...args: any[]) => infer W ? W : any {
+      return f.call(enhanced, ...args);
+    },
+
+    deriveCoordinate(coord: Partial<{ width: number; height: number }>) {
+      const { width: w = 0, height: h = 0 } = coord;
+      const { width, height } = enhanced;
+      const result = w * width + h * height;
+      return result;
+    },
+
+    deriveXY({
+      x = {},
+      y = {},
+    }: Partial<{
+      x: Partial<{ width: number; height: number }>;
+      y: Partial<{ width: number; height: number }>;
+    }>) {
+      return {
+        x: enhanced.deriveCoordinate(x),
+        y: enhanced.deriveCoordinate(y),
+      };
     },
   };
 
@@ -120,7 +163,7 @@ export function enhanceContext(
       if (key in target) {
         target[key] = value;
       }
-      return value;
+      return true;
     },
   };
 

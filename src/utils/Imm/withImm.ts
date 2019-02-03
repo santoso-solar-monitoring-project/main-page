@@ -1,5 +1,5 @@
 import React from 'react';
-import { fromJS } from '.';
+import { mapFromJS } from '.';
 import { ArrayToIntersection } from 'utils/meta';
 
 // Useful merger to ignore undefined
@@ -54,9 +54,9 @@ export function mergeFullWith<S extends any[]>(
   merger: <K, V>(old: V, next: V, key: K) => V,
   ...sources: S
 ): ArrayToIntersection<S> {
-  return fromJS({})
+  return mapFromJS({})
     .mergeDeepWith(merger, ...sources)
-    .toJS();
+    .toJS() as ArrayToIntersection<S>;
 }
 
 // Example use:

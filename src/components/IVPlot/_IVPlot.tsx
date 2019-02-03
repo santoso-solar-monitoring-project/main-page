@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { GoodCanvasChild } from 'components/GoodCanvas';
 import { usePoints } from 'components/usePoints';
 import { useLine } from 'components/useLine';
@@ -10,6 +10,10 @@ import { useScalesXY } from './useScales';
 import { FC } from 'utils/easy';
 import { useTimeSpan } from './useTimeSpan';
 import { useAnimationFrame } from './useAnimationFrame';
+import { useMemoSpring } from 'utils/CustomHooks';
+import { config } from 'react-spring';
+import { useImm } from 'utils/Imm';
+import { useCrop } from './useCrop';
 
 const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
   const { canvasRef, canvasNeedsUpdate } = props;
@@ -54,22 +58,46 @@ const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
     stride.current
   );
 
-  const dashed = (segments: number[]) =>
-    newEffect(ctx => {
-      ctx.setLineDash(segments);
-    });
+  const useDashes = (segments: number[], speed = 1) => {
+    const total = segments.reduce((a, x) => a + x, 0);
+    let offset = 0;
+    useAnimationFrame(
+      () => {
+        offset = (offset + speed) % total;
+      },
+      { silent: true }
+    );
+    return useImm(useMemo)(() => {
+      return newEffect(ctx => {
+        ctx.setLineDash(segments);
+        ctx.lineDashOffset = offset;
+      });
+    }, [segments]);
+  };
 
-  const dashed46 = dashed([4, 6]);
-  const line = useLine({
-    data: view,
-    // canvasStyle: { strokeStyle: 'green' },
-  });
-  const points = usePoints({ data: view });
-  const fps = useFPS();
+  const dashed = useDashes([4, 6], 1);
+  const cropped = useCrop();
+  const renderLoop = [
+    clear,
+    dashed(
+      useLine({
+        data: view,
+        // canvasStyle: { strokeStyle: 'green' /* , lineWidth: 10 */ },
+      })
+    ),
+    cropped(
+      useLine({
+        data: view,
+        //   // canvasStyle: { strokeStyle: 'green' },
+      }),
+      usePoints({ data: view })
+    ),
+    useFPS(),
+  ];
 
   if (canvasRef.current) {
     const { ctx } = getContext(canvasRef);
-    [clear, line, points, fps].forEach(e => e(ctx));
+    renderLoop.forEach(e => e(ctx));
   }
 
   useAnimationFrame();

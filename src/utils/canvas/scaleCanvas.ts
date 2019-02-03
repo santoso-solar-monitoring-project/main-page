@@ -39,6 +39,7 @@ export function scaleCanvas(args: Args) {
   ctx.scale(dpr, dpr);
 
   // Only draw visible region.
+  ctx.beginPath();
   ctx.rect(0, 0, savedWidth, savedHeight);
   ctx.clip();
 

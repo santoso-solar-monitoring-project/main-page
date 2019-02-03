@@ -2,9 +2,46 @@ import { useRef } from 'react';
 import { EnhancedContext, newEffect, EffectOptions } from 'utils/canvas';
 import { useFIR, useDecay, useMemoSpring } from 'utils/CustomHooks';
 import { config } from 'react-spring';
+import { declare } from 'utils/DefaultProps';
 
-export const useFPS = EffectOptions.wrap(
-  ({ canvasStyle, canvasRestyle }) => {
+const Args = declare(
+  class {
+    static defaults = {
+      position: {
+        x: {
+          // fraction of
+          width: 1,
+          // plus fraction of
+          height: 0,
+        },
+        y: {
+          // fraction of
+          width: 0,
+          // plus fraction of
+          height: 1,
+        },
+      },
+      offset: {
+        x: {
+          // fraction of
+          width: 0,
+          // plus fraction of
+          height: -0.05,
+        },
+        y: {
+          // fraction of
+          width: 0,
+          // plus fraction of
+          height: -0.025,
+        },
+      },
+    };
+  },
+  EffectOptions
+);
+
+export const useFPS = Args.wrap(
+  ({ position, offset, canvasStyle, canvasRestyle }) => {
     const last = useRef(performance.now());
     const now = performance.now();
     // Three options (+ combos): FIR, exponential, spring
@@ -21,12 +58,14 @@ export const useFPS = EffectOptions.wrap(
 
     return newEffect(
       ctx => {
-        ctx.font = `20px ubuntu mono, monospace`;
+        const fontHeight = 20;
+        ctx.font = `${fontHeight}px ubuntu mono, monospace`;
         ctx.fillStyle = '#fff';
         const text = `${fps.toFixed(1)} FPS`;
         const { width: textWidth } = ctx.measureText(text);
-        const { width, height } = ctx.canvas.dims;
-        ctx.fillText(text, width - textWidth - 5, height - 5);
+        const { x, y } = ctx.deriveXY(position);
+        const { x: offsetX, y: offsetY } = ctx.deriveXY(offset);
+        ctx.fillText(text, x + offsetX - textWidth, y + offsetY);
       },
       { canvasStyle, canvasRestyle }
     );
