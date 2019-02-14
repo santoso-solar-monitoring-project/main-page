@@ -1,54 +1,88 @@
-import { EnhancedContext } from './EnhancedContext';
+import { EnhancedContext, CanvasStyle } from './EnhancedContext';
 import noop from 'utils/noop';
 import { declare } from 'utils/DefaultProps';
+import warn from 'utils/warn';
+import { useImm } from 'utils/Imm';
+import { useMemo } from 'react';
 
 export type CanvasEffect = (ctx: EnhancedContext) => void;
 
 export const EffectOptions = declare(
   class {
     static defaults = {
-      canvasStyle: {} as Partial<EnhancedContext>,
-      canvasRestyle: noop as CanvasEffect,
+      style: {} as CanvasStyle,
+      injectEffect: noop as CanvasEffect,
     };
   }
 );
 
+const Options = declare(
+  class {
+    static defaults = {
+      inputs: undefined as React.InputIdentityList | void,
+      injection: false,
+    };
+  },
+  EffectOptions
+);
+
 export function newEffect(
   effect: CanvasEffect,
-  options: typeof EffectOptions.propsIn = {}
+  options: typeof Options.propsIn = {}
 ) {
-  function effectChain(...children: [EnhancedContext] | CanvasEffect[]) {
-    const { canvasStyle, canvasRestyle } = EffectOptions(options);
+  const { style, injectEffect, inputs, injection } = Options(options);
 
+  if (inputs != null)
+    return useImm(useMemo)(
+      () => effectChain as typeof Resolver['newEffect'],
+      inputs
+    );
+  else return effectChain as typeof Resolver['newEffect'];
+
+  function effectChain(
+    ...children: [EnhancedContext] | (CanvasEffect | null)[]
+  ) {
     const render = (ctx: EnhancedContext) => {
-      ctx.isolate(() => {
-        Object.assign(ctx, canvasStyle);
-        canvasRestyle(ctx);
+      const execute = () => {
+        Object.assign(ctx, style);
+        injectEffect(ctx);
         effect(ctx);
-        (children as CanvasEffect[]).forEach(e => e(ctx));
-      });
+        (children as (CanvasEffect | null)[])
+          .filter(Boolean)
+          .forEach(e => e!(ctx));
+      };
+
+      if (injection) {
+        execute();
+      } else {
+        ctx.isolate(execute);
+      }
     };
 
     if (Resolver.isEnhancedContext(children[0])) {
       const ctx = children[0];
+      if (children.length > 1) {
+        warn(
+          'This effect is ignoring the children it received because a canvas context was passed as its first argument. This is probably a programmer mistake. Ignored:',
+          children.slice(1)
+        );
+      }
       children = [];
       return render(ctx);
     } else {
       return render;
     }
   }
-
-  return effectChain as typeof Resolver['newEffect'];
 }
 
-class Resolver {
+export class Resolver {
   static newEffect(ctx: EnhancedContext): void;
-  static newEffect(...children: CanvasEffect[]): CanvasEffect;
-  static newEffect(...children: [EnhancedContext] | CanvasEffect[]) {
+  static newEffect(...children: (CanvasEffect | null)[]): CanvasEffect;
+  static newEffect(...children: [EnhancedContext] | (CanvasEffect | null)[]) {
     return {} as void | CanvasEffect;
   }
   static isEnhancedContext(
-    arg: EnhancedContext | CanvasEffect
+    arg: EnhancedContext | CanvasEffect | null
   ): arg is EnhancedContext {
     return (
       arg instanceof CanvasRenderingContext2D && arg.currentTransform != null

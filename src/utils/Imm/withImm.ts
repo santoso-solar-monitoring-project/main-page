@@ -1,5 +1,4 @@
-import React from 'react';
-import { mapFromJS } from '.';
+import { mapFromJS } from './mapFromJS';
 import { ArrayToIntersection } from 'utils/meta';
 
 // Useful merger to ignore undefined

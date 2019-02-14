@@ -1,5 +1,5 @@
-import { Omit, ArrayToIntersection, Equals } from './meta';
-import { withImm } from './Imm';
+import { Omit, ArrayToIntersection } from './meta';
+import * as withImm from './Imm/withImm'; // break circular dependency
 import warn from './warn';
 
 export type PropsClass = {

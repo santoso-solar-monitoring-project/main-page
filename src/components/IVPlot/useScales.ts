@@ -15,14 +15,12 @@ export function useScalesXY(
     []
   );
   // initialize axes scales
-  useEffect(
-    () => {
-      const { canvas } = getContext(canvasRef);
-      const { width, height } = canvas.dims;
-      scaleX.range([(0 + padX) * width, (1 - padX) * width]);
-      scaleY.range([(0 + padY) * height, (1 - padY) * height]);
-    },
-    [canvasNeedsUpdate]
-  );
+  useEffect(() => {
+    const { canvas } = getContext(canvasRef);
+    const { width, height } = canvas.dims;
+    scaleX.range([(0 + padX) * width, (1 - padX) * width]);
+    console.log('wow', scaleX.range());
+    scaleY.range([(0 + padY) * height, (1 - padY) * height]);
+  }, [canvasNeedsUpdate]);
   return [scaleX, scaleY];
 }

@@ -1,17 +1,17 @@
 import { Pair } from 'utils/Pair';
 import { declare } from 'utils/DefaultProps';
-import { EnhancedContext, newEffect, EffectOptions } from 'utils/canvas';
+import { newEffect, EffectOptions, CanvasStyle } from 'utils/canvas';
 
 export const Args = declare(
   class {
     static defaults = {
       data: [] as Pair[],
       radius: 3,
-      canvasStyle: {
+      style: {
         fillStyle: 'hsl(330, 100%, 75%)',
         strokeStyle: 'hsl(330, 100%, 50%)',
         lineWidth: 0.5,
-      } as Partial<EnhancedContext>,
+      } as CanvasStyle,
     };
   },
   EffectOptions
@@ -27,17 +27,13 @@ export const Args = declare(
   color: 'hsl(330, 100%, 50%)',
 }
 */
-export const usePoints = Args.wrap(
-  ({ data, radius, canvasStyle, canvasRestyle }) =>
-    newEffect(
-      ctx => {
-        for (const [x, y] of data || []) {
-          ctx.beginPath();
-          ctx.arc(x, y, radius!, 0, 2 * Math.PI);
-          ctx.fill();
-          ctx.stroke();
-        }
-      },
-      { canvasStyle, canvasRestyle }
-    )
+export const usePoints = Args.wrap(({ data, radius, ...effectOptions }) =>
+  newEffect(ctx => {
+    for (const [x, y] of data || []) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }, effectOptions)
 );

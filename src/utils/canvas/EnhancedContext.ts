@@ -5,6 +5,7 @@ export type RelativeCoordinates = Partial<{
   x: RelativeCoordinate;
   y: RelativeCoordinate;
 }>;
+export type CanvasStyle = Partial<CanvasRenderingContext2D>;
 
 export interface EnhancedContext extends CanvasRenderingContext2D {
   currentTransform: DOMMatrix;
@@ -29,7 +30,7 @@ export interface EnhancedContext extends CanvasRenderingContext2D {
     f: (...args: T) => any,
     ...args: T
   ): T extends (...args: any[]) => infer W ? W : any;
-  deriveCoordinate(coord: Partial<{ width: number; height: number }>): number;
+  deriveCoordinate(coord: RelativeCoordinate): number;
   deriveXY(coords: RelativeCoordinates): { x: number; y: number };
   readonly canvas: typeof GoodCanvasElement.propsOut;
   readonly width: number;

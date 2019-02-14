@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImmMapType, mapFromJS, List } from 'utils/Imm';
+import { ImmMapType, mapFromJS } from 'utils/Imm';
 import { useMemoRef } from 'utils/CustomHooks';
 
 type Callable = (...args: any[]) => any;
@@ -27,9 +27,8 @@ export function makeImmHook<
     arg: X,
     inputs: React.InputIdentityList
   ): UseCallBackCase<T, X, UseEffectCase<T, X, UseMemoCase<T, X>>> {
-    const savedInputs = useMemoRef<ImmMapType<typeof inputs>>(
-      () => mapFromJS(inputs),
-      []
+    const savedInputs = useMemoRef<ImmMapType<typeof inputs>>(() =>
+      mapFromJS(inputs)
     );
     savedInputs.current = savedInputs.current.mergeDeep(mapFromJS(inputs));
 

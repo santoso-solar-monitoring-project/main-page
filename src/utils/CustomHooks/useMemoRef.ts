@@ -1,10 +1,7 @@
 import { useMemo, useRef } from 'react';
 
-export function useMemoRef<T>(
-  factory: () => T,
-  inputs: React.InputIdentityList
-) {
-  const initialValue = useMemo(factory, inputs);
+export function useMemoRef<T>(factory: () => T) {
+  const initialValue = useMemo(factory, []);
   const ref = useRef(initialValue);
 
   return ref;

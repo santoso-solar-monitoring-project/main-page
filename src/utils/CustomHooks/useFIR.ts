@@ -6,19 +6,7 @@ export function useFIR(x: number, taps: number[]) {
 
   // buffer signal
   const save = useRef<Float32Array | null>(null);
-  const signal = useMemoRef(
-    () => {
-      const result = new Float32Array(taps.length);
-      if (save.current) {
-        // copy history
-        result.set(save.current.subarray(0, taps.length), 0);
-        index.current = index.current >= taps.length ? 0 : index.current;
-      }
-      return result;
-    },
-    // reallocate if taps length changes
-    [taps.length]
-  );
+  const signal = useMemoRef(() => new Float32Array(taps.length));
   save.current = signal.current;
 
   // append latest data point

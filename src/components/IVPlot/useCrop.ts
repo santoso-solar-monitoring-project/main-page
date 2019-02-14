@@ -1,31 +1,35 @@
 import { newEffect } from 'utils/canvas';
 import { declare } from 'utils/DefaultProps';
+import { RelativeCoordinate } from 'utils/canvas/EnhancedContext';
 
 const Args = declare(
   class {
     static defaults = {
-      // fraction of
-      width: 0,
-      // plus fraction of
-      height: 0.05,
+      by: {
+        width: 0,
+        height: 0.05,
+      } as RelativeCoordinate,
       invert: false,
     };
   }
 );
 
-export const useCrop = Args.wrap(
-  ({ invert, ...bounds }) => {
-    return newEffect(ctx => {
-      const { width, height } = ctx;
-      const clipBy = ctx.deriveCoordinate(bounds);
-      const region = new Path2D();
-      ctx.beginPath();
-      region.rect(clipBy, 0, width - 2 * clipBy, height);
-      if (invert) {
-        region.rect(0, 0, width, height);
-      }
-      ctx.clip(region, 'evenodd');
-    });
+export const useClip = Args.wrap(
+  ({ invert, by }) => {
+    return newEffect(
+      ctx => {
+        const { width, height } = ctx;
+        const clipBy = ctx.deriveCoordinate(by);
+        const region = new Path2D();
+        ctx.beginPath();
+        region.rect(clipBy, 0, width - 2 * clipBy, height);
+        if (invert) {
+          region.rect(0, 0, width, height);
+        }
+        ctx.clip(region, 'evenodd');
+      },
+      { inputs: [invert, by] }
+    );
   },
   { hint: 'all props optional' }
 );

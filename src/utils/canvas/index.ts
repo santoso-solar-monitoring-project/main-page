@@ -10,7 +10,9 @@ import {
   EnhancedContext as _EnhancedContext,
   RelativeCoordinate as _RelativeCoordinate,
   RelativeCoordinates as _RelativeCoordinates,
+  CanvasStyle as _CanvasStyle,
 } from './EnhancedContext';
 export type EnhancedContext = _EnhancedContext;
 export type RelativeCoordinate = _RelativeCoordinate;
 export type RelativeCoordinates = _RelativeCoordinates;
+export type CanvasStyle = _CanvasStyle;

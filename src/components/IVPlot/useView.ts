@@ -3,6 +3,7 @@ import { useMemoSpring } from 'utils/CustomHooks';
 import Denque from 'denque';
 import * as d3 from 'd3';
 import clamp from 'utils/clamp';
+import { useMemo } from 'react';
 
 export function useView(
   scaleX: d3.ScaleLinear<number, number>,
@@ -20,8 +21,13 @@ export function useView(
   const now = Date.now();
   const end = Math.min(now - seekOffset, now - pad * samplePeriod);
   const start = end - timespan;
-  const bisector = d3.bisector((d: Pair) => d[0]);
+  // scaleX.domain([start, end]);
+  const adjust = ([t0, t1]: Pair) => [end + t0, end + t1];
+  // console.log(scaleX.domain());
+  scaleX = scaleX.copy().domain(adjust(scaleX.domain() as Pair));
+  // console.log(scaleX.domain());
 
+  const bisector = useMemo(() => d3.bisector((d: Pair) => d[0]), []);
   // Extra factor of 2 (kind of arbitrary) is to ensure target is included
   const history = extraHistory * timespan;
   const leftBound = clamp(
@@ -39,8 +45,6 @@ export function useView(
     clamp(left - pad, {
       lo: 0,
     });
-
-  scaleX.domain([start, end]);
 
   // Get current view of buffer
   const view = buffer
