@@ -1,27 +1,25 @@
 import { useEffect } from 'react';
 import { getContext } from 'utils/canvas';
 import { GoodCanvasChild } from 'components/GoodCanvas';
-import { declare } from 'utils/DefaultProps';
+import { defaults, declare } from 'utils/DefaultProps';
+import { BaseProps } from 'utils/BaseProps';
 
 export const Props = declare(
-  class {
-    static defaults = {
-      radius: 100,
-    };
-  },
-  GoodCanvasChild.Props
+  defaults({
+    radius: 100,
+  }),
+  BaseProps,
+  GoodCanvasChild
 );
 
 const Corners: React.FC<typeof Props.propsOut> = props => {
   useEffect(() => {
-    const { canvasRef, canvasStyle, canvasEffects, radius } = props;
+    const { canvasRef, radius } = props;
     const { canvas, ctx } = getContext(canvasRef);
     const { width, height } = canvas.dims;
 
     ctx.clearRect(0, 0, width, height);
     ctx.save();
-    Object.assign(ctx, canvasStyle);
-    if (canvasEffects) canvasEffects(ctx);
 
     ctx.fillStyle = 'red';
     ctx.beginPath();

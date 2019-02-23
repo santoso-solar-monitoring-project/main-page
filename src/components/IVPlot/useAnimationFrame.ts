@@ -3,8 +3,9 @@ import { useEffect, useRef } from 'react';
 import noop from 'utils/noop';
 
 export function useAnimationFrame(
-  f: (...args: any[]) => void = noop,
-  { silent = false } = {}
+  f: () => void = noop,
+  { silent = true } = {},
+  inputs?: React.InputIdentityList
 ) {
   const choice = useRef(silent);
   if (silent !== choice.current) {
@@ -13,20 +14,15 @@ export function useAnimationFrame(
     );
   }
   choice.current = silent;
-
   const [, nextFrame] = silent ? useSilentCounter() : useCounter();
+
   useEffect(() => {
     const loop = () => {
-      // console.log(++n);
       f();
       nextFrame();
-      // id = requestAnimationFrame(loop);
+      id = requestAnimationFrame(loop);
     };
-    // let id = requestAnimationFrame(loop);
-    // return () => cancelAnimationFrame(id);
-
-    // let n = 0;
-    let id = window.setInterval(loop, 16.7);
-    return () => window.clearInterval(id);
-  }, []);
+    let id = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(id);
+  }, inputs);
 }

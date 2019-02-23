@@ -23,6 +23,9 @@ export type UnboxIntersect<I> = I extends { 0: infer T } ? T : never;
 export type ArrayToIntersection<T extends any[]> = UnboxIntersect<
   UnionToIntersect<ArrayToBoxedUnion<T>>
 >;
+export type ArrayToIntersectionNonNull<T extends any[]> = T extends { 0: any }
+  ? ArrayToIntersection<T>
+  : {};
 
 // https://stackoverflow.com/a/54010248/3624264
 type Narrowable =
@@ -58,3 +61,45 @@ export type Equals<A, B, C = true, D = false> = Extends<
 // type BBBBB = Extends<any, never>
 // type ccccc = Extends<string, number|string>
 // type CCCCC = Extends<number|string, string>
+
+/* 
+Tuple stuff seems interesting but difficult.
+*/
+// https://github.com/Microsoft/TypeScript/issues/25947#issuecomment-446916897
+
+// http://developingthoughts.co.uk/typescript-recursive-conditional-types/
+/* 
+  NonNullableArrays doesn't work... Can't assign NonNullable<T[]> to T[]...
+*/
+// type AnyFunction = (...args: any[]) => any;
+// type TopLevelProperty =
+//   | number
+//   | string
+//   | boolean
+//   | symbol
+//   | undefined
+//   | null
+//   | void
+//   | AnyFunction
+//   | Date;
+// export type NonNullableArrays<T> = T extends object ? _NonNullableArrays<T> : T;
+// type _NonNullableArrays<T> = {
+//   [K in keyof T]: T[K] extends TopLevelProperty
+//   ? T[K]
+//   : T[K] extends Array<infer U>
+//   ? Array<NonNullableArrays<U>>
+//   : T[K]
+// };
+// type aaaa = NonNullableArrays<{ hi: [1, 2, 3, null, 4, [1, 2, null]] }>;
+
+// https://github.com/Microsoft/TypeScript/issues/23199#issuecomment-379323872
+export type SelectKeys<T, U> = {
+  [P in keyof T]: T[P] extends U ? P : never
+}[keyof T];
+
+export type FilterOut<T, U = never> = {
+  [K in Exclude<keyof T, SelectKeys<T, U>>]: T[K]
+};
+// type bleh = FilterOut<[1,2,never], never>;
+
+export type Filter<A, B> = A extends B ? A : never;

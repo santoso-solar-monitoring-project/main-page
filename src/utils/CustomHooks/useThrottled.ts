@@ -14,7 +14,7 @@ interface Args extends Partial<typeof defaults> {
 
 export function useThrottled(args: Args, inputs?: React.InputIdentityList) {
   useEffect(() => {
-    const { event, first, last, timeout } = withImm.mergeFull(defaults, args);
+    const { event, first, last, timeout } = withImm.merge(defaults, args);
 
     if (!event) return;
 

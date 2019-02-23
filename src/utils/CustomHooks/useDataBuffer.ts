@@ -6,15 +6,16 @@ const defaults = {
   maxSize: Infinity,
 };
 
-interface Args<T> extends Partial<typeof defaults> {
+interface Args<T extends number> extends Partial<typeof defaults> {
   initialValue: T[];
 }
 
-export function useDataBuffer<T = number>(
+export function useDataBuffer<T extends number = number>(
   args: Args<T>
 ): [Denque<T>, (newData: T[]) => void] {
-  const { initialValue, maxSize } = withImm.mergeFull(defaults, args);
-  const [buffer, setBuffer] = useState(() => new Denque<T>(initialValue!));
+  // const { initialValue, maxSize } = withImm.merge(defaults, args);
+  const { initialValue, maxSize } = withImm.merge(args);
+  const [buffer, setBuffer] = useState(() => new Denque<T>(initialValue));
   const updateBuffer = useCallback(
     (newData: T[]) =>
       setBuffer(buf => {

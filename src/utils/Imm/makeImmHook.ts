@@ -1,6 +1,7 @@
 import React from 'react';
-import { ImmMapType, mapFromJS } from 'utils/Imm';
+import { ImmMapType, fromJS } from 'utils/Imm';
 import { useMemoRef } from 'utils/CustomHooks';
+import { _mergeDeep } from './withImm';
 
 type Callable = (...args: any[]) => any;
 
@@ -28,9 +29,9 @@ export function makeImmHook<
     inputs: React.InputIdentityList
   ): UseCallBackCase<T, X, UseEffectCase<T, X, UseMemoCase<T, X>>> {
     const savedInputs = useMemoRef<ImmMapType<typeof inputs>>(() =>
-      mapFromJS(inputs)
+      fromJS(inputs)
     );
-    savedInputs.current = savedInputs.current.mergeDeep(mapFromJS(inputs));
+    savedInputs.current = _mergeDeep(savedInputs.current, inputs);
 
     return hook(arg, [savedInputs.current]);
   }

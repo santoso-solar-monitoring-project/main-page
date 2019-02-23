@@ -5,6 +5,7 @@ import IVPlot from 'components/IVPlot';
 
 class App extends Component<{}, { bleh: number }> {
   render() {
+    // return 'blehehehehehe';
     return <IVPlot />;
     // return (
     //   <div className='App'>

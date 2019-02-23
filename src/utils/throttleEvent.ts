@@ -12,7 +12,7 @@ export const defaultArgs = {
 
 const throttle = (args: Args) => {
   // unpack args
-  const { _window } = withImm.merge(defaultArgs, args);
+  const { _window } = withImm.mergeIntersect(defaultArgs, args);
   const { event, customEvent } = args;
 
   if (!event) throw Error('`event` should not be blank');

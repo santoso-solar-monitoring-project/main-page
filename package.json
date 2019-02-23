@@ -6,9 +6,9 @@
     "d3": "^5.7.0",
     "denque": "^1.4.0",
     "immutable": "^4.0.0-rc.12",
-    "react": "16.7.0-alpha.2",
-    "react-dom": "16.7.0-alpha.2",
-    "react-spring": "^7.2.10"
+    "react": "16.8.0",
+    "react-dom": "16.8.0",
+    "react-spring": "^8.0.7"
   },
   "scripts": {
     "start": "react-scripts start",

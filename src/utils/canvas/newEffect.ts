@@ -1,29 +1,22 @@
 import { EnhancedContext, CanvasStyle } from './EnhancedContext';
 import noop from 'utils/noop';
-import { declare } from 'utils/DefaultProps';
+import { defaults } from 'utils/DefaultProps';
 import warn from 'utils/warn';
 import { useImm } from 'utils/Imm';
 import { useMemo } from 'react';
 
 export type CanvasEffect = (ctx: EnhancedContext) => void;
 
-export const EffectOptions = declare(
-  class {
-    static defaults = {
-      style: {} as CanvasStyle,
-      injectEffect: noop as CanvasEffect,
-    };
-  }
-);
+export const EffectOptions = defaults({
+  style: {} as CanvasStyle,
+  injectEffect: noop as CanvasEffect,
+});
 
-const Options = declare(
-  class {
-    static defaults = {
-      inputs: undefined as React.InputIdentityList | void,
-      injection: false,
-    };
-  },
-  EffectOptions
+const Options = EffectOptions.extend(
+  defaults({
+    inputs: undefined as React.InputIdentityList | void,
+    injection: false,
+  })
 );
 
 export function newEffect(

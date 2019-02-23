@@ -1,7 +1,7 @@
 import { EnhancedContext } from '.';
 import { getContext } from './getContext';
 import { GoodCanvasElement } from 'components/GoodCanvas';
-import { REF } from 'utils/easy';
+import { REF } from 'utils/easier';
 
 // in theory, SVGMatrix will be used by the Canvas API in the future;
 // in practice, we can borrow an SVG matrix today!
@@ -130,7 +130,7 @@ export function enhanceContext(
       return result;
     },
 
-    deriveXY({
+    deriveCoordinates({
       x = {},
       y = {},
     }: Partial<{

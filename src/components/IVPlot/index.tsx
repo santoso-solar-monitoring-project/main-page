@@ -1,9 +1,9 @@
 import React from 'react';
 import GoodCanvas from 'components/GoodCanvas';
-import { BaseProps } from 'utils/BaseProps';
-import _IVPlot from './_IVPlot';
-import { declare } from 'utils/DefaultProps';
-import { FC } from 'utils/easy';
+import { StyleProp } from 'utils/BaseProps';
+import { _IVPlot } from './_IVPlot';
+import { declare, defaults } from 'utils/DefaultProps';
+import { FC } from 'utils/easier';
 
 /* interface ModeType {
   style: React.CSSProperties | {};
@@ -32,17 +32,16 @@ export const lightMode: ModeType = {
 }; */
 
 export const Props = declare(
-  class {
-    static defaults = {
-      style: {
-        width: '100%',
-        height: '300px',
-        borderRadius: '5px',
-        // border: '10px solid blue',
-        backgroundColor: 'black',
-      } as typeof BaseProps.propsOut.style,
-    };
-  }
+  defaults({
+    style: {
+      width: '100%',
+      height: '300px',
+      borderRadius: '5px',
+      // border: '10px solid blue',
+      backgroundColor: 'black',
+    },
+  }),
+  StyleProp
 );
 
 const IVPlot: FC<typeof Props.propsOut> = props => {

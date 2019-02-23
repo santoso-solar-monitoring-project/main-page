@@ -31,7 +31,7 @@ export interface EnhancedContext extends CanvasRenderingContext2D {
     ...args: T
   ): T extends (...args: any[]) => infer W ? W : any;
   deriveCoordinate(coord: RelativeCoordinate): number;
-  deriveXY(coords: RelativeCoordinates): { x: number; y: number };
+  deriveCoordinates(coords: RelativeCoordinates): { x: number; y: number };
   readonly canvas: typeof GoodCanvasElement.propsOut;
   readonly width: number;
   readonly height: number;

@@ -1,71 +1,72 @@
 import { Pair } from 'utils/Pair';
-import { useMemoSpring } from 'utils/CustomHooks';
+import { useSpring } from 'react-spring';
 import Denque from 'denque';
 import * as d3 from 'd3';
 import clamp from 'utils/clamp';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { newEffect } from 'utils/canvas';
+import { required, defaults, declare } from 'utils/DefaultProps';
 
-export function useView(
-  scaleX: d3.ScaleLinear<number, number>,
-  scaleY: d3.ScaleLinear<number, number>,
-  buffer: Denque<Pair>,
-  seekOffset: number,
-  timespan: number,
-  samplePeriod: number,
-  stride: number,
-  // fraction of timespan to extend memory by for vertical autoscaling
-  extraHistory = 0
-) {
-  // Set end time and x-axis scaling.
-  const pad = 2; // extra samples to keep on edges
-  const now = Date.now();
-  const end = Math.min(now - seekOffset, now - pad * samplePeriod);
-  const start = end - timespan;
-  // scaleX.domain([start, end]);
-  const adjust = ([t0, t1]: Pair) => [end + t0, end + t1];
-  // console.log(scaleX.domain());
-  scaleX = scaleX.copy().domain(adjust(scaleX.domain() as Pair));
-  // console.log(scaleX.domain());
+const Args = declare(
+  required<{
+    scaleX: d3.ScaleLinear<number, number>;
+    scaleY: d3.ScaleLinear<number, number>;
+    buffer: Denque<Pair>;
+  }>(),
+  defaults({
+    // fraction of timespan to extend memory by for vertical autoscaling
+    extraHistory: 0,
+    maxPoints: 100,
+  })
+);
 
-  const bisector = useMemo(() => d3.bisector((d: Pair) => d[0]), []);
-  // Extra factor of 2 (kind of arbitrary) is to ensure target is included
-  const history = extraHistory * timespan;
-  const leftBound = clamp(
-    Math.ceil(buffer.length - (2 * (now - start + history)) / samplePeriod),
-    { lo: 0 }
-  );
-  const right = bisector.right(buffer, end, leftBound);
-  const left = bisector.left(buffer, start - history, leftBound, right);
-  const padRight =
-    clamp(right + pad, {
-      hi: buffer.length,
-    }) - right;
-  const padLeft =
-    left -
-    clamp(left - pad, {
-      lo: 0,
+export const useView = Args.wrap(
+  ({ scaleX, scaleY, buffer, extraHistory, maxPoints }) => {
+    const [{ extent }, update] = useSpring(() => ({
+      extent: [0, 0],
+      config: { tension: 60, friction: 10 },
+    }));
+    const currentScaleX = scaleX.copy();
+    const bisector = useMemo(() => d3.bisector((d: Pair) => d[0]), []);
+    const transformed = useRef([] as Pair[]);
+
+    const effect = newEffect(() => {
+      // Adjust the input scale domain for current time.
+      const now = Date.now();
+      currentScaleX.domain(scaleX.domain().map(x => x + now));
+      const [start, end] = currentScaleX.domain();
+      const timespan = end - start;
+
+      // Find indices in buffer corresponding to [start, end] times.
+      const history = extraHistory * timespan;
+      const left = bisector.left(buffer, start - history);
+      const right = bisector.right(buffer, end, left);
+
+      // Pad indices a little so the edge-jitter of the spline is not visible
+      const pad = 2;
+      const padRight = clamp(right + pad, [, buffer.length]);
+      const padLeft = clamp(left - pad, [0]);
+
+      // Calculate the stride to enforce maxPoints
+      const stride = clamp(Math.ceil((padRight - padLeft) / maxPoints), [1]);
+
+      // Slice the view of the buffer
+      const view = buffer
+        .slice(padLeft, padRight)
+        .filter(
+          (_, i, { length }) => i < pad || i >= length - pad || i % stride == 0
+        );
+
+      // Set y-axis scaling for view
+      if (view.length) {
+        update({ extent: d3.extent(view, d => d[1]) as Pair });
+      }
+      scaleY.domain(extent.value);
+      transformed.current = view.map(
+        ([x, y]): Pair => [currentScaleX(x), scaleY(y)]
+      );
     });
 
-  // Get current view of buffer
-  const view = buffer
-    .slice(left - padLeft, right + padRight)
-    .filter(
-      (_, i, a) => i < padLeft || i >= a.length - padRight || i % stride == 0
-    );
-
-  // console.log('timespan:', timespan);
-  // console.log('stride:', stride);
-  // console.log('left:', left);
-  // console.log('right:', right);
-  // console.log('start - pad:', start - pad);
-
-  // Set y-axis scaling for view
-  const extent = d3.extent(view.slice(), d => d[1]) as Pair;
-  const [lo] = useMemoSpring(extent[0], { tension: 60, friction: 10 });
-  const [hi] = useMemoSpring(extent[1], { tension: 60, friction: 10 });
-  scaleY.domain([lo, hi] as Pair);
-
-  const transformed = view.map(([x, y]): Pair => [scaleX(x), scaleY(y)]);
-
-  return { view: transformed, padLeft, padRight };
-}
+    return [transformed, effect] as [typeof transformed, typeof effect];
+  }
+);

@@ -1,114 +1,57 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo } from 'react';
 import { GoodCanvasChild } from 'components/GoodCanvas';
 import { usePoints } from 'components/usePoints';
 import { useLine } from 'components/useLine';
-import useDataFeed from './useDataFeed';
+import { useDataFeed } from './useDataFeed';
 import { useView } from './useView';
 import { clear, getContext } from 'utils/canvas';
 import { useDash } from './useDash';
 import { useFPS } from './useFPS';
 import { useScalesXY } from './useScales';
-import { FC } from 'utils/easy';
-import { useTimeSpan } from './useTimeSpan';
+import { useTimespan } from './useTimespan';
 import { useAnimationFrame } from './useAnimationFrame';
 import { useClip } from './useCrop';
-import { Pair } from 'utils/Pair';
-import * as d3 from 'd3';
+import { useZoom } from './useZoom';
 
-const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
-  const { canvasRef, canvasNeedsUpdate } = props;
-
-  const [amps, samplePeriod] = useDataFeed({
+export const _IVPlot = GoodCanvasChild.wrap(props => {
+  const amps = useDataFeed({
     samplePeriod: 500,
-    maxSize: 10000,
+    maxSize: 1000,
   });
-  const [volts] = useDataFeed({
+  const volts = useDataFeed({
     samplePeriod: 500,
-    maxSize: 10000,
+    maxSize: 1000,
   });
 
-  const padX = 0; // fraction of canvas width (applied left and right)
-  const padY = 0.05; // fraction of canvas height (applied top and bottom)
-  const [scaleX, scaleY] = useScalesXY(
-    canvasRef,
-    canvasNeedsUpdate,
-    padX,
-    padY
-  );
-  const [, scaleY2] = useScalesXY(canvasRef, canvasNeedsUpdate, padX, padY);
-
-  const timespan = useRef(7000); // milliseconds
-  const speed = useRef(100); // translate by pixels / second
-  const zoom = useRef(1); // factor to scale data down by
-  const baseSampleDensity = 0.1; // minimum samples per pixel
-  const stride = useRef(1); // take "one of every `stride`" elements of buffer
-  useTimeSpan({
-    canvasRef,
-    timespan,
-    speed,
-    zoom,
-    samplePeriod,
-    baseSampleDensity,
-    stride,
+  const [scaleX, scaleY] = useScalesXY({
+    padding: { y: { height: 0.05 } },
+    ...props,
+  });
+  const [, scaleY2] = useScalesXY({
+    padding: { y: { height: 0.05 } },
+    ...props,
   });
 
-  const diff = ([l, r]: Pair) => r - l;
-  const baseScale = useMemo(
-    () => d3.scaleLinear().domain([-timespan.current, 0]),
-    []
-  );
-  const zoomedScale = useRef(baseScale);
-  {
-    useEffect(() => {
-      console.log(
-        'hi',
-        scaleX.range(),
-        diff(scaleX.range() as Pair),
-        baseScale.domain()
-      );
-      baseScale.range(scaleX.range());
-    }, [canvasNeedsUpdate]);
+  const timespan = useTimespan({
+    speed: 100,
+    ...props,
+  });
 
-    const zoom = d3
-      .zoom<HTMLCanvasElement, any>()
-      .scaleExtent([1 / 20, 1])
-      .translateExtent([[-20 * diff(baseScale.range() as Pair), 0], [0, 0]]);
-    useEffect(() => {
-      zoom.on('zoom', () => {
-        const t = d3.event.transform as ReturnType<typeof d3.zoomTransform>;
-        zoomedScale.current = t.rescaleX(baseScale);
-        console.log(
-          t.toString(),
-          t.rescaleX(baseScale).domain(),
-          baseScale.domain()
-        );
-      });
-      d3.select(canvasRef.current as HTMLCanvasElement).call(zoom);
-      Object.assign(window, { canvas: canvasRef.current });
-    }, []);
-  }
+  const baseScale = scaleX.copy().domain([-timespan, 0]);
+  const zoomedScale = useZoom({ baseScale, ...props });
 
-  const seekOffset = useRef(0); // milliseconds to shift window into the past by
-  const { view: ampsView } = useView(
-    zoomedScale.current,
-    scaleY,
-    amps,
-    seekOffset.current,
-    timespan.current,
-    samplePeriod,
-    stride.current
-  );
-  const { view: voltsView } = useView(
-    zoomedScale.current,
-    scaleY2,
-    volts,
-    seekOffset.current,
-    timespan.current,
-    samplePeriod,
-    stride.current
-  );
+  const [ampsView, updateAmpsView] = useView({
+    scaleX: zoomedScale,
+    scaleY: scaleY,
+    buffer: amps,
+  });
+  const [voltsView, updateVoltsView] = useView({
+    scaleX: zoomedScale,
+    scaleY: scaleY2,
+    buffer: volts,
+  });
 
-  const dashed = useDash({ segments: [4, 6], speed: 1 });
+  const dashed = useDash({ segments: [4, 6], period: 1000 });
   const inside = useClip({ by: { height: 0.1 } });
   const outside = useClip({ by: { height: 0.1 }, invert: true });
   const line = useLine({
@@ -129,6 +72,8 @@ const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
   });
 
   const animations = [
+    updateAmpsView,
+    updateVoltsView,
     clear,
     outside(dashed(line)),
     outside(dashed(line2)),
@@ -137,14 +82,12 @@ const _IVPlot: FC<typeof GoodCanvasChild.Props.propsOut> = props => {
     useFPS({ offset: { x: { height: -0.1 } } }),
   ];
 
-  if (canvasRef.current) {
-    const { ctx } = getContext(canvasRef);
+  let n = 0;
+  useAnimationFrame(() => {
+    const { ctx } = getContext(props.canvasRef);
     animations.forEach(e => e(ctx));
-  }
-
-  useAnimationFrame();
+    console.log('frame:', ++n);
+  });
 
   return null;
-};
-
-export default GoodCanvasChild.Props.wrap(_IVPlot);
+});

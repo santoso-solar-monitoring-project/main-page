@@ -1,21 +1,16 @@
 import { newEffect } from 'utils/canvas';
-import { declare } from 'utils/DefaultProps';
+import { defaults } from 'utils/DefaultProps';
 
-export const Args = declare(
-  class {
-    static defaults = {
-      spread: 0,
-      blur: 1,
-      offsetX: 0,
-      offsetY: 0,
-      color: 'inherit',
-    };
-  }
-);
+export const Args = defaults({
+  spread: 0,
+  blur: 1,
+  offsetX: 0,
+  offsetY: 0,
+  color: 'inherit',
+});
 
 export const useGlow = Args.wrap(
-  args => {
-    const { spread, blur, offsetX, offsetY, color } = args;
+  ({ spread, blur, offsetX, offsetY, color }) => {
     return newEffect(
       ctx => {
         const { lineWidth = 0 } = ctx;
@@ -28,8 +23,7 @@ export const useGlow = Args.wrap(
           ctx.strokeStyle = color;
         }
       },
-      { inputs: [args], injection: true }
+      { injection: true }
     );
-  },
-  { hint: 'all props optional' }
+  }
 );

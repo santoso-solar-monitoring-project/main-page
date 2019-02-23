@@ -13,7 +13,7 @@ interface Args<T> extends Partial<typeof defaults> {
 export function useDataBufferSilent<T = number, U extends Array<T> = T[]>(
   args: Args<T>
 ): [Denque<T>, (newData: U) => void] {
-  const { initialValue, maxSize } = withImm.mergeFull(defaults, args);
+  const { initialValue, maxSize } = withImm.merge(defaults, args);
   const buffer = useMemo(
     () => (initialValue ? new Denque<T>(initialValue) : new Denque<T>()),
     []

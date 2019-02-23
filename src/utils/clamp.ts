@@ -1,3 +1,8 @@
-const clamp = (x: number, { lo = -Infinity, hi = Infinity } = {}) =>
-  Math.min(hi, Math.max(lo, x));
+import { withImm } from './Imm';
+
+const clamp = (x: number, range: [number?, number?]) => {
+  const [lo, hi] = withImm.mergeIntersect([-Infinity, Infinity], range);
+  return Math.min(hi, Math.max(lo, x));
+};
+
 export default clamp;

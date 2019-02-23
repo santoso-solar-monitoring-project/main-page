@@ -2,7 +2,7 @@ import { GoodCanvasElement } from './GoodCanvasElement';
 export { GoodCanvasElement } from './GoodCanvasElement';
 
 // Re-export ChildProps.*
-import * as GoodCanvasChild from './GoodCanvasChild';
+import { Props as GoodCanvasChild } from './GoodCanvasChild';
 export { GoodCanvasChild };
 
 import React, {
@@ -83,48 +83,41 @@ const GoodCanvas: React.RefForwardingComponent<
   warn();
 
   // Scale the canvas resolution.
-  useImm(useLayoutEffect)(
-    () => {
-      const container = containerRef.current!;
-      const { canvas, ctx } = getContext(ref);
-      const computeStyle = (property: string) =>
-        parseFloat(
-          window.getComputedStyle(container).getPropertyValue(property)
+  useImm(useLayoutEffect)(() => {
+    const container = containerRef.current!;
+    const { canvas, ctx } = getContext(ref);
+    const computeStyle = (property: string) =>
+      parseFloat(window.getComputedStyle(container).getPropertyValue(property));
+    let width = computeStyle('width');
+    let height = computeStyle('height');
+
+    // Subtract padding and border.
+    if (container.style.boxSizing == 'border-box') {
+      // Get padding and border offsets for one direction.
+      const getTotalOffset = (direction: string) => {
+        return (
+          computeStyle(`border-${direction}-width`) +
+          computeStyle(`padding-${direction}`)
         );
-      let width = computeStyle('width');
-      let height = computeStyle('height');
+      };
 
-      // Subtract padding and border.
-      if (container.style.boxSizing == 'border-box') {
-        // Get padding and border offsets for one direction.
-        const getTotalOffset = (direction: string) => {
-          return (
-            computeStyle(`border-${direction}-width`) +
-            computeStyle(`padding-${direction}`)
-          );
-        };
+      // Subtract horizontal offset.
+      width -= getTotalOffset('left') + getTotalOffset('right');
 
-        // Subtract horizontal offset.
-        width -= getTotalOffset('left') + getTotalOffset('right');
+      // Subtract vertical offset.
+      height -= getTotalOffset('top') + getTotalOffset('bottom');
+    }
 
-        // Subtract vertical offset.
-        height -= getTotalOffset('top') + getTotalOffset('bottom');
-      }
+    // Hard work happens here.
+    const t = performance.now();
+    scaleCanvas({ canvas, width, height, ctx });
+    warn(
+      `GoodCanvas rescale complete. (${(performance.now() - t).toFixed(2)} ms)`
+    );
 
-      // Hard work happens here.
-      const t = performance.now();
-      scaleCanvas({ canvas, width, height, ctx });
-      warn(
-        `GoodCanvas rescale complete. (${(performance.now() - t).toFixed(
-          2
-        )} ms)`
-      );
-
-      // Notify parents
-      if (!firstRender.current && notify) notify();
-    },
-    [needsUpdate, style]
-  );
+    // Notify parents
+    if (!firstRender.current && notify) notify();
+  }, [needsUpdate, style]);
 
   // Attach setNeedsUpdate to canvas DOM element.
   useLayoutEffect(() => {
@@ -147,17 +140,14 @@ const GoodCanvas: React.RefForwardingComponent<
   );
 
   // Warn about re-scale when styles change.
-  useImm(useEffect)(
-    () => {
-      if (firstRender.current) {
-        return;
-      }
-      warn(
-        'GoodCanvas is rescaling because the `style` prop changed. If this is happening often, there could be a negative performance impact.'
-      );
-    },
-    [style]
-  );
+  useImm(useEffect)(() => {
+    if (firstRender.current) {
+      return;
+    }
+    warn(
+      'GoodCanvas is rescaling because the `style` prop changed. If this is happening often, there could be a negative performance impact.'
+    );
+  }, [style]);
 
   // Mark first render cycle complete.
   useEffect(() => {
@@ -175,28 +165,14 @@ const GoodCanvas: React.RefForwardingComponent<
   warn('GoodCanvas RENDER');
 
   // Attach GoodCanvasChildPropsType props to children subtree.
-  const decoratedChildren = useImm(useMemo)(
-    () => {
-      return propagateProps<typeof GoodCanvasChild.OwnProps.propsIn>(
-        children,
-        child => {
-          const { canvasStyle, canvasEffects } = GoodCanvasChild.Props(
-            child.props
-          );
-
-          return {
-            canvasRef: ref as React.RefObject<
-              typeof GoodCanvasElement.propsOut
-            >,
-            canvasNeedsUpdate: needsUpdate,
-            canvasStyle,
-            canvasEffects,
-          };
-        }
-      );
-    },
-    [needsUpdate, children, ref]
-  );
+  const decoratedChildren = useImm(useMemo)(() => {
+    return propagateProps<typeof GoodCanvasChild.propsIn>(children, _child => {
+      return {
+        canvasRef: ref as React.RefObject<typeof GoodCanvasElement.propsOut>,
+        canvasNeedsUpdate: needsUpdate,
+      };
+    });
+  }, [needsUpdate, children, ref]);
 
   return (
     <div style={style} ref={containerRef}>

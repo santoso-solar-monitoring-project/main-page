@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Controller } from 'react-spring';
+import { Controller } from 'react-spring/renderprops';
 import { useImm } from 'utils/Imm';
 
 // Interpolate between values
