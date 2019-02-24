@@ -6,7 +6,15 @@ import IVPlot from 'components/IVPlot';
 class App extends Component<{}, { bleh: number }> {
   render() {
     // return 'blehehehehehe';
-    return <IVPlot />;
+    return (
+      <div style={{ padding: '1vw' }}>
+        <IVPlot />
+        <br />
+        <IVPlot />
+        <br />
+        <IVPlot />
+      </div>
+    );
     // return (
     //   <div className='App'>
     //     <header className='App-header'>

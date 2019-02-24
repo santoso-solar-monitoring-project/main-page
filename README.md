@@ -14,24 +14,26 @@ File Overview:
 
 ```bash
 $ wc -l src/components/*/** src/utils/**/* src/utils/*
-     54 src/components/Blur/index.tsx
+     75 src/components/Blur/index.tsx
      47 src/components/CornersTest/Corners.tsx
      14 src/components/CornersTest/index.tsx
      29 src/components/Glow/index.tsx
       8 src/components/GoodCanvas/GoodCanvasChild.ts
      15 src/components/GoodCanvas/GoodCanvasElement.ts
-    198 src/components/GoodCanvas/index.tsx
-     93 src/components/IVPlot/_IVPlot.tsx
+    195 src/components/GoodCanvas/index.tsx
+    205 src/components/IVPlot/_IVPlot.tsx
      66 src/components/IVPlot/index.tsx
-     28 src/components/IVPlot/useAnimationFrame.ts
+     43 src/components/IVPlot/useAnimationFrame.ts
+    169 src/components/IVPlot/useControls.ts
      25 src/components/IVPlot/useCrop.ts
-     33 src/components/IVPlot/useDash.ts
+     23 src/components/IVPlot/useDash.ts
      46 src/components/IVPlot/useDataFeed.ts
-     60 src/components/IVPlot/useFPS.ts
+     69 src/components/IVPlot/useFPS.ts
+     14 src/components/IVPlot/usePaddingSpring.ts
      32 src/components/IVPlot/useScales.ts
+      7 src/components/IVPlot/useTicks.ts
      24 src/components/IVPlot/useTimespan.ts
-     72 src/components/IVPlot/useView.ts
-     60 src/components/IVPlot/useZoom.ts
+     97 src/components/IVPlot/useView.ts
      44 src/components/TitleBar/index.js
       4 src/components/TitleBar/lock.svg
      21 src/components/TitleBar/Login.js
@@ -48,28 +50,30 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
      21 src/utils/canvas/isValidGoodCanvas.ts
      84 src/utils/canvas/newEffect.ts
      53 src/utils/canvas/scaleCanvas.ts
-      9 src/utils/CustomHooks/index.ts
+     10 src/utils/CustomHooks/index.ts
       7 src/utils/CustomHooks/useCounter.ts
      31 src/utils/CustomHooks/useDataBuffer.ts
      28 src/utils/CustomHooks/useDataBufferSilent.ts
-     32 src/utils/CustomHooks/useDecay.ts
+     35 src/utils/CustomHooks/useDecay.ts
      19 src/utils/CustomHooks/useFIR.ts
       8 src/utils/CustomHooks/useMemoRef.ts
      32 src/utils/CustomHooks/useMemoSpring.ts
       7 src/utils/CustomHooks/useSilentCounter.ts
+     10 src/utils/CustomHooks/useSilentSwitch.ts
      44 src/utils/CustomHooks/useThrottled.ts
      23 src/utils/Imm/index.ts
      49 src/utils/Imm/makeImmHook.ts
       8 src/utils/Imm/mapFromJS.ts
      18 src/utils/Imm/useImm.ts
-    139 src/utils/Imm/withImm.ts
+    135 src/utils/Imm/withImm.ts
      16 src/utils/BaseProps.ts
 wc: src/utils/canvas: Is a directory
       0 src/utils/canvas
       8 src/utils/clamp.ts
 wc: src/utils/CustomHooks: Is a directory
       0 src/utils/CustomHooks
-    233 src/utils/DefaultProps.ts
+    227 src/utils/DefaultProps.ts
+      5 src/utils/diff.ts
       7 src/utils/easier.ts
       4 src/utils/evaluate.ts
       2 src/utils/identity.ts
@@ -83,5 +87,5 @@ wc: src/utils/Imm: Is a directory
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   2485 total
+   2793 total
 ```

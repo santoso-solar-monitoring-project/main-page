@@ -1,32 +1,35 @@
 import { useRef } from 'react';
 import warn from 'utils/warn';
-import { declare } from 'utils/DefaultProps';
+import { defaults, required } from 'utils/DefaultProps';
 
-export const Args = declare(
-  class {
-    static required: {
-      datum: number;
-      delta: number; // ms
-    };
-    static defaults = {
-      minDelta: 10, // ms
-      maxDelta: Infinity, // ms
-      halfLife: 250, // ms
-    };
-  }
-);
+const Args = defaults({
+  initialValue: 0,
+  minDelta: 10, // ms
+  maxDelta: Infinity, // ms
+  halfLife: 250, // ms
+});
+
+const UpdateArgs = required<{
+  datum: number;
+  delta: number; // ms
+}>();
 
 export const useDecay = Args.wrap(
-  ({ datum, delta, minDelta, maxDelta, halfLife }) => {
-    const signal = useRef(datum);
-    const decay = Math.pow(0.5, delta / halfLife);
-    if (delta < minDelta) {
-    } else if (delta > maxDelta) signal.current = 1000 / delta;
-    else signal.current = decay * signal.current + (1 - decay) * datum;
-    if (isNaN(signal.current)) {
-      warn('Signal was NaN...');
-      signal.current = 0;
-    }
-    return signal.current;
+  ({ initialValue, minDelta, maxDelta, halfLife }) => {
+    const signal = useRef(initialValue);
+
+    const update = UpdateArgs.wrap(({ datum, delta }) => {
+      const decay = Math.pow(0.5, delta / halfLife);
+      if (delta < minDelta) {
+      } else if (delta > maxDelta) signal.current = 1000 / delta;
+      else signal.current = decay * signal.current + (1 - decay) * datum;
+      if (isNaN(signal.current)) {
+        warn('Signal was NaN...');
+        signal.current = 0;
+      }
+      return signal.current;
+    });
+
+    return update;
   }
 );

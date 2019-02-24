@@ -11,10 +11,7 @@ export function defaultMerger<V>(_old: V, next: V) {
   return next;
 }
 
-// Overwrite properties in `target` from `sources`.
-// Does not add new properties not originally in `target`.
-// Undefined values in `sources` are ignored (do not overwrite `target` values).
-// Excludes dangerous React props.
+// Like `Object.assign` but properties are merged deeply. Sources are copied not modified. Does not preserve reference equality for Immutable objects because the result is converted to a POJ. Use `_mergeDeep` to get an Immutable object back. Passing no sources will yield an empty object {}. Undefined values in `sources` are ignored (do not overwrite values in first source). Only considers own properties of objects (not properties inherited in their prototypes). Does not add new properties not originally in `target`.
 export function mergeIntersect<T extends object, S extends any[]>(
   target: T,
   ...sources: S
@@ -22,7 +19,7 @@ export function mergeIntersect<T extends object, S extends any[]>(
   return mergeIntersectWith(ignoreUndefined, target, ...sources) as T;
 }
 
-// Same as `merge` but allows configuring merge conflict behavior to do something besides ignore `undefined` values in `sources`.
+// Same as `mergeIntersect` but properties are merged deeply using the custom merge conflict resolver passed.
 export function mergeIntersectWith<T extends object, S extends any[]>(
   merger: <K, V>(old: V, next: V, key: K) => V,
   target: T,
@@ -46,8 +43,7 @@ export function mergeIntersectWith<T extends object, S extends any[]>(
   return mergeWith(merger, target, ...sources) as T;
 }
 
-// Like `Object.assign` but properties are merged deeply. Sources are copied not modified. Passing no sources will yield an empty object {}.
-// Undefined values in `sources` are ignored (do not overwrite values in first source).
+// Like `Object.assign` but properties are merged deeply. Sources are copied not modified. Does not preserve reference equality for Immutable objects because the result is converted to a POJ. Use `_mergeDeep` to get an Immutable object back. Passing no sources will yield an empty object {}. Undefined values in `sources` are ignored (do not overwrite values in first source). Only considers own properties of objects (not properties inherited in their prototypes).
 // Note: For some reason TypeScript doesn't recognize if you call merge() with both spread and individual arguments.
 // For instance `merge(...args, defaultSettings)` does not work!
 // My signature is probably at fault but I don't know how to fix it. (2/23/19)
@@ -57,7 +53,7 @@ export function merge<T extends any[]>(...sources: T) {
   };
 }
 
-// Like `Object.assign` but properties are merged deeply using the custom merge conflict resolver passed. Sources are copied not modified. Passing no sources will yield an empty object {}.
+// Same as `merge` but properties are merged deeply using the custom merge conflict resolver passed.
 export function mergeWith<T extends any[]>(
   merger: <K, V>(old: V, next: V, key: K) => V,
   ...sources: T

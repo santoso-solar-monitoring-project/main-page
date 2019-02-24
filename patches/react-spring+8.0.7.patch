@@ -393,7 +393,7 @@ new mode 100755
  
  // Make ForwardedProps chainable with interpolate / make it an animated value.
  export type ForwardedProps<T> = Pick<T, Exclude<keyof T, ExcludedProps>>
-@@ -121,38 +123,89 @@ export type UseSpringProps<DS extends object> = Merge<
+@@ -121,38 +123,93 @@ export type UseSpringProps<DS extends object> = Merge<
  >
  
  // there's a third value in the tuple but it's not public API (?)
@@ -416,6 +416,10 @@ new mode 100755
 +/* My interpretation of the docs --Spencer 2/15 */
 +type InferFromStrong<T extends object> = T extends { to: infer TTo, from: infer TFrom }
 +  ? TTo & TFrom
++  : T extends { to: infer TTo }
++  ? TTo
++  : T extends { from: infer TFrom }
++  ? TFrom
 +  : ForwardedProps<T>
 +type ScriptProps<DS> = {
 +  from: DS,
@@ -426,7 +430,7 @@ new mode 100755
 +export function useSpring<DS extends object>(
    getProps: () => UseSpringProps<DS & CSSProperties>
 -): [ForwardedProps<DS>, SetUpdateFn<DS>]
-+): [AnimatedValue<InferFromStrong<DS>, isRaw<DS>>, SetUpdateFn<DS>]
++): [AnimatedValue<InferFromStrong<DS>, isRaw<DS>>, SetUpdateFn<InferFromStrong<DS>>]
  export function useSpring<DS extends object>(
 -  getProps: () => UseSpringProps<DS>
 -): [AnimatedValue<ForwardedProps<DS>>, SetUpdateFn<DS>]
@@ -440,7 +444,7 @@ new mode 100755
 +// My shortcut versions which return raw not animated values.
 +export function useSpring$<DS extends object>(
 +  getProps: () => UseSpringProps<DS & CSSProperties>
-+): [InferFromStrong<DS>, SetUpdateFn<DS>]
++): [InferFromStrong<DS>, SetUpdateFn<InferFromStrong<DS>>]
 +export function useSpring$<DS extends object>(
 +  script: ScriptProps<DS>):
 +  ForwardedProps<DS>
@@ -495,7 +499,7 @@ new mode 100755
  export function useTrail<DS extends object>(
    count: number,
    getProps: () => UseSpringProps<DS>
-@@ -161,6 +214,23 @@ export function useTrail<DS extends object>(
+@@ -161,6 +218,23 @@ export function useTrail<DS extends object>(
    count: number,
    values: UseSpringProps<DS>
  ): AnimatedValue<ForwardedProps<DS>>[] // safe to modify (result of .map)
@@ -519,7 +523,7 @@ new mode 100755
  
  export interface UseTransitionProps<TItem, DS extends object>
    extends HooksBaseProps {
-@@ -204,6 +274,15 @@ export interface UseTransitionResult<TItem, DS extends object> {
+@@ -204,6 +278,15 @@ export interface UseTransitionResult<TItem, DS extends object> {
    props: AnimatedValue<ForwardedProps<DS>>
  }
  
@@ -535,7 +539,7 @@ new mode 100755
  export function useTransition<TItem, DS extends CSSProperties>(
    items: ReadonlyArray<TItem> | TItem | null | undefined,
    keys:
-@@ -212,7 +291,7 @@ export function useTransition<TItem, DS extends CSSProperties>(
+@@ -212,7 +295,7 @@ export function useTransition<TItem, DS extends CSSProperties>(
      | TransitionKeyProps
      | null,
    values: Merge<DS & CSSProperties, UseTransitionProps<TItem, DS>>
@@ -544,7 +548,7 @@ new mode 100755
  export function useTransition<TItem, DS extends object>(
    items: ReadonlyArray<TItem> | TItem | null | undefined,
    keys:
-@@ -222,3 +301,22 @@ export function useTransition<TItem, DS extends object>(
+@@ -222,3 +305,22 @@ export function useTransition<TItem, DS extends object>(
      | null,
    values: Merge<DS, UseTransitionProps<TItem, DS>>
  ): UseTransitionResult<TItem, AnimatedValue<ForwardedProps<DS>>>[] // result array is safe to modify
@@ -571,7 +575,17 @@ old mode 100644
 new mode 100755
 --- a/node_modules/react-spring/web.js
 +++ b/node_modules/react-spring/web.js
-@@ -970,6 +970,9 @@ class AnimatedArray extends AnimatedArrayWithChildren {
+@@ -701,6 +701,9 @@ class AnimatedInterpolation extends AnimatedArrayWithChildren {
+     this.calc = Interpolation.create(_config, _arg);
+   }
+ 
++  get value() {
++    return this.getValue();
++  }
+ }
+ const interpolate$1 = (parents, config, arg) => parents && new AnimatedInterpolation(parents, config, arg);
+ 
+@@ -970,6 +973,9 @@ class AnimatedArray extends AnimatedArrayWithChildren {
      this.payload = array.map(n => new AnimatedValue(n));
    }
  
@@ -581,7 +595,7 @@ new mode 100755
  }
  
  let active = false;
-@@ -1084,8 +1087,16 @@ const start = controller => {
+@@ -1084,8 +1090,16 @@ const start = controller => {
  
  let G = 0;
  class Controller {
@@ -595,11 +609,11 @@ new mode 100755
 +
    constructor(props) {
 -    this.getValues = () => this.interpolations;
-+    this.getValues = () => this.props.config.raw ? this.values : this.interpolations;
++    this.getValues = () => (this.props.config && this.props.config.raw) ? this.values : this.interpolations;
  
      this.id = G++;
      this.idle = true;
-@@ -1096,7 +1107,7 @@ class Controller {
+@@ -1096,7 +1110,7 @@ class Controller {
      this.merged = {};
      this.animations = {};
      this.interpolations = {};
@@ -608,7 +622,7 @@ new mode 100755
      this.configs = [];
      this.listeners = [];
      this.queue = [];
-@@ -1415,12 +1426,12 @@ class Controller {
+@@ -1415,12 +1429,12 @@ class Controller {
      if (this.hasChanged) {
        // Make animations available to frameloop
        this.configs = Object.values(this.animations);
@@ -623,7 +637,7 @@ new mode 100755
        }
      }
  
-@@ -1433,7 +1444,7 @@ class Controller {
+@@ -1433,7 +1447,7 @@ class Controller {
      this.merged = {};
      this.animations = {};
      this.interpolations = {};
@@ -632,7 +646,7 @@ new mode 100755
      this.configs = [];
      this.local = 0;
    }
-@@ -1877,4 +1888,15 @@ const extendedAnimated = domElements.reduce((acc, element) => {
+@@ -1877,4 +1891,15 @@ const extendedAnimated = domElements.reduce((acc, element) => {
    return acc;
  }, createAnimatedComponent);
  

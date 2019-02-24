@@ -1,5 +1,6 @@
 export { useCounter } from './useCounter';
 export { useSilentCounter } from './useSilentCounter';
+export { useSilentSwitch } from './useSilentSwitch';
 export { useMemoRef } from './useMemoRef';
 export { useThrottled } from './useThrottled';
 export { useDataBuffer } from './useDataBuffer';

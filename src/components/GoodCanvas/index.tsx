@@ -37,7 +37,7 @@ const Props = declare(
         height: '150px',
         boxSizing: 'content-box',
       } as typeof BaseProps.propsOut.style,
-      timeout: 250,
+      timeout: 500,
       notify: noop,
     };
   },
@@ -78,9 +78,6 @@ const GoodCanvas: React.RefForwardingComponent<
 
   // Populate default props.
   const { blur, children, style, timeout, notify } = props;
-
-  // Toggle warnings.
-  warn();
 
   // Scale the canvas resolution.
   useImm(useLayoutEffect)(() => {

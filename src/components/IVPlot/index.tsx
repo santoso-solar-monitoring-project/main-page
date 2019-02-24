@@ -35,7 +35,7 @@ export const Props = declare(
   defaults({
     style: {
       width: '100%',
-      height: '300px',
+      height: '150px',
       borderRadius: '5px',
       // border: '10px solid blue',
       backgroundColor: 'black',

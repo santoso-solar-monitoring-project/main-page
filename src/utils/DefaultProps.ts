@@ -38,12 +38,6 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     ...baseClasses.map(base => base.defaults),
     propsClass.defaults as D
   ) as Defaults;
-  console.log(
-    'baseClasses',
-    ...baseClasses.map(base => base.defaults),
-    'defaults',
-    defaults
-  );
 
   // Warn about bad behavior with React refs
   Object.keys(defaults).forEach(key => {

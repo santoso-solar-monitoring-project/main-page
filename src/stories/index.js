@@ -25,6 +25,7 @@ import CornersTest from 'components/CornersTest';
 //   ));
 
 storiesOf('IV Plot', module).add('play', () => {
+  // useSpring();
   return <IVPlot />;
 });
 

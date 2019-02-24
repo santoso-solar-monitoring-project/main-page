@@ -1,54 +1,75 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { optimizedResize } from 'utils/throttleEvent';
 import { useThrottled } from 'utils/CustomHooks';
 import { BaseProps } from 'utils/BaseProps';
-import { declare } from 'utils/DefaultProps';
+import { declare, defaults } from 'utils/DefaultProps';
+import { REF } from 'utils/easier';
+import { animated, useSpring } from 'react-spring';
 
 export const Props = declare(
-  class {
-    static defaults = {
-      radius: 5,
-      timeout: 250,
-      enabled: true,
-      style: { filter: '' } as typeof BaseProps.propsOut.style,
-    };
-  },
+  defaults({
+    radius: 5,
+    timeout: 250,
+    enabled: true,
+    style: { filter: '' } as typeof BaseProps.propsOut.style,
+  }),
   BaseProps
 );
 
 export const OwnProps = declare(Props.own);
 
-const Blur: React.RefForwardingComponent<
-  HTMLDivElement,
-  typeof Props.propsOut
-> = (props, ref) => {
-  // stateful variables
-  const [blurry, setBlurry] = useState(false);
+const Blur = Props.wrap(
+  ({ children, style, radius, timeout, enabled }, ref: REF<HTMLDivElement>) => {
+    const [{ filter }, update] = useSpring(() => ({
+      filter: `${style.filter} blur(0px)`,
+      from: {
+        filter: `${style.filter} blur(${radius}px)`,
+      },
+      config: { duration: 250 },
+    }));
 
-  // unpack props
-  const { children, style, radius, timeout, enabled } = props;
+    // attach handler to blur on window resize
+    useThrottled(
+      {
+        event: optimizedResize,
+        first: () =>
+          update({
+            filter: `${style.filter} blur(${enabled ? radius : 0}px)`,
+          }),
+        last: () =>
+          update({
+            filter: `${style.filter} blur(0px)`,
+          }),
+        timeout,
+      },
+      [timeout]
+    );
 
-  // attach handler to blur on window resize
-  useThrottled(
-    {
-      event: optimizedResize,
-      first: () => setBlurry(true),
-      last: () => setBlurry(false),
-      timeout,
-    },
-    [timeout]
-  );
+    // attach handler to blur on window resize
+    useEffect(() => {
+      const handler = () => {
+        update({
+          filter: `${style.filter} blur(${
+            enabled && document.hidden ? radius : 0
+          }px)`,
+        });
+      };
+      document.addEventListener('visibilitychange', handler);
+      return () => document.removeEventListener('visibilitychange', handler);
+    }, [style.filter, enabled, radius]);
 
-  // make it blurry
-  if (enabled && blurry) {
-    style!['filter'] += `blur(${radius}px)`;
+    return (
+      <animated.div
+        ref={ref}
+        style={{
+          ...style,
+          filter: (filter as unknown) as string,
+        }}
+      >
+        {children}
+      </animated.div>
+    );
   }
+);
 
-  return (
-    <div ref={ref} style={style}>
-      {children}
-    </div>
-  );
-};
-
-export default React.forwardRef(Props.wrap(Blur));
+export default React.forwardRef(Blur);
