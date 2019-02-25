@@ -147,20 +147,10 @@ export const _IVPlot = GoodCanvasChild.wrap(props => {
     data: ampsView,
     style: { strokeStyle: 'hsl(330, 100%, 67%)' },
   });
-  const glowLine = useLine({
-    data: ampsView,
-    style: { strokeStyle: 'hsl(330, 100%, 67%)' },
-    injectEffect: glow1,
-  });
   const points = usePoints({ data: ampsView });
   const line2 = useLine({
     data: voltsView,
     style: { strokeStyle: 'hsl(210, 100%, 67%)' },
-  });
-  const glowLine2 = useLine({
-    data: voltsView,
-    style: { strokeStyle: 'hsl(210, 100%, 67%)' },
-    injectEffect: glow2,
   });
   const points2 = usePoints({
     data: voltsView,
@@ -178,10 +168,8 @@ export const _IVPlot = GoodCanvasChild.wrap(props => {
     useTicks({ viewScale }),
     outside(dashed(line), dashed(line2)),
     inside(
-      glowLine,
       line,
       points(useLabels({ data: ampsView, scaleY })),
-      glowLine2,
       line2,
       points2(useLabels({ data: voltsView, scaleY: scaleY2 }))
     ),
