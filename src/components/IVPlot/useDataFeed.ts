@@ -3,13 +3,21 @@ import { Pair } from 'utils/Pair';
 import { useDataBufferSilent } from 'utils/CustomHooks';
 import { declare, required, defaults } from 'utils/DefaultProps';
 
+const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
+const [lo, hi] = [Math.min(...CURRENT), Math.max(...CURRENT)];
+const generate = (): Pair => [Date.now(), Math.random() * (hi - lo) + lo];
+const _initialValue = [...Array(100)].map((_x, i) => [
+  Date.now() + ((100 - 1 - i) / 100) * -10000,
+  Math.random() * (hi - lo) + lo,
+]);
+
 const Args = declare(
   required<{
     samplePeriod: number; // ms
   }>(),
   defaults({
     maxSize: 1000,
-    initialValue: [] as Pair[],
+    initialValue: _initialValue as Pair[],
   })
 );
 
@@ -38,9 +46,3 @@ export const useDataFeed = Args.wrap(
     return buffer;
   }
 );
-
-const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
-const [lo, hi] = [Math.min(...CURRENT), Math.max(...CURRENT)];
-const generate = (): Pair => [Date.now(), Math.random() * (hi - lo) + lo];
-
-const initialValue = CURRENT.map((v, i): Pair => [i * 500, v]);

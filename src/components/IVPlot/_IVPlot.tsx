@@ -179,7 +179,7 @@ export const _IVPlot = GoodCanvasChild.wrap(props => {
     }),
   ];
 
-  let n = 0;
+  // let n = 0;
   useAnimationFrame(
     () => {
       const { ctx } = getContext(props.canvasRef);
