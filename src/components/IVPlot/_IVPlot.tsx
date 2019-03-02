@@ -30,11 +30,11 @@ export const _IVPlot = GoodCanvasChild.wrap(props => {
   const samplePeriod = 400;
   const amps = useDataFeed({
     samplePeriod: samplePeriod,
-    maxSize: 1000,
+    maxSize: 40,
   });
   const volts = useDataFeed({
     samplePeriod: samplePeriod,
-    maxSize: 1000,
+    maxSize: 40,
   });
 
   const [scaleX, scaleY] = useScalesXY({
@@ -51,15 +51,14 @@ export const _IVPlot = GoodCanvasChild.wrap(props => {
     ...props,
   });
 
-  const baseScale = scaleX.copy().domain([-timespan, 0]);
+  const padding = 4 * samplePeriod;
+  const baseScale = scaleX.copy().domain([-timespan - padding, -padding]);
   const [zoomedScale, updateZoomedScale] = useControls({ baseScale, ...props });
 
-  const padding = usePaddingSpring({ by: 2 * samplePeriod });
   const { view: ampsView, update: updateAmpsView } = useView({
     scaleX: zoomedScale,
     scaleY: scaleY,
     buffer: amps,
-    padding,
   });
   const {
     view: voltsView,
@@ -69,7 +68,6 @@ export const _IVPlot = GoodCanvasChild.wrap(props => {
     scaleX: zoomedScale,
     scaleY: scaleY2,
     buffer: volts,
-    padding,
   });
 
   const Args = declare(
@@ -181,12 +179,12 @@ export const _IVPlot = GoodCanvasChild.wrap(props => {
 
   // let n = 0;
   useAnimationFrame(
-    () => {
+    ts => {
       const { ctx } = getContext(props.canvasRef);
       animations.forEach(e => e(ctx));
-      // console.log('frame:', ++n);
+      // console.log('frame:', ++n, 'ts:', ts);
     }
-    // ,{ interval: 500 }
+    // ,{ batch: 0, interval: 500 }
   );
 
   return null;

@@ -2,9 +2,11 @@ import { useCounter, useSilentCounter } from 'utils/CustomHooks';
 import { useEffect, useRef } from 'react';
 import noop from 'utils/noop';
 
+const batchMap = new Map<number, FrameRequestCallback[]>();
+
 export function useAnimationFrame(
-  f: () => void = noop,
-  { silent = true, interval = 16 } = {},
+  f: FrameRequestCallback = noop,
+  { silent = true, interval = 16, batch = NaN } = {},
   inputs?: React.InputIdentityList
 ) {
   const firstTime = useRef(true);
@@ -16,28 +18,38 @@ export function useAnimationFrame(
         "Options passed to useAnimationFrame were toggled in the same lifecycle of the component. Don't do this! Options must be kept constant or React hooks won't work."
       );
     }
-  }, [silent, interval]);
+  }, [silent, interval, batch]);
 
   const [, nextFrame] = silent ? useSilentCounter() : useCounter();
 
-  if (interval == 16) {
-    useEffect(() => {
-      const loop = () => {
-        f();
-        nextFrame();
-        id = window.requestAnimationFrame(loop);
-      };
-      let id = window.requestAnimationFrame(loop);
+  useEffect(() => {
+    let id: number;
+    const tail =
+      interval == 16
+        ? (callback: FrameRequestCallback) =>
+            (id = window.requestAnimationFrame(callback))
+        : (callback: FrameRequestCallback) =>
+            (id = window.setTimeout(callback, interval));
+
+    const tracks = isFinite(batch)
+      ? batchMap.has(batch)
+        ? (batchMap.get(batch)!.push(f), batchMap.get(batch)!)
+        : batchMap.set(batch, [f]).get(batch)!
+      : batchMap.set(batchMap.size, [f]).get(batchMap.size - 1)!;
+
+    const loop = (ts: number) => {
+      const now = ts || performance.now();
+      tracks.forEach(g => g(now));
+      nextFrame();
+      tail(loop);
+    };
+
+    if (interval == 16) {
+      id = window.requestAnimationFrame(loop);
       return () => window.cancelAnimationFrame(id);
-    }, inputs);
-  } else {
-    useEffect(() => {
-      const loop = () => {
-        f();
-        nextFrame();
-      };
-      let id = window.setInterval(loop, interval);
-      return () => window.clearInterval(id);
-    }, inputs);
-  }
+    } else {
+      id = window.setTimeout(loop, interval);
+      return () => window.clearTimeout(id);
+    }
+  }, inputs);
 }

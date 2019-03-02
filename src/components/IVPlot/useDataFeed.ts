@@ -16,8 +16,8 @@ const Args = declare(
     samplePeriod: number; // ms
   }>(),
   defaults({
-    maxSize: 1000,
-    initialValue: _initialValue as Pair[],
+    maxSize: 100,
+    initialValue: [] as Pair[],
   })
 );
 
