@@ -45,7 +45,7 @@ const Blur = Props.wrap(
       [timeout]
     );
 
-    // attach handler to blur on window resize
+    // attach handler to blur on visibility change
     useEffect(() => {
       const handler = () => {
         update({
@@ -63,7 +63,7 @@ const Blur = Props.wrap(
         ref={ref}
         style={{
           ...style,
-          filter: (filter as unknown) as string,
+          filter,
         }}
       >
         {children}

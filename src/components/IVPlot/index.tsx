@@ -1,9 +1,9 @@
-import React from 'react';
-import GoodCanvas from 'components/GoodCanvas';
-import { StyleProp } from 'utils/BaseProps';
+import React, { useRef, useEffect, useState } from 'react';
 import { _IVPlot } from './_IVPlot';
-import { declare, defaults } from 'utils/DefaultProps';
-import { FC } from 'utils/easier';
+import { defaults } from 'utils/DefaultProps';
+import Blur, { Props as BlurProps } from 'components/Blur';
+import { useThrottled, useCounter } from 'utils/CustomHooks';
+import { optimizedResize } from 'utils/throttleEvent';
 
 /* interface ModeType {
   style: React.CSSProperties | {};
@@ -31,31 +31,44 @@ export const lightMode: ModeType = {
   },
 }; */
 
-export const Props = declare(
+export const Props = BlurProps.extend(
   defaults({
     style: {
+      position: 'relative',
       width: '100%',
       height: '150px',
       borderRadius: '5px',
       // border: '10px solid blue',
       backgroundColor: 'black',
     },
-  }),
-  StyleProp
+  })
 );
 
-const IVPlot: FC<typeof Props.propsOut> = props => {
-  // unpack props
-  const { style } = props;
+const IVPlot = Props.wrap(({ style, ...rest }) => {
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Re-render on resize
+  const [, tick] = useCounter();
+  useThrottled(
+    {
+      event: optimizedResize,
+      last: tick,
+    },
+    []
+  );
 
   return (
-    <GoodCanvas style={style}>
-      <_IVPlot />
-    </GoodCanvas>
+    <div style={style}>
+      <Blur {...rest}>
+        <svg ref={svgRef} width='100%' height='100%'>
+          <_IVPlot svgRef={svgRef} />
+        </svg>
+      </Blur>
+    </div>
   );
-};
+});
 
-export default Props.wrap(IVPlot);
+export default IVPlot;
 
 /* 
 // canvasStyle={lightMode.current.line.canvasStyle}

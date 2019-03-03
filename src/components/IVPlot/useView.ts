@@ -1,12 +1,11 @@
 import { Pair } from 'utils/Pair';
-import { useSpring, OpaqueInterpolation, SetUpdateFn } from 'react-spring';
+import { useSpring } from 'react-spring';
 import Denque from 'denque';
 import * as d3 from 'd3';
 import clamp from 'utils/clamp';
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { newEffect } from 'utils/canvas';
 import { required, defaults, declare } from 'utils/DefaultProps';
-import { REF } from 'utils/easier';
 
 const Args = declare(
   required<{
@@ -21,7 +20,7 @@ const Args = declare(
 );
 
 export const useView = Args.wrap(({ scaleX, scaleY, buffer, extraHistory }) => {
-  const [{ extent }, update] = useSpring(() => ({
+  const [{ extent }, set] = useSpring(() => ({
     extent: [0, 0],
     config: { tension: 60, friction: 10 },
   }));
@@ -29,11 +28,16 @@ export const useView = Args.wrap(({ scaleX, scaleY, buffer, extraHistory }) => {
   const bisector = useMemo(() => d3.bisector((d: Pair) => d[0]), []);
   const transformed = useRef([] as Pair[]);
 
-  const effect = newEffect(() => {
+  useEffect(() => {
+    currentScaleX.domain(scaleX.domain()).range(scaleX.range());
+  });
+
+  const update = () => {
     // Adjust the input scale domain for current time.
     const now = Date.now();
-    currentScaleX.domain(scaleX.domain().map(x => x + now));
-    const [start, end] = currentScaleX.domain();
+    const [start, end] = currentScaleX
+      .domain(scaleX.domain().map(x => x + now))
+      .domain();
     const timespan = end - start;
 
     // Find indices in buffer corresponding to [start, end] times.
@@ -47,13 +51,13 @@ export const useView = Args.wrap(({ scaleX, scaleY, buffer, extraHistory }) => {
     const padLeft = clamp(left - pad, [0]);
 
     // Slice the view of the buffer.
-    let view = buffer.slice(padLeft, padRight);
+    const view = buffer.slice(padLeft, padRight);
 
     // TODO: If I have a lot of free time, add striding to the view, with consistent phase.
 
     // Set y-axis scaling for view
     if (view.length) {
-      update({ extent: d3.extent(view, d => d[1]) as Pair });
+      set({ extent: d3.extent(view, d => d[1]) as Pair });
     }
 
     Object.assign(window, {
@@ -69,12 +73,16 @@ export const useView = Args.wrap(({ scaleX, scaleY, buffer, extraHistory }) => {
       length: transformed.current.length,
       transformed,
     });
-    // debugger;
+
     scaleY.domain(extent.value);
     transformed.current = view.map(
       ([x, y]): Pair => [currentScaleX(x), scaleY(y)]
     );
-  });
+  };
 
-  return { view: transformed, update: effect, scaleX: currentScaleX };
+  return [transformed, update, currentScaleX] as [
+    typeof transformed,
+    typeof update,
+    typeof currentScaleX
+  ];
 });

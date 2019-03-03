@@ -28,7 +28,7 @@ export type ArrayToIntersectionNonNull<T extends any[]> = T extends { 0: any }
   : {};
 
 // https://stackoverflow.com/a/54010248/3624264
-type Narrowable =
+export type Narrowable =
   | string
   | number
   | boolean
@@ -45,6 +45,37 @@ export const literally = <
 >(
   t: T
 ) => t;
+
+export type UndoNarrowable<T> = T extends string
+  ? string
+  : T extends number
+  ? number
+  : T extends boolean
+  ? boolean
+  : T extends symbol
+  ? symbol
+  : // : T extends object
+  // ? object
+  T extends null
+  ? null
+  : T extends undefined
+  ? undefined
+  : T extends void
+  ? void
+  : T extends ((...args: any[]) => any)
+  ? ((...args: any[]) => any)
+  : // : T extends {}
+    // ? {}
+    never;
+
+export type Unliterally<T> = {
+  [K in keyof T]: T[K] extends object
+    ? Unliterally<T[K]>
+    : ({ $: T[K] } | UndoNarrowable<T[K]>)
+};
+// const a = literally({hello:5, world: ['bleh', 'bla']});
+// type b = Unliterally<typeof a>
+// const c:b = a;
 
 export type Extends<A, B, C = true, D = false> = [A] extends [B] ? C : D;
 export type Equals<A, B, C = true, D = false> = Extends<

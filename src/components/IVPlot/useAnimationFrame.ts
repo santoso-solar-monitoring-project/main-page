@@ -1,14 +1,19 @@
 import { useCounter, useSilentCounter } from 'utils/CustomHooks';
 import { useEffect, useRef } from 'react';
 import noop from 'utils/noop';
+import { defaults } from 'utils/DefaultProps';
 
 const batchMap = new Map<number, FrameRequestCallback[]>();
 
+export const Args = defaults({ silent: true, interval: 16, batch: NaN });
+
 export function useAnimationFrame(
   f: FrameRequestCallback = noop,
-  { silent = true, interval = 16, batch = NaN } = {},
+  options = {},
   inputs?: React.InputIdentityList
 ) {
+  const { silent, interval, batch } = Args(options);
+
   const firstTime = useRef(true);
   useEffect(() => {
     if (firstTime.current) {

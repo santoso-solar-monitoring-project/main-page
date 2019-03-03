@@ -54,61 +54,6 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
     }
   });
 
-  // Type expanded inline for better tooltip
-  type Factory = (
-    props: { [K in keyof PropsIn]: PropsIn[K] }
-  ) => { [K in keyof PropsOut]: PropsOut[K] };
-
-  const factory: Factory = props => {
-    return {
-      ...props,
-      ...withImm.mergeIntersect(defaults, props),
-    } as ReturnType<Factory>;
-  };
-
-  // Runtime check for whether all props specified are optional (defaults or injected)
-  const allOptional = ![propsClass, ...baseClasses].some(c => 'required' in c);
-
-  type Decorated<T> = <U extends any[], V>(
-    props: PropsIn,
-    placeholder?: V,
-    ...rest: U
-  ) => T extends (...args: any[]) => infer W ? W : any;
-
-  type DecoratedOptional<T> = <U extends any[], V>(
-    props?: PropsIn,
-    placeholder?: V,
-    ...rest: U
-  ) => T extends (...args: any[]) => infer W ? W : any;
-
-  type AcceptsPropsOut = (props: PropsOut, ...rest: any[]) => any;
-
-  class Wrap {
-    static default<T extends AcceptsPropsOut>(f: T) {
-      const decorated: Decorated<T> = (props, placeholder, ...rest) => {
-        return f(
-          factory(props as Parameters<Factory>[0]),
-          placeholder,
-          ...rest
-        );
-      };
-
-      return decorated;
-    }
-
-    static optional<T extends AcceptsPropsOut>(f: T) {
-      return (Wrap.default(f) as unknown) as DecoratedOptional<T>;
-    }
-
-    // Select which Wrap signature to use depending on allOptional
-    static decorator = (allOptional ? Wrap.optional : Wrap.default) as Equals<
-      RequiredOnly<Required>,
-      {},
-      typeof Wrap.optional,
-      typeof Wrap.default
-    >;
-  }
-
   type Me = { required: Required; defaults: Defaults; injected: Injected };
 
   function extend<T extends PropsClass, U extends PropsClass[]>(
@@ -139,13 +84,76 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
         ? { [L in keyof PropsClass]-?: S[K][L] }
         : S[K]
     },
-    // Decorator accepting a function whose props are to be transformed
-    wrap: Wrap['decorator'],
     // Shortcut to declare() with this DefaultProps object as the baseClass
     extend,
   };
 
-  return Object.assign(factory, types);
+  // Type expanded inline for better tooltip
+  type Factory = (
+    props: { [K in keyof PropsIn]: PropsIn[K] }
+  ) => { [K in keyof PropsOut]: PropsOut[K] };
+
+  const factory: Factory = props => {
+    return {
+      ...props,
+      ...withImm.mergeIntersect(defaults, props),
+    } as ReturnType<Factory>;
+  };
+
+  // Runtime check for whether all props specified are optional (defaults or injected)
+  const allOptional = ![propsClass, ...baseClasses].some(c => 'required' in c);
+
+  type Decorated<T> = <U extends any[], V>(
+    props: PropsIn,
+    placeholder?: V,
+    ...rest: U
+  ) => T extends (...args: any[]) => infer W ? W : any;
+
+  type DecoratedOptional<T> = <U extends any[], V>(
+    props?: PropsIn,
+    placeholder?: V,
+    ...rest: U
+  ) => T extends (...args: any[]) => infer W ? W : any;
+
+  type AcceptsPropsOut = (props: PropsOut, ...rest: any[]) => any;
+
+  class Wrap {
+    // Decorator accepting a function whose props are to be transformed
+    static default<T extends AcceptsPropsOut>(f: T) {
+      const decorated: Decorated<T> = (props, placeholder, ...rest) => {
+        return f(
+          factory(props as Parameters<Factory>[0]),
+          placeholder,
+          ...rest
+        );
+      };
+
+      return Object.assign(decorated, types, { wrap: Wrap.default });
+    }
+
+    // Decorator accepting a function whose props are to be transformed where the props argument is optional.
+    static optional<T extends AcceptsPropsOut>(f: T) {
+      const decorated: DecoratedOptional<T> = (props, placeholder, ...rest) => {
+        return f(
+          factory(props as Parameters<Factory>[0]),
+          placeholder,
+          ...rest
+        );
+      };
+
+      return Object.assign(decorated, types, { wrap: Wrap.optional });
+    }
+
+    // Select which Wrap signature to use depending on allOptional
+    static decorator = (allOptional ? Wrap.optional : Wrap.default) as Equals<
+      RequiredOnly<Required>,
+      {},
+      typeof Wrap.optional,
+      typeof Wrap.default
+    >;
+  }
+
+  return Object.assign(factory, types, { wrap: Wrap['decorator'] });
 }
 
 export function required<T extends object, S extends object[] = []>(

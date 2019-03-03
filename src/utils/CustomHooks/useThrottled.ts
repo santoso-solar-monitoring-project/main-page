@@ -1,44 +1,43 @@
 import React, { useEffect } from 'react';
 import noop from 'utils/noop';
-import { withImm } from 'utils/Imm';
+import { declare, required, defaults } from 'utils/DefaultProps';
 
-const defaults = {
-  timeout: 250,
-  first: noop,
-  last: noop,
-};
+const Args = declare(
+  required<{ event: string }>(),
+  defaults({
+    timeout: 250,
+    first: noop,
+    last: noop,
+  })
+);
 
-interface Args extends Partial<typeof defaults> {
-  event: string;
-}
+export const useThrottled = Args.wrap(
+  ({ event, first, last, timeout }, inputs?: React.InputIdentityList) => {
+    useEffect(() => {
+      if (!event) return;
 
-export function useThrottled(args: Args, inputs?: React.InputIdentityList) {
-  useEffect(() => {
-    const { event, first, last, timeout } = withImm.merge(defaults, args);
+      let ongoing = false;
+      let id: number;
 
-    if (!event) return;
+      const handler = () => {
+        // first resize event
+        if (!ongoing) {
+          if (first) first();
+          ongoing = true;
+        }
 
-    let ongoing = false;
-    let id: number;
+        // dismiss pending events
+        if (id) clearTimeout(id);
 
-    const handler = () => {
-      // first resize event
-      if (!ongoing) {
-        if (first) first();
-        ongoing = true;
-      }
+        // fulfill last response after timeout
+        id = window.setTimeout(() => {
+          ongoing = false;
+          if (last) last();
+        }, timeout);
+      };
 
-      // dismiss pending events
-      if (id) clearTimeout(id);
-
-      // fulfill last response after timeout
-      id = window.setTimeout(() => {
-        ongoing = false;
-        if (last) last();
-      }, timeout);
-    };
-
-    window.addEventListener(event, handler);
-    return () => window.removeEventListener(event, handler);
-  }, inputs);
-}
+      window.addEventListener(event, handler);
+      return () => window.removeEventListener(event, handler);
+    }, inputs);
+  }
+);
