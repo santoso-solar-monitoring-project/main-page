@@ -112,10 +112,10 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
           volts.update();
         })}
       </animated.g>
-      <Line stroke='pink' data={clock.interpolate(() => amps.view.current)} />
       <Ticks
         {...{ clock, scale: amps.currentScaleX, timespan, dims, count: 25 }}
       />
+      <Line stroke='pink' data={clock.interpolate(() => amps.view.current)} />
       <Line stroke='cyan' data={clock.interpolate(() => volts.view.current)} />
     </>
   );
