@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { GoodCanvasChild } from 'components/GoodCanvas';
 import { usePoints } from 'components/usePoints';
-import { Line } from 'components/useLine';
+import { Line } from 'components/Line';
 import { useDataFeed } from './useDataFeed';
 import { useView } from './useView';
 import { useLine } from './useLine';
@@ -34,9 +34,14 @@ import { number } from 'prop-types';
 import noop from 'utils/noop';
 import { useAnimationClock } from './useAnimationClock';
 
-const Args = declare(required<{ svgRef: CREF<SVGSVGElement> }>());
+const Args = declare(
+  required<{
+    svgRef: CREF<SVGSVGElement>;
+    channelNames: string[];
+  }>()
+);
 
-export const _IVPlot = Args.wrap(({ svgRef }) => {
+export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
   const clock = useAnimationClock();
   const samplePeriod = 400;
 
@@ -55,6 +60,9 @@ export const _IVPlot = Args.wrap(({ svgRef }) => {
     buffer: useDataFeed({
       samplePeriod: samplePeriod,
       maxSize: 500,
+      pusher: {
+        channelName: channelNames[0],
+      },
     }),
     scaleX: d3.scaleLinear(),
     scaleY: d3.scaleLinear(),
@@ -68,6 +76,9 @@ export const _IVPlot = Args.wrap(({ svgRef }) => {
     buffer: useDataFeed({
       samplePeriod: samplePeriod,
       maxSize: 500,
+      pusher: {
+        channelName: channelNames[1],
+      },
     }),
     scaleX: amps.scaleX,
     scaleY: d3.scaleLinear(),

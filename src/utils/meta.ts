@@ -53,9 +53,8 @@ export type UndoNarrowable<T> = T extends string
   : T extends boolean
   ? boolean
   : T extends symbol
-  ? symbol
-  : // : T extends object
-  // ? object
+  ? symbol // : T extends object
+  : // ? object
   T extends null
   ? null
   : T extends undefined
@@ -63,9 +62,8 @@ export type UndoNarrowable<T> = T extends string
   : T extends void
   ? void
   : T extends ((...args: any[]) => any)
-  ? ((...args: any[]) => any)
-  : // : T extends {}
-    // ? {}
+  ? ((...args: any[]) => any) // : T extends {}
+  : // ? {}
     never;
 
 export type Unliterally<T> = {
@@ -134,3 +132,7 @@ export type FilterOut<T, U = never> = {
 // type bleh = FilterOut<[1,2,never], never>;
 
 export type Filter<A, B> = A extends B ? A : never;
+
+export type RecursivePartial<T> = {
+  [K in keyof T]+?: T[K] extends object ? RecursivePartial<T[K]> : T[K]
+};

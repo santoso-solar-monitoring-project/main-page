@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { _IVPlot } from './_IVPlot';
-import { defaults } from 'utils/DefaultProps';
+import { defaults, required } from 'utils/DefaultProps';
 import Blur, { Props as BlurProps } from 'components/Blur';
 import { useThrottled, useCounter } from 'utils/CustomHooks';
 import { optimizedResize } from 'utils/throttleEvent';
+import { Omit } from 'utils/meta';
 
 /* interface ModeType {
   style: React.CSSProperties | {};
@@ -32,6 +33,7 @@ export const lightMode: ModeType = {
 }; */
 
 export const Props = BlurProps.extend(
+  required<Omit<typeof _IVPlot.required, 'svgRef'>>(),
   defaults({
     style: {
       position: 'relative',
@@ -44,7 +46,7 @@ export const Props = BlurProps.extend(
   })
 );
 
-const IVPlot = Props.wrap(({ style, ...rest }) => {
+const IVPlot = Props.wrap(({ channelNames, style, ...rest }) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Re-render on resize
@@ -61,7 +63,7 @@ const IVPlot = Props.wrap(({ style, ...rest }) => {
     <div style={style}>
       <Blur {...rest}>
         <svg ref={svgRef} width='100%' height='100%'>
-          <_IVPlot svgRef={svgRef} />
+          <_IVPlot channelNames={channelNames} svgRef={svgRef} />
         </svg>
       </Blur>
     </div>

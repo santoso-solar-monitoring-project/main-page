@@ -1,4 +1,10 @@
-import { Omit, Equals, RequiredOnly, ArrayToIntersectionNonNull } from './meta';
+import {
+  Omit,
+  Equals,
+  RequiredOnly,
+  ArrayToIntersectionNonNull,
+  RecursivePartial,
+} from './meta';
 import * as withImm from './Imm/withImm';
 import warn from './warn';
 
@@ -30,7 +36,9 @@ export function declare<P extends PropsClass, S extends PropsClass[]>(
   type Injected = Mix<I & BasesI<BaseClasses>>;
 
   // External-facing props interface
-  type PropsIn = Mix<Required & Partial<Defaults> & Partial<Injected>>;
+  type PropsIn = Mix<
+    Required & RecursivePartial<Defaults> & RecursivePartial<Injected>
+  >;
   // Internal-facing props interface
   type PropsOut = Mix<Required & Defaults & Injected>;
 

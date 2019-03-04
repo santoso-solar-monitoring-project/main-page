@@ -21,26 +21,26 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
       8 src/components/GoodCanvas/GoodCanvasChild.ts
      15 src/components/GoodCanvas/GoodCanvasElement.ts
     195 src/components/GoodCanvas/index.tsx
-    205 src/components/IVPlot/_IVPlot.tsx
-     79 src/components/IVPlot/index.tsx
+    216 src/components/IVPlot/_IVPlot.tsx
+     81 src/components/IVPlot/index.tsx
      93 src/components/IVPlot/Ticks.tsx
      20 src/components/IVPlot/useAnimationClock.ts
      60 src/components/IVPlot/useAnimationFrame.ts
      25 src/components/IVPlot/useClip.ts
     154 src/components/IVPlot/useControls.ts
      23 src/components/IVPlot/useDash.ts
-     54 src/components/IVPlot/useDataFeed.ts
+     78 src/components/IVPlot/useDataFeed.ts
      69 src/components/IVPlot/useFPS.ts
      35 src/components/IVPlot/useLine.ts
      14 src/components/IVPlot/usePaddingSpring.ts
      24 src/components/IVPlot/useTimespan.ts
      88 src/components/IVPlot/useView.ts
+     34 src/components/Line/index.tsx
      44 src/components/TitleBar/index.js
       4 src/components/TitleBar/lock.svg
      21 src/components/TitleBar/Login.js
      14 src/components/TitleBar/Time.js
      35 src/components/TitleBar/Wifi.js
-     34 src/components/useLine/index.tsx
      37 src/components/usePoints/index.tsx
       1 src/components/Weather/index.tsx
       6 src/utils/canvas/clear.ts
@@ -74,7 +74,7 @@ wc: src/utils/canvas: Is a directory
      25 src/utils/coordinates.ts
 wc: src/utils/CustomHooks: Is a directory
       0 src/utils/CustomHooks
-    235 src/utils/DefaultProps.ts
+    243 src/utils/DefaultProps.ts
       5 src/utils/diff.ts
       7 src/utils/easier.ts
       4 src/utils/evaluate.ts
@@ -83,11 +83,11 @@ wc: src/utils/CustomHooks: Is a directory
 wc: src/utils/Imm: Is a directory
       0 src/utils/Imm
      19 src/utils/isValidRefObject.ts
-    136 src/utils/meta.ts
+    138 src/utils/meta.ts
       2 src/utils/noop.ts
       1 src/utils/Pair.d.ts
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   2980 total
+   3027 total
 ```
