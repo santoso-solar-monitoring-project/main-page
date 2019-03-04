@@ -8,11 +8,11 @@ class App extends Component<{}, { bleh: number }> {
     // return 'blehehehehehe';
     return (
       <div style={{ padding: '1vw' }}>
-        <IVPlot channelNames={['ch0', 'ch1']} />
+        <IVPlot channelNames={['debug', 'debug']} />
         <br />
-        <IVPlot channelNames={['ch2', 'ch3']} />
+        <IVPlot channelNames={['debug', 'debug']} />
         <br />
-        <IVPlot channelNames={['ch4', 'ch5']} />
+        <IVPlot channelNames={['debug', 'debug']} />
       </div>
     );
     // return (

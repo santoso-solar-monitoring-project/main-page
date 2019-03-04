@@ -1,8 +1,6 @@
 import { useMemo, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { newEffect } from 'utils/canvas';
-import { required, declare } from 'utils/DefaultProps';
-import { withImm, fromJS, ImmMapType, useImm } from 'utils/Imm';
+import { required, declare, defaults } from 'utils/DefaultProps';
 import { Pair } from 'utils/Pair';
 import noop from 'utils/noop';
 import { REF, CREF } from 'utils/easier';
@@ -13,14 +11,19 @@ const Args = declare(
     scale: d3.ScaleLinear<number, number>;
     svgRef: CREF<SVGSVGElement>;
     dims: REF<{ width: number; height: number }>;
-  }>()
+  }>(),
+  defaults({
+    dblclick: 150, // ms
+  })
 );
 
 const slope = (s: d3.ScaleLinear<number, number>) =>
   diff(s.range() as Pair) / diff(s.domain() as Pair);
+const avg = (values: number[]) =>
+  values.length ? values.reduce((a, x) => a + x, 0) / values.length : 0;
 type Zoom = d3.ZoomBehavior<SVGSVGElement, any>;
 
-export const useControls = Args.wrap(({ scale, svgRef, dims }) => {
+export const useControls = Args.wrap(({ scale, svgRef, dims, dblclick }) => {
   const baseScale = scale.copy();
   const effect = useRef(noop);
 
@@ -30,125 +33,71 @@ export const useControls = Args.wrap(({ scale, svgRef, dims }) => {
   );
 
   useEffect(() => {
-    const { width, height } = dims.current;
-    zoom.extent([[0, 0], [width, height]]);
-    zoom.translateExtent([[-Infinity, 0], [width, height]]);
+    const width = dims.current.width;
+    zoom.extent([[0, 0], [width, 0]]);
+    zoom.translateExtent([[-Infinity, 0], [width, 0]]);
     baseScale.domain(scale.domain()).range(scale.range());
   });
 
   useEffect(() => {
     const selection = d3.select(svgRef.current!);
 
-    const { onStart, onEnd } = playPause({
-      zoom,
-      baseScale,
-      selection,
-      effect,
-    });
-
+    let start: number;
     zoom
       .on('zoom', () => {
         const t = d3.event.transform as d3.ZoomTransform;
         scale.domain(t.rescaleX(baseScale).domain());
       })
-      .on('start', onStart)
-      .on('end', onEnd);
-    // TODO: Make onEnd also translate with some momentum
+      .duration(dblclick);
 
-    // TODO: Use zoom.translateTo, zoom.scaleTo, and useSpring to do this without a duration? (Spring transitions between d3.zoomTransform(canvas) and d3.zoomIdentity)
-    selection.call(zoom).on('dblclick.zoom', () => {
+    const pause = (at: number) => () => {
+      const delta = Date.now() - at;
+      at += delta;
+      const dx = delta * slope(baseScale);
+      zoom.translateBy(selection, dx, 0);
+    };
+    let clickID = NaN;
+    const clickHandler = () => {
+      if (clickID) {
+        window.clearTimeout(clickID);
+        clickID = NaN;
+      } else {
+        // duration to wait in case of dblclick
+        clickID = window.setTimeout(() => {
+          clickID = NaN;
+          effect.current = effect.current === noop ? pause(Date.now()) : noop;
+        }, dblclick);
+      }
+    };
+
+    const factor = 0.33; // adjust duration calculated by d3.interpolateZoom
+    const reset = () => {
+      const t = d3.zoomTransform(svgRef.current!);
+      const width = diff(scale.range() as Pair);
+      const cx = t.x + width / 2;
+      const duration =
+        factor *
+        d3.interpolateZoom(
+          [cx, 0, width],
+          [avg(baseScale.range()), 0, diff(baseScale.range() as Pair)]
+        ).duration;
       selection
         .transition()
-        .duration(500)
+        .duration(duration)
         .call(zoom.transform, d3.zoomIdentity);
-    });
+    };
+
+    selection
+      .call(zoom)
+      .on('dblclick.zoom', () => {
+        effect.current = noop;
+        reset();
+      })
+      .on('click', clickHandler);
 
     return () => selection.on('.zoom', null);
   });
 
-  Object.assign(window, { zoom, d3 });
-
-  const update = newEffect(() => effect.current());
+  const update = () => effect.current();
   return update;
 });
-
-const PlayPauseArgs = required<{
-  zoom: Zoom;
-  baseScale: d3.ScaleLinear<number, number>;
-  selection: d3.Selection<SVGSVGElement, any, any, any>;
-  effect: REF<typeof noop>;
-}>();
-
-const playPause = PlayPauseArgs.wrap(
-  ({ zoom, baseScale, selection, effect }) => {
-    let start = fromJS({ clientX: 0, clientY: 0 }) as ImmMapType;
-    let lastClicked = Date.now();
-    let playing = true;
-
-    let at = Date.now();
-    const moonWalk = () => {
-      const delta = Date.now() - at;
-      at += delta;
-      const dx = delta * slope(baseScale);
-      if (isFinite(dx)) {
-        zoom.translateBy(selection, dx, 0);
-      }
-      Object.assign(window, { at, lastClicked, effect: effect.current });
-    };
-
-    function onStart() {
-      const e = d3.event;
-      if (
-        !(
-          e.sourceEvent instanceof MouseEvent ||
-          e.sourceEvent instanceof TouchEvent
-        )
-      )
-        return;
-
-      const position = {
-        clientX: e.sourceEvent.clientX,
-        clientY: e.sourceEvent.clientY,
-      };
-      start = withImm._mergeDeep(start, position);
-    }
-
-    function onEnd() {
-      const e = d3.event;
-      if (
-        !(
-          e.sourceEvent instanceof MouseEvent ||
-          e.sourceEvent instanceof TouchEvent
-        )
-      )
-        return;
-
-      const position = {
-        clientX: e.sourceEvent.clientX,
-        clientY: e.sourceEvent.clientY,
-      };
-      const current = withImm._mergeDeep(start, position);
-
-      // Is it a click and not a drag?
-      if (current === start) {
-        const delta = Date.now() - lastClicked;
-        lastClicked += delta;
-
-        if (delta < 250) {
-          playing = true;
-          effect.current = noop;
-          selection.dispatch('dblclick.zoom');
-        } else if (playing) {
-          playing = false;
-          at = lastClicked;
-          effect.current = moonWalk;
-        } else {
-          playing = true;
-          effect.current = noop;
-        }
-      }
-    }
-
-    return { onStart, onEnd };
-  }
-);

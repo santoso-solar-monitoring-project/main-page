@@ -21,18 +21,18 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
       8 src/components/GoodCanvas/GoodCanvasChild.ts
      15 src/components/GoodCanvas/GoodCanvasElement.ts
     195 src/components/GoodCanvas/index.tsx
-    216 src/components/IVPlot/_IVPlot.tsx
+    243 src/components/IVPlot/_IVPlot.tsx
      81 src/components/IVPlot/index.tsx
-     93 src/components/IVPlot/Ticks.tsx
      20 src/components/IVPlot/useAnimationClock.ts
      60 src/components/IVPlot/useAnimationFrame.ts
      25 src/components/IVPlot/useClip.ts
-    154 src/components/IVPlot/useControls.ts
+    103 src/components/IVPlot/useControls.ts
      23 src/components/IVPlot/useDash.ts
-     78 src/components/IVPlot/useDataFeed.ts
+     80 src/components/IVPlot/useDataFeed.ts
      69 src/components/IVPlot/useFPS.ts
      35 src/components/IVPlot/useLine.ts
-     14 src/components/IVPlot/usePaddingSpring.ts
+     12 src/components/IVPlot/usePaddingSpring.ts
+     85 src/components/IVPlot/useTicks.tsx
      24 src/components/IVPlot/useTimespan.ts
      88 src/components/IVPlot/useView.ts
      34 src/components/Line/index.tsx
@@ -89,5 +89,5 @@ wc: src/utils/Imm: Is a directory
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   3027 total
+   2995 total
 ```

@@ -5,7 +5,7 @@ import { diff } from 'utils/diff';
 import { Pair } from 'utils/Pair';
 import clamp from 'utils/clamp';
 import { REF } from 'utils/easier';
-import { OpaqueInterpolation, animated } from 'react-spring';
+import { OpaqueInterpolation, animated, interpolate } from 'react-spring';
 
 const Args = declare(
   required<{
@@ -30,7 +30,7 @@ const Args = declare(
 
 const blank = new Date(0);
 
-export const Ticks = Args.wrap(
+export const useTicks = Args.wrap(
   ({ clock, scale, timespan, dims, count, textStyle, lineStyle }) => {
     const currentScale = d3.scaleTime();
     const format = currentScale.tickFormat();
@@ -40,54 +40,46 @@ export const Ticks = Args.wrap(
       const span = diff(currentScale.domain() as Pair<Date>, x => x.getTime());
       const every = clamp(span / timespan.current, [1]);
       const ticks = currentScale.ticks(d3.timeSecond.every(every)!);
-      const gap = diff(ticks.slice(0, 2) as Pair<Date>, currentScale);
+      const gap = diff(ticks.slice(0, 2) as Pair<Date>, currentScale) || 0;
       const pad = clamp(0.05 * gap, [1]);
-
       const height = dims.current.height;
-      Object.assign(window, { it: height, currentScale, ticks });
 
-      return [...Array(count)].map((_, i) => {
-        const tick = ticks[i] || blank;
-        const t = currentScale(tick);
-        return {
-          g: { transform: `translate(${t},0)`, visibility: +(tick !== blank) },
-          text: {
-            x: pad,
-            y: height - pad,
-            children: format(tick),
-          },
-        };
-      });
+      return { ticks, pad, height };
     });
 
-    console.log(count);
-    Object.assign(window, { count });
-    // return null;
-    return (
-      <animated.g>
+    const Ticks = () => (
+      <g>
         {[...Array(count)].map((_, i) => {
-          const item = data.interpolate(d => d[i]);
+          const tick = data.interpolate(data => data.ticks[i] || blank);
+          const t = tick.interpolate(tick => currentScale(tick));
+          const height = data.interpolate(data => data.height);
+          const pad = data.interpolate(data => data.pad);
           return (
             <animated.g
               key={i}
-              transform={item.interpolate(d => d.g.transform)}
-              visibility={item.interpolate(d => d.g.visibility)}
+              transform={t.interpolate(t => `translate(${t},0)`)}
+              visibility={tick.interpolate(tick => +(tick !== blank))}
             >
-              <animated.line
-                y2={clock.interpolate(() => dims.current.height)}
-                {...lineStyle}
-              />
+              <animated.line y2={height} {...lineStyle} />
               <animated.text
-                x={item.interpolate(d => d.text.x)}
-                y={item.interpolate(d => d.text.y)}
+                x={pad}
+                y={interpolate([height, pad], (height, pad) => height - pad)}
                 {...textStyle}
               >
-                {item.interpolate(d => d.text.children)}
+                {tick.interpolate(tick => format(tick))}
               </animated.text>
             </animated.g>
           );
         })}
-      </animated.g>
+      </g>
     );
+
+    const ticks = data.interpolate(data => data.ticks);
+
+    return [Ticks, ticks, currentScale] as [
+      typeof Ticks,
+      typeof ticks,
+      typeof currentScale
+    ];
   }
 );

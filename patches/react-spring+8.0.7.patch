@@ -319,6 +319,31 @@ old mode 100644
 new mode 100755
 old mode 100644
 new mode 100755
+--- a/node_modules/react-spring/renderprops-universal.d.ts
++++ b/node_modules/react-spring/renderprops-universal.d.ts
+@@ -12,6 +12,7 @@ import {
+   ForwardRefExoticComponent,
+   ComponentPropsWithRef,
+ } from 'react'
++import { OpaqueInterpolation } from 'react-spring/web';
+ 
+ export type SpringEasingFunc = (t: number) => number
+ 
+@@ -119,9 +120,11 @@ export const config: {
+ 
+ export class Spring<DS extends object> extends PureComponent<SpringProps<DS>> {}
+ 
+-export function interpolate(
+-  parent: number[],
+-  config: (...args: number[]) => any
++type UnboxOpaqueInterpolation<T extends any[]> = { [K in keyof T]: T[K] extends OpaqueInterpolation<infer U> ? U : T[K] }
++
++export function interpolate<T extends any[]>(
++  parent: T,
++  config: (...args: UnboxOpaqueInterpolation<T>) => any
+ ): any
+ 
+ export function animated<T extends ReactType>(
 old mode 100644
 new mode 100755
 old mode 100644
@@ -420,14 +445,57 @@ new mode 100755
  
  // Make ForwardedProps chainable with interpolate / make it an animated value.
  export type ForwardedProps<T> = Pick<T, Exclude<keyof T, ExcludedProps>>
-@@ -121,38 +126,93 @@ export type UseSpringProps<DS extends object> = Merge<
- >
+@@ -72,7 +77,8 @@ type InferFrom<T extends object> = T extends { to: infer TTo }
+ type Merge<A, B> = { [K in keyof A]: K extends keyof B ? B[K] : A[K] } & B
+ 
+ export type SetUpdateFn<DS extends object> = (
+-  ds: Pick<DS, Exclude<keyof DS, ExcludedProps>>
++  ds: Partial<DS> & UseSpringBaseProps & OnRest<DS> & OnFrame<DS> & { from?: Partial<DS>, to?: Partial<DS> }
++  // ds: Pick<DS, Exclude<keyof DS, ExcludedProps>>
+ ) => void
+ 
+ // The hooks do emulate React's 'ref' by accepting { ref?: React.RefObject<Controller> } and
+@@ -106,53 +112,116 @@ export interface HooksBaseProps
+ }
+ 
+ export interface UseSpringBaseProps extends HooksBaseProps {
+-  config?: SpringBaseProps['config']
++  config?: SpringBaseProps['config'] & {raw?: boolean}
+ }
+ 
+-export type UseSpringProps<DS extends object> = Merge<
+-  DS & UseSpringBaseProps,
+-  {
+-    from?: InferFrom<DS>
+-    /**
+-     * Callback when the animation comes to a still-stand
+-     */
+-    onRest?(ds: InferFrom<DS>): void
+-  }
+->
++type OnRest<T> = { onRest?(ds: ForwardedProps<T>): void }
++type OnFrame<T> = { onFrame?(ds: ForwardedProps<T>): void }
++
++export type UseSpringProps<DS extends object> = DS & UseSpringBaseProps & OnRest<InferFromStrong<DS>> & OnFrame<InferFromStrong<DS>> & CSSProperties
++
++// export type UseSpringProps<DS extends object> = Merge<
++//   DS & UseSpringBaseProps,
++//   {
++//     from?: InferFrom<DS>
++//     /**
++//      * Callback when the animation comes to a still-stand
++//      */
++//     onRest?(ds: InferFrom<DS>): void
++//   }
++// >
  
  // there's a third value in the tuple but it's not public API (?)
 -export function useSpring<DS extends CSSProperties>(
 -  values: UseSpringProps<DS & CSSProperties>
 -): ForwardedProps<DS>
 -export function useSpring<DS extends CSSProperties>(
+-  getProps: () => UseSpringProps<DS & CSSProperties>
+-): [ForwardedProps<DS>, SetUpdateFn<DS>]
 +// export function useSpring<DS extends CSSProperties>(
 +//   values: UseSpringProps<DS & CSSProperties>
 +// ): ForwardedProps<DS>
@@ -441,42 +509,42 @@ new mode 100755
 +//   values: UseSpringProps<DS>
 +// ): AnimatedValue<ForwardedProps<DS>>
 +/* My interpretation of the docs --Spencer 2/15 */
-+type InferFromStrong<T extends object> = T extends { to: infer TTo, from: infer TFrom }
-+  ? TTo & TFrom
-+  : T extends { to: infer TTo }
-+  ? TTo
-+  : T extends { from: infer TFrom }
-+  ? TFrom
-+  : ForwardedProps<T>
++type Omit<T, U> = Pick<T, Exclude<keyof T, U>>;
++
++type InferFromStrong<T extends object> = ForwardedProps<T extends { to: infer To, from: infer From }
++  ? To & From & Omit<T, 'from' | 'to'>
++  : T extends { to: infer To }
++  ? To & Omit<T, 'to'>
++  : T extends { from: infer From }
++  ? From & Omit<T, 'from'>
++  : T>
++
 +type ScriptProps<DS> = {
 +  from: DS,
 +  to: (next: (value: DS) => Promise<void>, cancel: () => Promise<void>) => Promise<void>
 +  onRest?(ds: DS): void
 +} & UseSpringBaseProps
-+type isRaw<DS> = DS extends {config: {raw: any}} ? true : false;
-+export function useSpring<DS extends object>(
-   getProps: () => UseSpringProps<DS & CSSProperties>
--): [ForwardedProps<DS>, SetUpdateFn<DS>]
++type isRaw<DS> = DS extends { config: { raw: infer T } } ? T : false;
+ export function useSpring<DS extends object>(
+   getProps: () => UseSpringProps<DS>
+-): [AnimatedValue<ForwardedProps<DS>>, SetUpdateFn<DS>]
 +): [AnimatedValue<InferFromStrong<DS>, isRaw<DS>>, SetUpdateFn<InferFromStrong<DS>>]
  export function useSpring<DS extends object>(
--  getProps: () => UseSpringProps<DS>
--): [AnimatedValue<ForwardedProps<DS>>, SetUpdateFn<DS>]
 +  script: ScriptProps<DS>):
 +  AnimatedValue<ForwardedProps<DS>, isRaw<DS>>
- export function useSpring<DS extends object>(
--  values: UseSpringProps<DS>
--): AnimatedValue<ForwardedProps<DS>>
-+  values: UseSpringProps<DS & CSSProperties>
++export function useSpring<DS extends object>(
++  values: UseSpringProps<DS>
 +): AnimatedValue<InferFromStrong<DS>, isRaw<DS>>
 +// My shortcut versions which return raw not animated values.
 +export function useSpring$<DS extends object>(
-+  getProps: () => UseSpringProps<DS & CSSProperties>
++  getProps: () => UseSpringProps<DS>
 +): [InferFromStrong<DS>, SetUpdateFn<InferFromStrong<DS>>]
 +export function useSpring$<DS extends object>(
 +  script: ScriptProps<DS>):
 +  ForwardedProps<DS>
 +export function useSpring$<DS extends object>(
-+  values: UseSpringProps<DS & CSSProperties>
+   values: UseSpringProps<DS>
+-): AnimatedValue<ForwardedProps<DS>>
 +): InferFromStrong<DS>
 +
  
@@ -526,7 +594,7 @@ new mode 100755
  export function useTrail<DS extends object>(
    count: number,
    getProps: () => UseSpringProps<DS>
-@@ -161,6 +221,23 @@ export function useTrail<DS extends object>(
+@@ -161,6 +230,23 @@ export function useTrail<DS extends object>(
    count: number,
    values: UseSpringProps<DS>
  ): AnimatedValue<ForwardedProps<DS>>[] // safe to modify (result of .map)
@@ -550,7 +618,7 @@ new mode 100755
  
  export interface UseTransitionProps<TItem, DS extends object>
    extends HooksBaseProps {
-@@ -204,6 +281,15 @@ export interface UseTransitionResult<TItem, DS extends object> {
+@@ -204,6 +290,15 @@ export interface UseTransitionResult<TItem, DS extends object> {
    props: AnimatedValue<ForwardedProps<DS>>
  }
  
@@ -566,7 +634,7 @@ new mode 100755
  export function useTransition<TItem, DS extends CSSProperties>(
    items: ReadonlyArray<TItem> | TItem | null | undefined,
    keys:
-@@ -212,7 +298,7 @@ export function useTransition<TItem, DS extends CSSProperties>(
+@@ -212,7 +307,7 @@ export function useTransition<TItem, DS extends CSSProperties>(
      | TransitionKeyProps
      | null,
    values: Merge<DS & CSSProperties, UseTransitionProps<TItem, DS>>
@@ -575,7 +643,7 @@ new mode 100755
  export function useTransition<TItem, DS extends object>(
    items: ReadonlyArray<TItem> | TItem | null | undefined,
    keys:
-@@ -222,3 +308,22 @@ export function useTransition<TItem, DS extends object>(
+@@ -222,3 +317,22 @@ export function useTransition<TItem, DS extends object>(
      | null,
    values: Merge<DS, UseTransitionProps<TItem, DS>>
  ): UseTransitionResult<TItem, AnimatedValue<ForwardedProps<DS>>>[] // result array is safe to modify

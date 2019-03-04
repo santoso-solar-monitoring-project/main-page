@@ -49,28 +49,30 @@ export const useDataFeed = Args.wrap(
     });
 
     useEffect(() => {
-      // let id: number;
+      if (channelName === 'debug') {
+        let id: number;
 
-      // const receiveData = () => {
-      //   concat([generate()]);
-      //   id = window.setTimeout(
-      //     receiveData,
-      //     samplePeriod + 250 * (Math.random() - 0.5)
-      //   );
-      // };
-      // receiveData();
+        const receiveData = () => {
+          concat([generate()]);
+          id = window.setTimeout(
+            receiveData,
+            samplePeriod + 250 * (Math.random() - 0.5)
+          );
+        };
+        receiveData();
 
-      // return () => clearTimeout(id);
+        return () => clearTimeout(id);
+      } else {
+        const pusher = new Pusher(key, options);
+        const channel = pusher.subscribe(channelName);
+        const handler = ({ payload }: { payload: Pair[] }) => {
+          concat(payload);
+          Object.assign(window, { buffer, payload });
+        };
+        channel.bind(event, handler);
 
-      const pusher = new Pusher(key, options);
-      const channel = pusher.subscribe(channelName);
-      const handler = ({ payload }: { payload: Pair[] }) => {
-        concat(payload);
-        Object.assign(window, { buffer, payload });
-      };
-      channel.bind(event, handler);
-
-      return () => pusher.unsubscribe(channelName);
+        return () => pusher.unsubscribe(channelName);
+      }
     }, []);
 
     return buffer;

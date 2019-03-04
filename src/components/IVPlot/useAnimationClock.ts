@@ -11,10 +11,10 @@ const Args = FrameArgs.extend(
 export const useAnimationClock = Args.wrap(args => {
   const [{ clock }, update] = useSpring(() => ({
     clock: 0,
-    config: { duration: 0 },
+    immediate: true,
   }));
   useAnimationFrame(() => {
-    update({ clock: clock.value + 1 });
+    update({ clock: clock.value + args.interval });
   }, args);
   return clock;
 });

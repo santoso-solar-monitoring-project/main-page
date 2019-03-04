@@ -17,7 +17,7 @@ import { useDash } from './useDash';
 import { useFPS } from './useFPS';
 import { useTimespan } from './useTimespan';
 import { useClip } from './useClip';
-import { Ticks } from './Ticks';
+import { useTicks } from './useTicks';
 import { useControls } from './useControls';
 import { usePaddingSpring } from './usePaddingSpring';
 import * as d3 from 'd3';
@@ -90,6 +90,11 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
 
   const updateControls = useControls({ scale: amps.scaleX, svgRef, dims });
 
+  const numTicks = 25;
+  const [Ticks, ticks, ticksScale] = useTicks({
+    ...{ clock, scale: amps.currentScaleX, timespan, dims, count: numTicks },
+  });
+
   const start = performance.now();
   let count = 0;
   return (
@@ -112,11 +117,33 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
           volts.update();
         })}
       </animated.g>
-      <Ticks
-        {...{ clock, scale: amps.currentScaleX, timespan, dims, count: 25 }}
-      />
+      <Ticks />
       <Line stroke='pink' data={clock.interpolate(() => amps.view.current)} />
       <Line stroke='cyan' data={clock.interpolate(() => volts.view.current)} />
+      {/* <animated.g>
+        {[...Array(numTicks)].map((_, i) => {
+          console.log('hiiii', i);
+          const tick = ticks.interpolate(ticks => ticks[i]);
+          const t = tick.interpolate(tick => ticksScale(tick));
+          const available = clock.interpolate(
+            () => amps.view.current.length > i
+          );
+          const y = available.interpolate(available =>
+            available ? amps.view.current[i][1] : 0
+          );
+          const visibility = available.interpolate(a => +a);
+
+          return (
+            <animated.circle
+              cx={t}
+              cy={y}
+              r={5}
+              fill='pink'
+              visibility={visibility}
+            />
+          );
+        })}
+      </animated.g> */}
     </>
   );
 
