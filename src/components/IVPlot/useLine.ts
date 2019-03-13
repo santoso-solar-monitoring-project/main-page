@@ -30,6 +30,6 @@ export const useLine = Args.wrap(
     });
 
     const [view, update, currentScaleX] = useView(init);
-    return Object.assign({ view, update, currentScaleX }, init);
+    return { view, update, currentScaleX, ...init };
   }
 );

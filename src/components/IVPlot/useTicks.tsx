@@ -28,8 +28,6 @@ const Args = declare(
   })
 );
 
-const blank = new Date(0);
-
 export const useTicks = Args.wrap(
   ({ clock, scale, timespan, dims, count, textStyle, lineStyle }) => {
     const currentScale = d3.scaleTime();
@@ -47,10 +45,10 @@ export const useTicks = Args.wrap(
       return { ticks, pad, height };
     });
 
-    const Ticks = () => (
-      <g>
+    const Ticks = required<SVGAttributes<SVGGElement>>().wrap(props => (
+      <g {...props}>
         {[...Array(count)].map((_, i) => {
-          const tick = data.interpolate(data => data.ticks[i] || blank);
+          const tick = data.interpolate<Date | 0>(data => data.ticks[i] || 0);
           const t = tick.interpolate(tick => currentScale(tick));
           const height = data.interpolate(data => data.height);
           const pad = data.interpolate(data => data.pad);
@@ -58,7 +56,9 @@ export const useTicks = Args.wrap(
             <animated.g
               key={i}
               transform={t.interpolate(t => `translate(${t},0)`)}
-              visibility={tick.interpolate(tick => +(tick !== blank))}
+              visibility={tick.interpolate<string>(tick =>
+                tick !== 0 ? 'visible' : 'hidden'
+              )}
             >
               <animated.line y2={height} {...lineStyle} />
               <animated.text
@@ -66,13 +66,13 @@ export const useTicks = Args.wrap(
                 y={interpolate([height, pad], (height, pad) => height - pad)}
                 {...textStyle}
               >
-                {tick.interpolate(tick => format(tick))}
+                {tick.interpolate(tick => format(tick as Date))}
               </animated.text>
             </animated.g>
           );
         })}
       </g>
-    );
+    ));
 
     const ticks = data.interpolate(data => data.ticks);
 

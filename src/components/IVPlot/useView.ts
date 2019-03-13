@@ -60,20 +60,6 @@ export const useView = Args.wrap(({ scaleX, scaleY, buffer, extraHistory }) => {
       set({ extent: d3.extent(view, d => d[1]) as Pair });
     }
 
-    Object.assign(window, {
-      extent: extent.value,
-      timespan,
-      left,
-      right,
-      buffer,
-      hist: history,
-      start,
-      end,
-      now,
-      length: transformed.current.length,
-      transformed,
-    });
-
     scaleY.domain(extent.value);
     transformed.current = view.map(
       ([x, y]): Pair => [currentScaleX(x), scaleY(y)]

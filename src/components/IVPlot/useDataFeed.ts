@@ -6,13 +6,7 @@ import Pusher from 'pusher-js';
 
 const CURRENT = [3.1, 3.2, 2.1, 2.0, 2.9, 1.8, 4.5, 4.2];
 const [lo, hi] = [Math.min(...CURRENT), Math.max(...CURRENT)];
-// const start = Date.now();
-const generate = (): Pair => [
-  // (((Date.now() - start) / 1000 / 10) * 1400) % 1400,
-  Date.now(),
-  Math.random() * 150,
-  // Math.random() * (hi - lo) + lo,
-];
+const generate = (): Pair => [Date.now(), Math.random() * (hi - lo) + lo];
 const _initialValue = [...Array(100)].map((_x, i) => [
   Date.now() + ((100 - 1 - i) / 100) * -10000,
   Math.random() * (hi - lo) + lo,

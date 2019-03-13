@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-
+import React from 'react';
+import { useAnimationClock } from '../IVPlot/useAnimationClock';
+import { animated } from 'react-spring';
 export function Time() {
-  const [, setState] = useState(null);
-  useEffect(() => {
-    const animate = () => {
-      setState(() => null);
-      requestAnimationFrame(animate);
-    };
-    let id = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(id);
-  }, []);
-  return <div>{new Date().toLocaleTimeString()}</div>;
+  const clock = useAnimationClock();
+  return (
+    <animated.div
+      style={{
+        position: 'absolute',
+        left: '50%',
+        transform: 'translateX(-50%)',
+      }}
+    >
+      {clock.interpolate(() => new Date().toLocaleTimeString())}
+    </animated.div>
+  );
 }

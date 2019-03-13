@@ -38,15 +38,15 @@ export const Props = BlurProps.extend(
     style: {
       position: 'relative',
       width: '100%',
-      height: '150px',
+      height: '100%',
       borderRadius: '5px',
       // border: '10px solid blue',
-      backgroundColor: 'black',
+      backgroundColor: '#040404',
     },
   })
 );
 
-const IVPlot = Props.wrap(({ channelNames, style, ...rest }) => {
+const IVPlot = Props.wrap(({ channelNames, ...rest }) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Re-render on resize
@@ -60,13 +60,11 @@ const IVPlot = Props.wrap(({ channelNames, style, ...rest }) => {
   );
 
   return (
-    <div style={style}>
-      <Blur {...rest}>
-        <svg ref={svgRef} width='100%' height='100%'>
-          <_IVPlot channelNames={channelNames} svgRef={svgRef} />
-        </svg>
-      </Blur>
-    </div>
+    <Blur {...rest}>
+      <svg ref={svgRef} width='100%' height='100%'>
+        <_IVPlot channelNames={channelNames} svgRef={svgRef} />
+      </svg>
+    </Blur>
   );
 });
 

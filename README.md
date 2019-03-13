@@ -21,27 +21,30 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
       8 src/components/GoodCanvas/GoodCanvasChild.ts
      15 src/components/GoodCanvas/GoodCanvasElement.ts
     195 src/components/GoodCanvas/index.tsx
-    243 src/components/IVPlot/_IVPlot.tsx
-     81 src/components/IVPlot/index.tsx
+    290 src/components/IVPlot/_IVPlot.tsx
+    181 src/components/IVPlot/bleh.html
+  14862 src/components/IVPlot/Haydn_Cello_Concerto_D-1.mp3
+     79 src/components/IVPlot/index.tsx
+      0 src/components/IVPlot/test.html
      20 src/components/IVPlot/useAnimationClock.ts
      60 src/components/IVPlot/useAnimationFrame.ts
      25 src/components/IVPlot/useClip.ts
-    103 src/components/IVPlot/useControls.ts
+    120 src/components/IVPlot/useControls.ts
      23 src/components/IVPlot/useDash.ts
-     80 src/components/IVPlot/useDataFeed.ts
+     74 src/components/IVPlot/useDataFeed.ts
      69 src/components/IVPlot/useFPS.ts
      35 src/components/IVPlot/useLine.ts
      12 src/components/IVPlot/usePaddingSpring.ts
      85 src/components/IVPlot/useTicks.tsx
      24 src/components/IVPlot/useTimespan.ts
-     88 src/components/IVPlot/useView.ts
-     34 src/components/Line/index.tsx
-     44 src/components/TitleBar/index.js
+     74 src/components/IVPlot/useView.ts
+     42 src/components/Line/index.tsx
+     30 src/components/TitleBar/index.js
       4 src/components/TitleBar/lock.svg
      21 src/components/TitleBar/Login.js
-     14 src/components/TitleBar/Time.js
+     17 src/components/TitleBar/Time.js
      35 src/components/TitleBar/Wifi.js
-     37 src/components/usePoints/index.tsx
+     86 src/components/usePoints/index.tsx
       1 src/components/Weather/index.tsx
       6 src/utils/canvas/clear.ts
     204 src/utils/canvas/enhanceContext.ts
@@ -89,5 +92,5 @@ wc: src/utils/Imm: Is a directory
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   2995 total
+  18126 total
 ```

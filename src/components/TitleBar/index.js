@@ -1,37 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Wifi } from './Wifi';
 import { Time } from './Time';
 import { Login } from './Login';
-const TitleBar = props => {
-  const [state, setState] = useState({ level: 0, username: 'DoctorSantoso' });
-  useEffect(() => {
-    let count = 0;
-    const animate = () => {
-      count++;
-      setState(({ level, username }) => {
-        return {
-          level: Math.round(Math.random() * 5),
-          username:
-            count % 4 === 0 ? username.slice(1) + username[0] : username,
-        };
-      });
-      requestAnimationFrame(animate);
-    };
-    let id = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(id);
-  }, []);
+const TitleBar = () => {
+  const [state] = useState({ level: 4, username: 'Dr. Santoso' });
+
   return (
     <div
       style={{
         font: '1em monospace',
         lineHeight: '1.25em',
-        backgroundColor: 'black',
+        backgroundColor: '#222',
         color: 'white',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingLeft: '2ex',
         paddingRight: '2ex',
+        position: 'relative',
       }}
     >
       <Wifi level={state.level} />

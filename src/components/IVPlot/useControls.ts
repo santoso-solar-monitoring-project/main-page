@@ -42,7 +42,6 @@ export const useControls = Args.wrap(({ scale, svgRef, dims, dblclick }) => {
   useEffect(() => {
     const selection = d3.select(svgRef.current!);
 
-    let start: number;
     zoom
       .on('zoom', () => {
         const t = d3.event.transform as d3.ZoomTransform;
@@ -50,23 +49,40 @@ export const useControls = Args.wrap(({ scale, svgRef, dims, dblclick }) => {
       })
       .duration(dblclick);
 
-    const pause = (at: number) => () => {
+    const paused = (at: number) => () => {
       const delta = Date.now() - at;
       at += delta;
       const dx = delta * slope(baseScale);
       zoom.translateBy(selection, dx, 0);
     };
     let clickID = NaN;
-    const clickHandler = () => {
-      if (clickID) {
-        window.clearTimeout(clickID);
-        clickID = NaN;
-      } else {
-        // duration to wait in case of dblclick
-        clickID = window.setTimeout(() => {
-          clickID = NaN;
-          effect.current = effect.current === noop ? pause(Date.now()) : noop;
-        }, dblclick);
+    type States = 'unpaused' | 'waiting' | 'paused' | 'cancelling';
+    let state: States = 'unpaused';
+    const nextState = (s: States) => {
+      const prevState = state;
+      switch ((state = s)) {
+        case 'unpaused': {
+          effect.current = noop;
+          break;
+        }
+        case 'waiting': {
+          if (prevState === 'waiting') break;
+          const from = { unpaused: 'paused', paused: 'unpaused' } as {
+            [k: string]: States;
+          };
+          clickID = window.setTimeout(() => {
+            nextState(from[prevState]);
+          }, dblclick);
+          break;
+        }
+        case 'paused': {
+          effect.current = paused(Date.now());
+          break;
+        }
+        case 'cancelling': {
+          window.clearTimeout(clickID);
+          break;
+        }
       }
     };
 
@@ -90,10 +106,11 @@ export const useControls = Args.wrap(({ scale, svgRef, dims, dblclick }) => {
     selection
       .call(zoom)
       .on('dblclick.zoom', () => {
-        effect.current = noop;
         reset();
+        nextState('cancelling');
+        nextState('unpaused');
       })
-      .on('click', clickHandler);
+      .on('click', () => nextState('waiting'));
 
     return () => selection.on('.zoom', null);
   });

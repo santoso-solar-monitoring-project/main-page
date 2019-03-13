@@ -1,0 +1,184 @@
+patch-package
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+--- a/node_modules/d3-shape/src/curve/catmullRom.js
++++ b/node_modules/d3-shape/src/curve/catmullRom.js
+@@ -1,5 +1,7 @@
+ import {epsilon} from "../math";
+ import {Cardinal} from "./cardinal";
++import {path} from "d3-path";
++import {bisector} from 'd3-array'
+ 
+ export function point(that, x, y) {
+   var x1 = that._x1,
+@@ -84,5 +86,55 @@ export default (function custom(alpha) {
+     return custom(+alpha);
+   };
+ 
++  var _ = getControlPoints();
++  catmullRom.getControlPoints = function (data) {
++    if (data.length != 4) throw new Error('Need 4 data points in order to determine the control points.')
++    return _(data, catmullRom);
++  }
++
++  var b = bisector(function (d) { return d[0] });
++  catmullRom.interpolate = function (x, data) {
++    var i = b.left(data, x);
++    var left = Math.max(i - 2, 0);
++    var right = Math.min(i + 2, data.length);
++    if (right - left != 4) return NaN;
++    var $ = catmullRom.getControlPoints(data.slice(left, right));
++    var t = (x - $.x0) / ($.x3 - $.x0);
++    return Math.pow(1 - t, 3) * $.y0
++      + 3 * Math.pow(1 - t, 2) * t * $.y1
++      + 3 * (1 - t) * Math.pow(t, 2) * $.y2
++      + Math.pow(t, 3) * $.y3;
++  }
++
+   return catmullRom;
+ })(0.5);
++
++function getControlPoints() {
++  var context = path();
++  var x1, y1, x2, y2;
++  context.moveTo = function () { };
++  context.bezierCurveTo = function ($x1, $y1, $x2, $y2, _x, _y) {
++    x1 = $x1;
++    y1 = $y1;
++    x2 = $x2;
++    y2 = $y2;
++  };
++
++  return function (data, curve) {
++    var c = curve(context);
++    c.lineStart();
++    c.point(data[0][0], data[0][1]);
++    c.point(data[1][0], data[1][1]);
++    // Control points are for the bezier curve connecting the two points
++    // data[1] and data[2].
++    c.point(data[2][0], data[2][1]);
++    c.point(data[3][0], data[3][1]);
++
++    return {
++      x0: data[1][0], y0: data[1][1],
++      x1, y1,
++      x2, y2,
++      x3: data[2][0], y3: data[2][1]
++    };
++  }
++}
+\ No newline at end of file
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755

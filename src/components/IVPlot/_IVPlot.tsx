@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { GoodCanvasChild } from 'components/GoodCanvas';
-import { usePoints } from 'components/usePoints';
+import { Points } from 'components/usePoints';
 import { Line } from 'components/Line';
 import { useDataFeed } from './useDataFeed';
 import { useView } from './useView';
@@ -95,6 +95,10 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
     ...{ clock, scale: amps.currentScaleX, timespan, dims, count: numTicks },
   });
 
+  const line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+
+  const sideClip = 0.2;
+
   const start = performance.now();
   let count = 0;
   return (
@@ -117,33 +121,76 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
           volts.update();
         })}
       </animated.g>
+      <clipPath id='inside'>
+        <animated.rect
+          x={clock.interpolate(() => dims.current.height * sideClip)}
+          width={clock.interpolate(
+            () => dims.current.width - 2 * dims.current.height * sideClip
+          )}
+          height='100%'
+        />
+      </clipPath>
+      <clipPath id='outside'>
+        <animated.rect
+          width={clock.interpolate(() => dims.current.height * sideClip)}
+          height='100%'
+        />
+        <animated.rect
+          x={clock.interpolate(
+            () => dims.current.width - dims.current.height * sideClip
+          )}
+          width={clock.interpolate(() => dims.current.height * sideClip)}
+          height='100%'
+        />
+      </clipPath>
       <Ticks />
-      <Line stroke='pink' data={clock.interpolate(() => amps.view.current)} />
-      <Line stroke='cyan' data={clock.interpolate(() => volts.view.current)} />
-      {/* <animated.g>
-        {[...Array(numTicks)].map((_, i) => {
-          console.log('hiiii', i);
-          const tick = ticks.interpolate(ticks => ticks[i]);
-          const t = tick.interpolate(tick => ticksScale(tick));
-          const available = clock.interpolate(
-            () => amps.view.current.length > i
-          );
-          const y = available.interpolate(available =>
-            available ? amps.view.current[i][1] : 0
-          );
-          const visibility = available.interpolate(a => +a);
-
-          return (
-            <animated.circle
-              cx={t}
-              cy={y}
-              r={5}
-              fill='pink'
-              visibility={visibility}
-            />
-          );
-        })}
-      </animated.g> */}
+      <g clipPath='url(#inside)'>
+        <Line data={amps.view} clock={clock} line={line} />
+        <Points
+          ticks={ticks}
+          ticksScale={ticksScale}
+          scaleY={amps.scaleY}
+          data={amps.view}
+          count={numTicks}
+          curve={line.curve() as d3.CurveCatmullRomFactory}
+        />
+        <Line
+          stroke='hsl(210, 100%, 67%)'
+          data={volts.view}
+          clock={clock}
+          line={line}
+        />
+        <Points
+          circleStyle={{
+            fill: 'hsl(210, 100%, 75%)',
+            stroke: 'hsl(210, 100%, 50%)',
+          }}
+          textStyle={{ fill: 'hsl(210, 100%, 75%)' }}
+          ticks={ticks}
+          ticksScale={ticksScale}
+          scaleY={volts.scaleY}
+          data={volts.view}
+          count={numTicks}
+          curve={line.curve() as d3.CurveCatmullRomFactory}
+        />
+      </g>
+      <g clipPath='url(#outside)'>
+        <Line
+          data={amps.view}
+          clock={clock}
+          line={line}
+          strokeDasharray='4 6'
+          strokeDashoffset={clock.interpolate(t => t / 20)}
+        />
+        <Line
+          strokeDasharray='4 6'
+          strokeDashoffset={clock.interpolate(t => t / 20)}
+          stroke='hsl(210, 100%, 67%)'
+          data={volts.view}
+          clock={clock}
+          line={line}
+        />
+      </g>
     </>
   );
 

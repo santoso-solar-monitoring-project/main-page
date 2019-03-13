@@ -361,11 +361,11 @@ new mode 100755
 +import { AnimatedValue, OpaqueInterpolation } from './web';
 +
 +type EachAnimatedValue<T> = T extends object ? AnimatedValue<T> : T;
-+type EachOpaqueInterpolation<T> = T extends T ? OpaqueInterpolation<T> : never;
++type EachOpaqueInterpolation<T> = T extends any ? OpaqueInterpolation<T> : never;
 +
 +type AnimatableAttr<V, W = NonNullable<V>> = V | EachAnimatedValue<W> | EachOpaqueInterpolation<W>;
 +type Recursable = 'style';
-+type Animatable<T> = {
++export type Animatable<T> = {
 +  [attr in keyof T]:
 +  attr extends Recursable
 +  ? Animatable<T[attr]>

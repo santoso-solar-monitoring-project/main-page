@@ -1,0 +1,31 @@
+patch-package
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+old mode 100644
+new mode 100755
+--- a/node_modules/@types/d3-shape/index.d.ts
++++ b/node_modules/@types/d3-shape/index.d.ts
+@@ -1813,6 +1813,7 @@ export const curveCardinalClosed: CurveCardinalFactory;
+  */
+ export const curveCardinalOpen: CurveCardinalFactory;
+ 
++type Pair = [number, number];
+ /**
+  * A curve factory for cubic Catmull–Rom spline generators.
+  */
+@@ -1826,6 +1827,13 @@ export interface CurveCatmullRomFactory extends CurveFactory {
+      * @param alpha A constant in the [0, 1] interval.
+      */
+     alpha(alpha: number): this;
++    getControlPoints(data: Pair[]): {
++        x0: number, y0: number,
++        x1: number, y1: number,
++        x2: number, y2: number,
++        x3: number, y3: number,
++    };
++    interpolate(x: number, data: Pair[]): number;
+ }
+ 
+ /**
