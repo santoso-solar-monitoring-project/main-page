@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu|Ubuntu+Mono');
+
 body {
   background-color: black;
+  font-family: 'Ubuntu Mono';
 }
 
 .main {
@@ -16,7 +19,8 @@ body {
   height: 150px;
   border-radius: 5px;
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  /* justify-content: space-between; */
 }
 
 .row > * {
@@ -25,4 +29,24 @@ body {
 
 .row > *:last-child {
   margin-right: initial;
+  flex-grow: 10;
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  color: #fffa;
+  text-transform: uppercase;
+  align-items: center;
+}
+.caption > *:nth-child(1) {
+  height: calc(100% - 16px);
+}
+
+.caption > *:nth-child(2) {
+  height: 20px;
+  font-size: 12px;
+  padding-top: 8px;
+  letter-spacing: 0.08rem;
+  font-family: Ubuntu;
 }

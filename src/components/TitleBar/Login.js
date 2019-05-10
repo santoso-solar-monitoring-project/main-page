@@ -10,6 +10,7 @@ export function Login(props) {
     >
       <Lock
         style={{
+          display: props.username === 'Guest' ? 'none' : 'initial',
           width: '1em',
           height: '1em',
           fill: 'white',

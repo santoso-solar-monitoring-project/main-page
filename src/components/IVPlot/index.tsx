@@ -1,36 +1,10 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import { _IVPlot } from './_IVPlot';
 import { defaults, required } from 'utils/DefaultProps';
 import Blur, { Props as BlurProps } from 'components/Blur';
 import { useThrottled, useCounter } from 'utils/CustomHooks';
 import { optimizedResize } from 'utils/throttleEvent';
 import { Omit } from 'utils/meta';
-
-/* interface ModeType {
-  style: React.CSSProperties | {};
-  current: {
-    line: {
-      canvasStyle?: CanvasRenderingContext2D | {};
-    };
-    points: {
-      canvasStyle?: CanvasRenderingContext2D | {};
-    };
-  };
-}
-
-export const lightMode: ModeType = {
-  style: { backgroundColor: 'transparent' },
-  current: {
-    line: {
-      canvasStyle: { strokeStyle: 'hsl(330, 100%, 75%)' },
-      // glow: { blurRadius: 10, color: 'hsl(330, 100%, 50%)' },
-    },
-    points: {
-      canvasStyle: { strokeStyle: 'hsl(330, 100%, 75%)' },
-      // glow: { blurRadius: 10, color: 'hsl(330, 100%, 50%)' },
-    },
-  },
-}; */
 
 export const Props = BlurProps.extend(
   required<Omit<typeof _IVPlot.required, 'svgRef'>>(),

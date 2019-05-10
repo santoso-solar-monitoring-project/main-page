@@ -3,7 +3,11 @@ import { Wifi } from './Wifi';
 import { Time } from './Time';
 import { Login } from './Login';
 const TitleBar = () => {
-  const [state] = useState({ level: 4, username: 'Dr. Santoso' });
+  const [state] = useState({
+    level: 4,
+    username:
+      new URL(document.location).searchParams.get('username') || 'Guest',
+  });
 
   return (
     <div

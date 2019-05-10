@@ -56,13 +56,11 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
   const padDomain = 4 * samplePeriod;
   const padRange = { y: { height: 0.1 } };
 
-  const amps = useLine({
+  const volts = useLine({
     buffer: useDataFeed({
       samplePeriod: samplePeriod,
       maxSize: 500,
-      pusher: {
-        channelName: channelNames[0],
-      },
+      channelName: channelNames[0],
     }),
     scaleX: d3.scaleLinear(),
     scaleY: d3.scaleLinear(),
@@ -72,15 +70,13 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
     padRange,
   });
 
-  const volts = useLine({
+  const amps = useLine({
     buffer: useDataFeed({
       samplePeriod: samplePeriod,
       maxSize: 500,
-      pusher: {
-        channelName: channelNames[1],
-      },
+      channelName: channelNames[1],
     }),
-    scaleX: amps.scaleX,
+    scaleX: volts.scaleX,
     scaleY: d3.scaleLinear(),
     timespan,
     dims,
@@ -147,6 +143,7 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
       <g clipPath='url(#inside)'>
         <Line data={amps.view} clock={clock} line={line} />
         <Points
+          labelUnit='A'
           ticks={ticks}
           ticksScale={ticksScale}
           scaleY={amps.scaleY}
@@ -161,6 +158,7 @@ export const _IVPlot = Args.wrap(({ svgRef, channelNames }) => {
           line={line}
         />
         <Points
+          labelUnit='V'
           circleStyle={{
             fill: 'hsl(210, 100%, 75%)',
             stroke: 'hsl(210, 100%, 50%)',

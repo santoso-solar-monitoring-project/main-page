@@ -39,37 +39,159 @@ old mode 100644
 new mode 100755
 --- a/node_modules/d3-shape/src/curve/catmullRom.js
 +++ b/node_modules/d3-shape/src/curve/catmullRom.js
-@@ -1,5 +1,7 @@
- import {epsilon} from "../math";
- import {Cardinal} from "./cardinal";
-+import {path} from "d3-path";
-+import {bisector} from 'd3-array'
+@@ -1,22 +1,24 @@
+-import {epsilon} from "../math";
+-import {Cardinal} from "./cardinal";
++import { epsilon } from '../math';
++import { Cardinal } from './cardinal';
++import { path } from 'd3-path';
++import { bisector } from 'd3-array';
  
  export function point(that, x, y) {
    var x1 = that._x1,
-@@ -84,5 +86,55 @@ export default (function custom(alpha) {
+-      y1 = that._y1,
+-      x2 = that._x2,
+-      y2 = that._y2;
++    y1 = that._y1,
++    x2 = that._x2,
++    y2 = that._y2;
+ 
+   if (that._l01_a > epsilon) {
+     var a = 2 * that._l01_2a + 3 * that._l01_a * that._l12_a + that._l12_2a,
+-        n = 3 * that._l01_a * (that._l01_a + that._l12_a);
++      n = 3 * that._l01_a * (that._l01_a + that._l12_a);
+     x1 = (x1 * a - that._x0 * that._l12_2a + that._x2 * that._l01_2a) / n;
+     y1 = (y1 * a - that._y0 * that._l12_2a + that._y2 * that._l01_2a) / n;
+   }
+ 
+   if (that._l23_a > epsilon) {
+     var b = 2 * that._l23_2a + 3 * that._l23_a * that._l12_a + that._l12_2a,
+-        m = 3 * that._l23_a * (that._l23_a + that._l12_a);
++      m = 3 * that._l23_a * (that._l23_a + that._l12_a);
+     x2 = (x2 * b + that._x1 * that._l23_2a - x * that._l12_2a) / m;
+     y2 = (y2 * b + that._y1 * that._l23_2a - y * that._l12_2a) / m;
+   }
+@@ -37,45 +39,56 @@ CatmullRom.prototype = {
+     this._line = NaN;
+   },
+   lineStart: function() {
+-    this._x0 = this._x1 = this._x2 =
+-    this._y0 = this._y1 = this._y2 = NaN;
+-    this._l01_a = this._l12_a = this._l23_a =
+-    this._l01_2a = this._l12_2a = this._l23_2a =
+-    this._point = 0;
++    this._x0 = this._x1 = this._x2 = this._y0 = this._y1 = this._y2 = NaN;
++    this._l01_a = this._l12_a = this._l23_a = this._l01_2a = this._l12_2a = this._l23_2a = this._point = 0;
+   },
+   lineEnd: function() {
+     switch (this._point) {
+-      case 2: this._context.lineTo(this._x2, this._y2); break;
+-      case 3: this.point(this._x2, this._y2); break;
++      case 2:
++        this._context.lineTo(this._x2, this._y2);
++        break;
++      case 3:
++        this.point(this._x2, this._y2);
++        break;
+     }
+-    if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();
++    if (this._line || (this._line !== 0 && this._point === 1))
++      this._context.closePath();
+     this._line = 1 - this._line;
+   },
+   point: function(x, y) {
+-    x = +x, y = +y;
++    (x = +x), (y = +y);
+ 
+     if (this._point) {
+       var x23 = this._x2 - x,
+-          y23 = this._y2 - y;
+-      this._l23_a = Math.sqrt(this._l23_2a = Math.pow(x23 * x23 + y23 * y23, this._alpha));
++        y23 = this._y2 - y;
++      this._l23_a = Math.sqrt(
++        (this._l23_2a = Math.pow(x23 * x23 + y23 * y23, this._alpha))
++      );
+     }
+ 
+     switch (this._point) {
+-      case 0: this._point = 1; this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y); break;
+-      case 1: this._point = 2; break;
+-      case 2: this._point = 3; // proceed
+-      default: point(this, x, y); break;
++      case 0:
++        this._point = 1;
++        this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y);
++        break;
++      case 1:
++        this._point = 2;
++        break;
++      case 2:
++        this._point = 3; // proceed
++      default:
++        point(this, x, y);
++        break;
+     }
+ 
+-    this._l01_a = this._l12_a, this._l12_a = this._l23_a;
+-    this._l01_2a = this._l12_2a, this._l12_2a = this._l23_2a;
+-    this._x0 = this._x1, this._x1 = this._x2, this._x2 = x;
+-    this._y0 = this._y1, this._y1 = this._y2, this._y2 = y;
+-  }
++    (this._l01_a = this._l12_a), (this._l12_a = this._l23_a);
++    (this._l01_2a = this._l12_2a), (this._l12_2a = this._l23_2a);
++    (this._x0 = this._x1), (this._x1 = this._x2), (this._x2 = x);
++    (this._y0 = this._y1), (this._y1 = this._y2), (this._y2 = y);
++  },
+ };
+ 
+ export default (function custom(alpha) {
+-
+   function catmullRom(context) {
+     return alpha ? new CatmullRom(context, alpha) : new Cardinal(context, 0);
+   }
+@@ -84,5 +97,83 @@ export default (function custom(alpha) {
      return custom(+alpha);
    };
  
 +  var _ = getControlPoints();
-+  catmullRom.getControlPoints = function (data) {
-+    if (data.length != 4) throw new Error('Need 4 data points in order to determine the control points.')
-+    return _(data, catmullRom);
-+  }
++  catmullRom.getControlPoints = function(
++    data,
++    { pointX = d => d[0], pointY = d => d[1] } = {}
++  ) {
++    if (data.length !== 4)
++      throw new Error(
++        'Need 4 data points in order to determine the control points.'
++      );
 +
-+  var b = bisector(function (d) { return d[0] });
-+  catmullRom.interpolate = function (x, data) {
-+    var i = b.left(data, x);
++    return _(data, catmullRom, { pointX, pointY });
++  };
++
++  var b = bisector(function(d) {
++    return d[0];
++  });
++  catmullRom.interpolate = function(
++    t,
++    data,
++    { bisector = b, pointX = d => d[0], pointY = d => d[1] } = {}
++  ) {
++    var i = bisector.left(data, t);
 +    var left = Math.max(i - 2, 0);
 +    var right = Math.min(i + 2, data.length);
-+    if (right - left != 4) return NaN;
-+    var $ = catmullRom.getControlPoints(data.slice(left, right));
-+    var t = (x - $.x0) / ($.x3 - $.x0);
-+    return Math.pow(1 - t, 3) * $.y0
-+      + 3 * Math.pow(1 - t, 2) * t * $.y1
-+      + 3 * (1 - t) * Math.pow(t, 2) * $.y2
-+      + Math.pow(t, 3) * $.y3;
-+  }
++    if (right - left !== 4) return NaN;
++
++    var $ = catmullRom.getControlPoints(data.slice(left, right), {
++      pointX,
++      pointY,
++    });
++    var z = (t - $.x0) / ($.x3 - $.x0);
++
++    return (
++      Math.pow(1 - z, 3) * $.y0 +
++      3 * Math.pow(1 - z, 2) * z * $.y1 +
++      3 * (1 - z) * Math.pow(z, 2) * $.y2 +
++      Math.pow(z, 3) * $.y3
++    );
++  };
 +
    return catmullRom;
  })(0.5);
@@ -77,33 +199,40 @@ new mode 100755
 +function getControlPoints() {
 +  var context = path();
 +  var x1, y1, x2, y2;
-+  context.moveTo = function () { };
-+  context.bezierCurveTo = function ($x1, $y1, $x2, $y2, _x, _y) {
++  context.moveTo = function() {};
++  context.bezierCurveTo = function($x1, $y1, $x2, $y2, _x, _y) {
 +    x1 = $x1;
 +    y1 = $y1;
 +    x2 = $x2;
 +    y2 = $y2;
 +  };
 +
-+  return function (data, curve) {
++  return function(
++    data,
++    curve,
++    { pointX = d => d[0], pointY = d => d[1] } = {}
++  ) {
 +    var c = curve(context);
 +    c.lineStart();
-+    c.point(data[0][0], data[0][1]);
-+    c.point(data[1][0], data[1][1]);
++    c.point(pointX(data[0]), pointY(data[0]));
++    c.point(pointX(data[1]), pointY(data[1]));
 +    // Control points are for the bezier curve connecting the two points
 +    // data[1] and data[2].
-+    c.point(data[2][0], data[2][1]);
-+    c.point(data[3][0], data[3][1]);
++    c.point(pointX(data[2]), pointY(data[2]));
++    c.point(pointX(data[3]), pointY(data[3]));
 +
 +    return {
-+      x0: data[1][0], y0: data[1][1],
-+      x1, y1,
-+      x2, y2,
-+      x3: data[2][0], y3: data[2][1]
++      x0: pointX(data[1]),
++      y0: pointY(data[1]),
++      x1,
++      y1,
++      x2,
++      y2,
++      x3: pointX(data[2]),
++      y3: pointY(data[2]),
 +    };
-+  }
++  };
 +}
-\ No newline at end of file
 old mode 100644
 new mode 100755
 old mode 100644

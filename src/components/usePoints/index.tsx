@@ -28,6 +28,7 @@ export const Args = declare(
         font: '16px ubuntu mono, monospace',
       },
     } as Animatable<SVGAttributes<SVGTextElement>>,
+    labelUnit: '',
   }),
   required<Animatable<SVGAttributes<SVGGElement>>>()
 );
@@ -52,6 +53,7 @@ export const Points = Args.wrap(
     scaleY,
     circleStyle,
     textStyle,
+    labelUnit,
     ...rest
   }) => (
     <animated.g {...rest}>
@@ -76,7 +78,10 @@ export const Points = Args.wrap(
           >
             <animated.circle cx={0} cy={0} {...circleStyle} />
             <animated.text x={5} y={4} {...textStyle}>
-              {y.interpolate(y => scaleY.invert(y).toFixed(1))}
+              <animated.tspan>
+                {y.interpolate(y => scaleY.invert(y).toFixed(1))}
+              </animated.tspan>
+              <tspan>{labelUnit && labelUnit}</tspan>
             </animated.text>
           </animated.g>
         );

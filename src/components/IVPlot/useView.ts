@@ -51,7 +51,8 @@ export const useView = Args.wrap(({ scaleX, scaleY, buffer, extraHistory }) => {
     const padLeft = clamp(left - pad, [0]);
 
     // Slice the view of the buffer.
-    const view = buffer.slice(padLeft, padRight);
+    const compare = ([a]: Pair, [b]: Pair) => +new Date(a) - +new Date(b);
+    const view = buffer.slice(padLeft, padRight).sort(compare);
 
     // TODO: If I have a lot of free time, add striding to the view, with consistent phase.
 

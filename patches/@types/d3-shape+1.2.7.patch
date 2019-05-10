@@ -7,7 +7,7 @@ old mode 100644
 new mode 100755
 --- a/node_modules/@types/d3-shape/index.d.ts
 +++ b/node_modules/@types/d3-shape/index.d.ts
-@@ -1813,6 +1813,7 @@ export const curveCardinalClosed: CurveCardinalFactory;
+@@ -1813,19 +1813,42 @@ export const curveCardinalClosed: CurveCardinalFactory;
   */
  export const curveCardinalOpen: CurveCardinalFactory;
  
@@ -15,17 +15,47 @@ new mode 100755
  /**
   * A curve factory for cubic Catmull–Rom spline generators.
   */
-@@ -1826,6 +1827,13 @@ export interface CurveCatmullRomFactory extends CurveFactory {
-      * @param alpha A constant in the [0, 1] interval.
-      */
-     alpha(alpha: number): this;
-+    getControlPoints(data: Pair[]): {
-+        x0: number, y0: number,
-+        x1: number, y1: number,
-+        x2: number, y2: number,
-+        x3: number, y3: number,
-+    };
-+    interpolate(x: number, data: Pair[]): number;
+ export interface CurveCatmullRomFactory extends CurveFactory {
+-    /**
+-     * Returns a cubic Catmull–Rom curve factory with the specified alpha in the range [0, 1].
+-     * If alpha is zero, produces a uniform spline, equivalent to curveCardinal with a tension of zero;
+-     * if alpha is one, produces a chordal spline; if alpha is 0.5, produces a centripetal spline.
+-     * Centripetal splines are recommended to avoid self-intersections and overshoot.
+-     *
+-     * @param alpha A constant in the [0, 1] interval.
+-     */
+-    alpha(alpha: number): this;
++  /**
++   * Returns a cubic Catmull–Rom curve factory with the specified alpha in the range [0, 1].
++   * If alpha is zero, produces a uniform spline, equivalent to curveCardinal with a tension of zero;
++   * if alpha is one, produces a chordal spline; if alpha is 0.5, produces a centripetal spline.
++   * Centripetal splines are recommended to avoid self-intersections and overshoot.
++   *
++   * @param alpha A constant in the [0, 1] interval.
++   */
++  alpha(alpha: number): this;
++  getControlPoints(
++    data: Pair[],
++    accessors?: { pointX?: (Pair) => number; pointY?: (Pair) => number }
++  ): {
++    x0: number;
++    y0: number;
++    x1: number;
++    y1: number;
++    x2: number;
++    y2: number;
++    x3: number;
++    y3: number;
++  };
++  interpolate(
++    x: number,
++    data: Pair[],
++    options?: {
++      bisector?: import('d3-shape').Bisector;
++      pointX?: (Pair) => number;
++      pointY?: (Pair) => number;
++    }
++  ): number;
  }
  
  /**
