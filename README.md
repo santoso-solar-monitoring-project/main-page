@@ -11,6 +11,11 @@ File Overview:
 ```bash
 $ wc -l src/components/*/** src/utils/**/* src/utils/*
      75 src/components/Blur/index.tsx
+     16 src/components/BottomBar/Energy.js
+     13 src/components/BottomBar/FPS.js
+     13 src/components/BottomBar/Ping.js
+     46 src/components/BottomBar/index.js
+      4 src/components/BottomBar/lock.svg
     138 src/components/CirclePlot/index.tsx
      47 src/components/CornersTest/Corners.tsx
      14 src/components/CornersTest/index.tsx
@@ -94,5 +99,5 @@ wc: src/utils/canvas: Is a directory
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   5264 total
+   5356 total
 ```
