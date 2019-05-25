@@ -41,284 +41,6 @@ old mode 100644
 new mode 100755
 old mode 100644
 new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
-old mode 100644
-new mode 100755
 --- a/node_modules/react-spring/renderprops-universal.d.ts
 +++ b/node_modules/react-spring/renderprops-universal.d.ts
 @@ -12,6 +12,7 @@ import {
@@ -808,30 +530,31 @@ new mode 100755
    items: ReadonlyArray<TItem> | TItem | null | undefined,
    keys:
 @@ -221,4 +335,23 @@ export function useTransition<TItem, DS extends object>(
-     | TransitionKeyProps
+     | TransitionKeyProps           
      | null,
    values: Merge<DS, UseTransitionProps<TItem, DS>>
 -): UseTransitionResult<TItem, AnimatedValue<ForwardedProps<DS>>>[] // result array is safe to modify
-+): UseTransitionResult<TItem, AnimatedValue<ForwardedProps<DS>>>[]; // result array is safe to modify
-+// My shortcut versions which return raw not animated values.
-+export function useTransition$<TItem, DS extends CSSProperties>(
-+  items: ReadonlyArray<TItem> | TItem | null | undefined,
-+  keys:
-+    | ((item: TItem) => TransitionKeyProps)
-+    | ReadonlyArray<TransitionKeyProps>
-+    | TransitionKeyProps
-+    | null,
-+  values: Merge<DS & CSSProperties, UseTransitionProps<TItem, DS>>
-+): UseTransitionResult<TItem, ForwardedProps<DS>>[]; // result array is safe to modify
-+export function useTransition$<TItem, DS extends object>(
-+  items: ReadonlyArray<TItem> | TItem | null | undefined,
-+  keys:
-+    | ((item: TItem) => TransitionKeyProps)
-+    | ReadonlyArray<TransitionKeyProps>
-+    | TransitionKeyProps
-+    | null,
-+  values: Merge<DS, UseTransitionProps<TItem, DS>>
-+): UseTransitionResult<TItem, ForwardedProps<DS>>[]; // result array is safe to modify
++  ): UseTransitionResult<TItem, AnimatedValue<ForwardedProps<DS>>>[]; // result array is safe to modify
++  // My shortcut versions which return raw not animated values.
++  export function useTransition$<TItem, DS extends CSSProperties>(
++    items: ReadonlyArray<TItem> | TItem | null | undefined,
++    keys:
++      | ((item: TItem) => TransitionKeyProps)
++      | ReadonlyArray<TransitionKeyProps>
++      | TransitionKeyProps
++      | null,
++    values: Merge<DS & CSSProperties, UseTransitionProps<TItem, DS>>
++  ): UseTransitionResult<TItem, ForwardedProps<DS>>[]; // result array is safe to modify
++  export function useTransition$<TItem, DS extends object>(
++    items: ReadonlyArray<TItem> | TItem | null | undefined,
++    keys:
++      | ((item: TItem) => TransitionKeyProps)
++      | ReadonlyArray<TransitionKeyProps>
++      | TransitionKeyProps
++      | null,
++    values: Merge<DS, UseTransitionProps<TItem, DS>>
++  ): UseTransitionResult<TItem, ForwardedProps<DS>>[]; // result array is safe to modify
+\ No newline at end of file
 old mode 100644
 new mode 100755
 --- a/node_modules/react-spring/web.js

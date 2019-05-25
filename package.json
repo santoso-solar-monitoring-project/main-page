@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/moment-timezone": "^0.5.12",
     "@types/pusher-js": "^4.2.0",
     "d3": "^5.7.0",
     "denque": "^1.4.0",
     "immutable": "^4.0.0-rc.12",
+    "moment-timezone": "^0.5.25",
     "pusher-js": "^4.4.0",
     "react": "16.8.0",
     "react-dom": "16.8.0",

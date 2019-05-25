@@ -96,7 +96,7 @@ new mode 100755
 +  this._list[i] = value;
 +};
 +
-+/* 
++/*
 +Test with:
 +a = new Denque([0,1,2,3,4]);a.shift();a.slice()
 +// Expect [1,2,3,4]

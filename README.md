@@ -13,9 +13,9 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
      75 src/components/Blur/index.tsx
      16 src/components/BottomBar/Energy.js
      13 src/components/BottomBar/FPS.js
+     13 src/components/BottomBar/Ping.js
      46 src/components/BottomBar/index.js
       4 src/components/BottomBar/lock.svg
-     13 src/components/BottomBar/Ping.js
     138 src/components/CirclePlot/index.tsx
      47 src/components/CornersTest/Corners.tsx
      14 src/components/CornersTest/index.tsx
@@ -23,9 +23,9 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
       8 src/components/GoodCanvas/GoodCanvasChild.ts
      15 src/components/GoodCanvas/GoodCanvasElement.ts
     195 src/components/GoodCanvas/index.tsx
+      1 src/components/IVPlot/LOG.tsx
     288 src/components/IVPlot/_IVPlot.tsx
      53 src/components/IVPlot/index.tsx
-      1 src/components/IVPlot/LOG.tsx
      20 src/components/IVPlot/useAnimationClock.ts
      60 src/components/IVPlot/useAnimationFrame.ts
      25 src/components/IVPlot/useClip.ts
@@ -42,23 +42,15 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
      10 src/components/Pusher/index.tsx
      16 src/components/Pusher/pusher.config.json
      24 src/components/SheetsData/index.js
-     34 src/components/TitleBar/index.js
-      4 src/components/TitleBar/lock.svg
      22 src/components/TitleBar/Login.js
      17 src/components/TitleBar/Time.js
      35 src/components/TitleBar/Wifi.js
-     91 src/components/usePoints/index.tsx
-    292 src/components/Weather/index.js
+     34 src/components/TitleBar/index.js
+      4 src/components/TitleBar/lock.svg
+    293 src/components/Weather/index.js
     121 src/components/Weather/scrape.js
     886 src/components/Weather/skycons.js
-      6 src/utils/canvas/clear.ts
-    204 src/utils/canvas/enhanceContext.ts
-     38 src/utils/canvas/EnhancedContext.ts
-     35 src/utils/canvas/getContext.ts
-     18 src/utils/canvas/index.ts
-     21 src/utils/canvas/isValidGoodCanvas.ts
-     84 src/utils/canvas/newEffect.ts
-     53 src/utils/canvas/scaleCanvas.ts
+     91 src/components/usePoints/index.tsx
      10 src/utils/CustomHooks/index.ts
       7 src/utils/CustomHooks/useCounter.ts
      31 src/utils/CustomHooks/useDataBuffer.ts
@@ -75,28 +67,36 @@ $ wc -l src/components/*/** src/utils/**/* src/utils/*
       8 src/utils/Imm/mapFromJS.ts
      18 src/utils/Imm/useImm.ts
     135 src/utils/Imm/withImm.ts
+     38 src/utils/canvas/EnhancedContext.ts
+      6 src/utils/canvas/clear.ts
+    204 src/utils/canvas/enhanceContext.ts
+     35 src/utils/canvas/getContext.ts
+     18 src/utils/canvas/index.ts
+     21 src/utils/canvas/isValidGoodCanvas.ts
+     84 src/utils/canvas/newEffect.ts
+     53 src/utils/canvas/scaleCanvas.ts
      16 src/utils/BaseProps.ts
+wc: src/utils/CustomHooks: Is a directory
+      0 src/utils/CustomHooks
+    243 src/utils/DefaultProps.ts
+      1 src/utils/FETCH.js
+wc: src/utils/Imm: Is a directory
+      0 src/utils/Imm
+      1 src/utils/Pair.d.ts
 wc: src/utils/canvas: Is a directory
       0 src/utils/canvas
       8 src/utils/clamp.ts
      25 src/utils/coordinates.ts
-wc: src/utils/CustomHooks: Is a directory
-      0 src/utils/CustomHooks
-    243 src/utils/DefaultProps.ts
       5 src/utils/diff.ts
       7 src/utils/easier.ts
       4 src/utils/evaluate.ts
-      1 src/utils/FETCH.js
       2 src/utils/identity.ts
       2 src/utils/ignore.ts
-wc: src/utils/Imm: Is a directory
-      0 src/utils/Imm
      19 src/utils/isValidRefObject.ts
     138 src/utils/meta.ts
       2 src/utils/noop.ts
-      1 src/utils/Pair.d.ts
      29 src/utils/propagateProps.tsx
      48 src/utils/throttleEvent.ts
       3 src/utils/warn.ts
-   4640 total
+   4641 total
 ```

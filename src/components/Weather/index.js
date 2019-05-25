@@ -20,16 +20,16 @@ async function getRange(spreadsheetId, range = 'A1:Z1000000') {
 }
 
 async function mostRecentFile(folder) {
-  const url = `https://www.googleapis.com/drive/v3/files?orderBy=recency&q=%27${
-    ID[folder]
-  }%27%20in%20parents&pageSize=1&key=${KEY}`;
+  const url = `https://www.googleapis.com/drive/v3/files?orderBy=recency&q=%27${ID[
+    folder
+  ]}%27%20in%20parents&pageSize=1&key=${KEY}`;
   return (await FETCH(url)).files[0].id;
 }
 
 export function Weather(props) {
   const ref = useRef(null);
   const skycons = useRef(null);
-  const [status, setStatus] = useState({
+  const [ status, setStatus ] = useState({
     temp: NaN,
     descrip: '',
     irradiance: NaN,
@@ -37,45 +37,48 @@ export function Weather(props) {
 
   // Fetch weather.gov data
   useEffect(() => {
-    fetch('https://api.weather.gov/stations/KATT/observations/latest')
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        const {
-          properties: {
-            textDescription: descrip,
-            temperature: { value: temp },
-          },
-        } = data;
-        skycons.current = setIcons(ref.current, descrip);
-        setStatus(status => ({
-          ...status,
-          descrip,
-          temp: fahr(temp).toFixed(0) + ' °F',
-        }));
-        LOG(descrip + ' ' + fahr(temp).toFixed(0) + ' °F');
-      })
-      .catch(error => console.error(error));
-    return () => skycons.current && skycons.current.pause();
+    const update = () =>
+      fetch('https://api.weather.gov/stations/KATT/observations/latest')
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          const { properties: { textDescription: descrip, temperature: { value: temp } } } = data;
+          skycons.current = setIcons(ref.current, descrip);
+          setStatus(status => ({
+            ...status,
+            descrip,
+            temp: fahr(temp).toFixed(0) + ' °F',
+          }));
+          LOG(descrip + ' ' + fahr(temp).toFixed(0) + ' °F');
+        })
+        .catch(error => console.error(error));
+
+    update();
+    const id = setInterval(update, 15 * 60e3);
+    return () => {
+      clearInterval(id);
+      skycons.current && skycons.current.pause();
+    };
   }, []);
 
   // Fetch Solcast data
-  // TODO:
-  //   Get real data
-  //   Find the d[index] that corresponds to "right now"
-  //   Update d[index] when "right now" has changed (every 30 min).
   useEffect(() => {
-    mostRecentFile('solcast')
-      .then(id => getRange(id))
-      .then(d => {
-        const irradiance = getIrradiance(d).toFixed(0);
-        setStatus(status => ({
-          ...status,
-          irradiance,
-        }));
-      })
-      .catch(error => console.error(error));
+    const update = () =>
+      mostRecentFile('solcast')
+        .then(id => getRange(id))
+        .then(d => {
+          const irradiance = getIrradiance(d).toFixed(0);
+          setStatus(status => ({
+            ...status,
+            irradiance,
+          }));
+        })
+        .catch(error => console.error(error));
+
+    update();
+    const id = setInterval(update, 15 * 60e3);
+    return () => clearInterval(id);
   }, []);
 
   // Size the Canvas resolution
@@ -83,8 +86,8 @@ export function Weather(props) {
     const dpr = window.devicePixelRatio;
     const elem = ref.current;
     const { height } = elem.getBoundingClientRect();
-    const [bufferW, bufferH] = [height, height].map(x => Math.ceil(x * dpr));
-    const [newW, newH] = [bufferW, bufferH].map(x => x / dpr);
+    const [ bufferW, bufferH ] = [ height, height ].map(x => Math.ceil(x * dpr));
+    const [ newW, newH ] = [ bufferW, bufferH ].map(x => x / dpr);
     elem.style.width = newW + 'px';
     elem.style.height = newH + 'px';
     elem.width = bufferW;
@@ -96,8 +99,8 @@ export function Weather(props) {
     // return () => window.removeEventListener('resize', sizeCanvas);
   }, []);
 
-  const [alpha, setAlpha] = useState('10');
-  const [scale, setScale] = useState(1);
+  const [ alpha, setAlpha ] = useState('10');
+  const [ scale, setScale ] = useState(1);
   const container = useRef(null);
   return (
     <div
@@ -108,9 +111,7 @@ export function Weather(props) {
         const { clientX: x, clientY: y } = e.nativeEvent;
         const elem = container.current;
         const { width, height, left, top } = elem.getBoundingClientRect();
-        const fromCenter =
-          Math.hypot((x - left) / width - 0.5, (y - top - height / 2) / width) *
-          2;
+        const fromCenter = Math.hypot((x - left) / width - 0.5, (y - top - height / 2) / width) * 2;
         const alpha = 8 * fromCenter + 16 * (1 - fromCenter);
         setAlpha((~~alpha).toString(16).padStart(2, '0'));
       }}
@@ -212,23 +213,23 @@ export function Weather(props) {
 // Convert weather.gov textDescription to Skycon compatible icon name
 const LUT = {
   _: [
-    [/Clear Day/, 'clear-day'],
-    [/Clear Night/, 'clear-night'],
-    [/Partly Cloudy/, 'partly-cloudy-day'],
-    [/Partly Cloudy/, 'partly-cloudy-night'],
-    [/Cloudy|Mostly Cloudy/, 'cloudy'],
-    [/Rain|Thunderstorms/, 'sleet'],
-    [/Drizzle|Unknown Precipitation/, 'rain'],
-    [/Snow/, 'snow'],
-    [/Windy|Breezy/, 'wind'],
-    [/Fog|Smoke|Haze|Mist/, 'fog'],
+    [ /Clear Day/, 'clear-day' ],
+    [ /Clear Night/, 'clear-night' ],
+    [ /Partly Cloudy/, 'partly-cloudy-day' ],
+    [ /Partly Cloudy/, 'partly-cloudy-night' ],
+    [ /Cloudy|Mostly Cloudy/, 'cloudy' ],
+    [ /Rain|Thunderstorms/, 'sleet' ],
+    [ /Drizzle|Unknown Precipitation/, 'rain' ],
+    [ /Snow/, 'snow' ],
+    [ /Windy|Breezy/, 'wind' ],
+    [ /Fog|Smoke|Haze|Mist/, 'fog' ],
   ],
   get: function(textDescription) {
     const hour = new Date().getHours();
     const daytime = hour >= 7 && hour < 19;
     textDescription += daytime ? ' Day' : ' Night';
     const match =
-      this._.find(([pattern]) => pattern.test(textDescription)) ||
+      this._.find(([ pattern ]) => pattern.test(textDescription)) ||
       (daytime ? this._[0] : this._[1]);
     return LOG(match[1]);
   },
@@ -243,7 +244,7 @@ function setIcons(canvas, textDescription) {
   return skycons;
 }
 
-const fahr = x => (x * 9) / 5 + 32;
+const fahr = x => x * 9 / 5 + 32;
 
 const derivedConfig = {
   fields: [
@@ -267,7 +268,7 @@ function calculateTotalIrradiance(sample) {
   const { dhi, dni, zenith: sunZenith, azimuth: sunAzimuth } = sample;
   const { panelArea, panelTilt, panelAzimuth } = derivedConfig;
   // Convert trig functions to use degrees instead of radians.
-  const [cos, sin] = [Math.cos, Math.sin].map(f => x => f((x / 180) * Math.PI));
+  const [ cos, sin ] = [ Math.cos, Math.sin ].map(f => x => f(x / 180 * Math.PI));
   const cosBetaIncident =
     sin(sunZenith) * sin(panelTilt) * cos(sunAzimuth - panelAzimuth) +
     cos(sunZenith) * cos(panelTilt);
